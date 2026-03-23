@@ -1,34 +1,80 @@
+.fh-header-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
 .fh-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--fh-s-3) var(--fh-s-4);
-    background: linear-gradient(120deg, var(--fh-surface), var(--fh-surface-2));
-    border-bottom: 1px solid var(--fh-border);
-}
-
-.fh-brand {
-    display: flex;
-    align-items: center;
     gap: var(--fh-s-3);
+    padding: var(--fh-s-3) var(--fh-s-4);
+    background: linear-gradient(145deg, var(--fh-surface), var(--fh-surface-2));
+    border: 1px solid var(--fh-border);
+    box-shadow: var(--fh-shadow);
 }
 
-.fh-brand-mark {
-    width: 42px;
-    height: 42px;
-    border-radius: 14px;
+.fh-header-top {
+    border-radius: 0 0 var(--fh-r-2) var(--fh-r-2);
+    border-top: 0;
+}
+
+.fh-header-bottom {
+    margin-top: var(--fh-s-2);
+    border-radius: var(--fh-r-2);
+}
+
+.fh-brand-title {
+    margin: 0;
+    color: var(--fh-text);
+    text-shadow: 0 0 0 transparent;
+    animation: fhPulseGlow 2.8s ease-in-out infinite;
+}
+
+.fh-date-nav {
+    width: 100%;
     display: grid;
-    place-items: center;
-    font-weight: 800;
-    color: #fff;
-    background: linear-gradient(135deg, var(--fh-primary), var(--fh-primary-2));
+    grid-template-columns: auto auto minmax(180px, 230px) auto auto auto;
+    gap: var(--fh-s-2);
+    justify-content: end;
+    align-items: center;
 }
 
-.fh-brand h1 {
-    font-size: 1.2rem;
+#refDate {
+    min-height: 40px;
+    border: 1px solid var(--fh-border);
+    border-radius: var(--fh-r-1);
+    background: var(--fh-surface);
+    color: var(--fh-text);
+    padding: 0 var(--fh-s-2);
 }
 
-.fh-brand p {
-    color: var(--fh-muted);
-    font-size: 0.9rem;
+@keyframes fhPulseGlow {
+    0% {
+        transform: scale(1);
+        text-shadow: 0 0 0 transparent;
+    }
+
+    50% {
+        transform: scale(1.02);
+        text-shadow: 0 0 12px var(--fh-glow), 0 0 28px var(--fh-glow);
+    }
+
+    100% {
+        transform: scale(1);
+        text-shadow: 0 0 0 transparent;
+    }
+}
+
+@media (max-width: 940px) {
+    .fh-header-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fh-date-nav {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        justify-content: stretch;
+    }
 }

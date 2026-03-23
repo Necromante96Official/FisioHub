@@ -1,23 +1,20 @@
 .home-layout {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto auto auto auto auto;
+    gap: var(--fh-s-4);
     min-height: 100vh;
+    padding-bottom: var(--fh-s-5);
 }
 
-.home-main-grid {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: var(--fh-s-4);
-    padding: var(--fh-s-4);
-}
-
-.home-center-stack {
-    display: grid;
-    gap: var(--fh-s-4);
+.fh-separator {
+    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent 0%, var(--fh-border) 15%, var(--fh-border) 85%, transparent 100%);
 }
 
 @media (max-width: 1000px) {
-    .home-main-grid {
-        grid-template-columns: 1fr;
+    .home-layout {
+        gap: var(--fh-s-3);
     }
 }

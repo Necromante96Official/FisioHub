@@ -1,29 +1,50 @@
-.fh-sidebar {
-    background: var(--fh-surface);
-    border: 1px solid var(--fh-border);
-    border-radius: var(--fh-r-2);
-    padding: var(--fh-s-4);
-    box-shadow: var(--fh-shadow);
+.fh-panel-wrap {
+    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
+    margin: 0 auto;
     display: grid;
     gap: var(--fh-s-3);
 }
 
-.fh-sidebar h2 {
-    font-size: 1.1rem;
+.fh-panel-head {
+    display: flex;
+    justify-content: center;
 }
 
-.fh-date-box,
-.fh-input-box {
+.fh-panel {
+    background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
+    border: 1px solid var(--fh-border);
+    border-radius: var(--fh-r-3);
+    box-shadow: var(--fh-shadow);
+    padding: var(--fh-s-4);
+    display: grid;
+    gap: var(--fh-s-3);
+    min-height: 320px;
+}
+
+.fh-data-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     gap: var(--fh-s-2);
+    max-height: 340px;
+    overflow: auto;
 }
 
-#rawInput {
-    min-height: 260px;
-    resize: vertical;
+.fh-data-item {
     border: 1px solid var(--fh-border);
     border-radius: var(--fh-r-1);
-    padding: var(--fh-s-2);
-    background: var(--fh-surface-2);
-    color: var(--fh-text);
+    background: var(--fh-surface);
+    padding: var(--fh-s-2) var(--fh-s-3);
+}
+
+.fh-empty-state {
+    color: var(--fh-muted);
+}
+
+.fh-panel-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--fh-s-2);
+    flex-wrap: wrap;
 }

@@ -2,6 +2,11 @@
     box-sizing: border-box;
 }
 
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 html,
 body {
     margin: 0;
@@ -11,6 +16,7 @@ body {
 body {
     min-height: 100vh;
     background: var(--fh-bg);
+    background-image: var(--fh-bg-accent);
     color: var(--fh-text);
 }
 
@@ -18,4 +24,11 @@ button,
 input,
 textarea {
     font: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid var(--fh-focus);
+    outline-offset: 2px;
 }

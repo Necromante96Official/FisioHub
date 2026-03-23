@@ -1,15 +1,18 @@
-<div class="fh-sidebar">
-  <h2>Painel de Entrada</h2>
-  <div class="fh-date-box">
-    <label for="refDate">Data de referência</label>
-    <input id="refDate" type="date">
+<section class="fh-panel-wrap">
+  <div class="fh-panel-head">
+    <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
+    <input id="importFileInput" type="file" accept=".txt,.json" hidden>
   </div>
-  <div class="fh-input-box">
-    <label for="rawInput">Cole os dados da agenda</label>
-    <textarea id="rawInput" placeholder="Cole aqui os dados coletados..."></textarea>
+
+  <article class="fh-panel" aria-live="polite">
+    <h2>Dados importados</h2>
+    <p class="fh-subtitle">A lista abaixo responde ao filtro da data de referência.</p>
+    <ul id="importedDataList" class="fh-data-list"></ul>
+    <p id="emptyState" class="fh-empty-state">Nenhum dado importado ainda.</p>
+  </article>
+
+  <div class="fh-panel-actions">
+    <button id="processBtn" class="fh-btn" type="button">Processar</button>
+    <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
   </div>
-  <div class="fh-sidebar-actions">
-    <button id="importBtn" class="fh-btn" type="button">Importar</button>
-    <button id="processBtn" class="fh-btn fh-btn-primary" type="button">Processar</button>
-  </div>
-</div>
+</section>

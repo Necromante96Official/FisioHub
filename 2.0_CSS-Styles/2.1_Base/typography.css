@@ -1,10 +1,25 @@
 body {
-    font-family: "Segoe UI", "Trebuchet MS", sans-serif;
-    line-height: 1.4;
+    font-family: "Tahoma", "Verdana", "Segoe UI", sans-serif;
+    line-height: 1.5;
+    letter-spacing: 0.1px;
 }
 
 h1,
 h2,
 p {
     margin: 0;
+}
+
+h1 {
+    font-size: clamp(1.45rem, 2.5vw, 2.1rem);
+    font-weight: 800;
+}
+
+h2 {
+    font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+    font-weight: 700;
+}
+
+small {
+    line-height: 1.45;
 }

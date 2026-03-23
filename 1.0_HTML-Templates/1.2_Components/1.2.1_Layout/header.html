@@ -1,12 +1,18 @@
-<header class="fh-header">
-  <div class="fh-brand">
-    <div class="fh-brand-mark">FH</div>
-    <div>
-      <h1>FisioHub</h1>
-      <p>Gestão clínica modular</p>
-    </div>
+<header class="fh-header-wrap">
+  <div class="fh-header fh-header-top">
+    <h1 class="fh-brand-title" aria-label="FisioHub">FisioHub</h1>
+    <button id="themeToggleBtn" class="fh-btn fh-btn-ghost" type="button" aria-label="Alternar tema">Tema:
+      Claro</button>
   </div>
-  <div class="fh-header-actions">
-    <button id="themeToggleBtn" class="fh-btn fh-btn-ghost" type="button" aria-label="Alternar tema">Tema</button>
+
+  <div class="fh-header fh-header-bottom">
+    <div class="fh-date-nav" role="group" aria-label="Navegação de calendário">
+      <button id="prevMonthBtn" class="fh-btn" type="button" aria-label="Voltar um mês">&lt;&lt;</button>
+      <button id="prevDayBtn" class="fh-btn" type="button" aria-label="Voltar um dia">-</button>
+      <input id="refDate" type="date" aria-label="Data de referência">
+      <button id="nextDayBtn" class="fh-btn" type="button" aria-label="Avançar um dia">+</button>
+      <button id="nextMonthBtn" class="fh-btn" type="button" aria-label="Avançar um mês">&gt;&gt;</button>
+      <button id="todayBtn" class="fh-btn fh-btn-primary" type="button">Hoje</button>
+    </div>
   </div>
 </header>

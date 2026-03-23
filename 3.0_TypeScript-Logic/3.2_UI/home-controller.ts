@@ -1,16 +1,24 @@
 import { ThemeManager } from "../3.1_Core/theme-manager";
 
+type ImportedItem = {
+    raw: string;
+    dateIso: string | null;
+};
+
 export class HomeController {
     private readonly appId = "app";
     private readonly homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
     private readonly theme = new ThemeManager();
+    private importedItems: ImportedItem[] = [];
 
     async bootstrap(): Promise<void> {
-        this.theme.init();
+        const initialTheme = this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
+        this.setDate(this.todayIso());
+        this.updateThemeButtonLabel(initialTheme);
         this.bindHandlers();
-        this.applyDefaultDate();
+        this.renderImportedData();
     }
 
     private async loadHome(): Promise<void> {
@@ -32,29 +40,171 @@ export class HomeController {
 
     private bindHandlers(): void {
         const themeBtn = document.getElementById("themeToggleBtn");
-        themeBtn?.addEventListener("click", () => this.theme.toggle());
+        themeBtn?.addEventListener("click", () => {
+            const next = this.theme.toggle();
+            this.updateThemeButtonLabel(next);
+        });
 
-        const modules = Array.from(document.querySelectorAll(".fh-module-card"));
-        modules.forEach((btn) => {
+        const modules = Array.from(document.querySelectorAll(".fh-module-card")) as HTMLButtonElement[];
+        modules.forEach((btn: HTMLButtonElement) => {
             btn.addEventListener("click", () => {
-                const moduleName = btn.getAttribute("data-module") || "modulo";
-                window.alert(`Porte em construção: ${moduleName}`);
+                const target = btn.getAttribute("data-target");
+                if (!target) return;
+                window.location.href = target;
             });
+        });
+
+        const importBtn = document.getElementById("importBtn");
+        const fileInput = document.getElementById("importFileInput") as HTMLInputElement | null;
+        importBtn?.addEventListener("click", () => fileInput?.click());
+        fileInput?.addEventListener("change", async () => {
+            const file = fileInput.files?.[0];
+            if (!file) return;
+            const content = await file.text();
+            this.importContent(content);
+            fileInput.value = "";
+        });
+
+        const clearBtn = document.getElementById("clearDataBtn");
+        clearBtn?.addEventListener("click", () => {
+            this.importedItems = [];
+            this.renderImportedData();
         });
 
         const processBtn = document.getElementById("processBtn");
         processBtn?.addEventListener("click", () => {
-            window.alert("Processamento inicial conectado. Próximo porte: parser + pipeline.");
+            const date = this.getCurrentDate();
+            const filtered = this.getFilteredItems(date);
+            window.alert(`Processamento conectado para ${filtered.length} registro(s) na data ${date}.`);
+        });
+
+        const dateInput = this.getDateInput();
+        dateInput?.addEventListener("change", () => this.renderImportedData());
+
+        document.getElementById("todayBtn")?.addEventListener("click", () => {
+            this.setDate(this.todayIso());
+            this.renderImportedData();
+        });
+
+        document.getElementById("prevDayBtn")?.addEventListener("click", () => this.moveDateByDays(-1));
+        document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
+        document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
+        document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
+    }
+
+    private importContent(content: string): void {
+        const lines = this.parseContent(content);
+        const mapped = lines
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0)
+            .map((line) => ({
+                raw: line,
+                dateIso: this.extractIsoDate(line)
+            }));
+
+        this.importedItems = mapped;
+        this.renderImportedData();
+    }
+
+    private parseContent(content: string): string[] {
+        try {
+            const parsed = JSON.parse(content);
+            if (Array.isArray(parsed)) {
+                return parsed.map((item) => String(item));
+            }
+        } catch {
+            // Se nao for JSON valido, segue como texto linha a linha.
+        }
+
+        return content
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+    }
+
+    private extractIsoDate(value: string): string | null {
+        const isoMatch = value.match(/(\d{4})-(\d{2})-(\d{2})/);
+        if (isoMatch) {
+            return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+        }
+
+        const brMatch = value.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+        if (brMatch) {
+            return `${brMatch[3]}-${brMatch[2]}-${brMatch[1]}`;
+        }
+
+        return null;
+    }
+
+    private getCurrentDate(): string {
+        const dateInput = this.getDateInput();
+        return dateInput?.value || this.todayIso();
+    }
+
+    private getDateInput(): HTMLInputElement | null {
+        return document.getElementById("refDate") as HTMLInputElement | null;
+    }
+
+    private setDate(value: string): void {
+        const dateInput = this.getDateInput();
+        if (!dateInput) return;
+        dateInput.value = value;
+    }
+
+    private moveDateByDays(days: number): void {
+        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
+        current.setDate(current.getDate() + days);
+        this.setDate(this.toIso(current));
+        this.renderImportedData();
+    }
+
+    private moveMonthStart(monthShift: number): void {
+        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
+        current.setMonth(current.getMonth() + monthShift, 1);
+        this.setDate(this.toIso(current));
+        this.renderImportedData();
+    }
+
+    private toIso(date: Date): string {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, "0");
+        const dd = String(date.getDate()).padStart(2, "0");
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    private todayIso(): string {
+        return this.toIso(new Date());
+    }
+
+    private getFilteredItems(dateIso: string): ImportedItem[] {
+        return this.importedItems.filter((item) => !item.dateIso || item.dateIso === dateIso);
+    }
+
+    private renderImportedData(): void {
+        const list = document.getElementById("importedDataList") as HTMLUListElement | null;
+        const emptyState = document.getElementById("emptyState") as HTMLParagraphElement | null;
+        if (!list || !emptyState) return;
+
+        list.innerHTML = "";
+        const filtered = this.getFilteredItems(this.getCurrentDate());
+
+        if (filtered.length === 0) {
+            emptyState.style.display = "block";
+            return;
+        }
+
+        emptyState.style.display = "none";
+        filtered.forEach((item) => {
+            const li = document.createElement("li");
+            li.className = "fh-data-item";
+            li.textContent = item.raw;
+            list.appendChild(li);
         });
     }
 
-    private applyDefaultDate(): void {
-        const el = document.getElementById("refDate") as HTMLInputElement | null;
-        if (!el) return;
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, "0");
-        const dd = String(now.getDate()).padStart(2, "0");
-        el.value = `${yyyy}-${mm}-${dd}`;
+    private updateThemeButtonLabel(theme: string): void {
+        const themeBtn = document.getElementById("themeToggleBtn") as HTMLButtonElement | null;
+        if (!themeBtn) return;
+        themeBtn.textContent = theme === "dark" ? "Tema: Escuro" : "Tema: Claro";
     }
 }

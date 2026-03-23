@@ -1,7 +1,9 @@
 .fh-modules {
+    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
+    margin: 0 auto;
     background: var(--fh-surface);
     border: 1px solid var(--fh-border);
-    border-radius: var(--fh-r-2);
+    border-radius: var(--fh-r-3);
     padding: var(--fh-s-4);
     box-shadow: var(--fh-shadow);
     display: grid;
@@ -14,42 +16,47 @@
 
 .fh-modules-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--fh-s-3);
 }
 
 .fh-module-card {
-    padding: var(--fh-s-4);
+    padding: var(--fh-s-4) var(--fh-s-3);
     border-radius: var(--fh-r-2);
     border: 1px solid var(--fh-border);
-    background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
-    text-align: left;
+    background: linear-gradient(180deg, var(--fh-surface-2), var(--fh-surface));
+    text-align: center;
     cursor: pointer;
+    font-weight: 700;
+    color: var(--fh-text);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .fh-module-card:hover {
     transform: translateY(-2px);
-}
-
-.fh-system-actions,
-.fh-sidebar-actions {
-    display: flex;
-    gap: var(--fh-s-2);
-    flex-wrap: wrap;
+    border-color: var(--fh-primary-2);
+    box-shadow: 0 8px 18px var(--fh-glow);
 }
 
 .fh-btn {
     border: 1px solid var(--fh-border);
     border-radius: var(--fh-r-1);
-    background: var(--fh-surface-2);
+    background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
     color: var(--fh-text);
-    padding: 10px 14px;
+    padding: 10px 16px;
     cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.18s ease, filter 0.18s ease;
+}
+
+.fh-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.02);
 }
 
 .fh-btn-primary {
-    background: var(--fh-primary);
-    border-color: var(--fh-primary);
+    background: linear-gradient(140deg, var(--fh-primary), var(--fh-primary-2));
+    border-color: var(--fh-primary-2);
     color: #fff;
 }
 
@@ -64,6 +71,12 @@
 }
 
 @media (max-width: 760px) {
+    .fh-modules-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 540px) {
     .fh-modules-grid {
         grid-template-columns: 1fr;
     }

@@ -1,9 +1,11 @@
 :root {
-    --fh-s-1: 8px;
+    --fh-s-1: 6px;
     --fh-s-2: 12px;
-    --fh-s-3: 16px;
-    --fh-s-4: 24px;
-    --fh-s-5: 32px;
+    --fh-s-3: 18px;
+    --fh-s-4: 26px;
+    --fh-s-5: 36px;
+    --fh-s-6: 52px;
     --fh-r-1: 10px;
-    --fh-r-2: 16px;
+    --fh-r-2: 18px;
+    --fh-r-3: 26px;
 }
