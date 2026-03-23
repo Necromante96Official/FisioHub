@@ -42,15 +42,6 @@ export class HomeController {
             this.updateThemeButtonLabel(next);
         });
 
-        const modules = Array.from(document.querySelectorAll(".fh-module-card"));
-        modules.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                const target = btn.getAttribute("data-target");
-                if (!target) return;
-                window.location.href = target;
-            });
-        });
-
         const importBtn = document.getElementById("importBtn");
         const fileInput = document.getElementById("importFileInput");
         importBtn?.addEventListener("click", () => fileInput?.click());
