@@ -1,3 +1,8 @@
+html {
+    height: 100%;
+    scrollbar-gutter: stable;
+}
+
 * {
     box-sizing: border-box;
 }
@@ -14,10 +19,13 @@ body {
 }
 
 body {
+    height: 100%;
     min-height: 100vh;
     background: var(--fh-bg);
     background-image: var(--fh-bg-accent);
     color: var(--fh-text);
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 button,

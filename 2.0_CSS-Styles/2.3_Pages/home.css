@@ -3,9 +3,11 @@
     flex-direction: column;
     align-items: stretch;
     gap: var(--fh-s-3);
+    height: 100vh;
     min-height: 100vh;
     width: 100%;
-    padding: var(--fh-s-4) 0 var(--fh-s-2);
+    padding: var(--fh-s-4) 0 var(--fh-s-1);
+    overflow: hidden;
 }
 
 .home-layout>section:nth-of-type(2) {
