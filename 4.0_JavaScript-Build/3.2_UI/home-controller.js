@@ -8,8 +8,6 @@ export class HomeController {
         const initialTheme = this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
-        this.bindFooterInteractions();
-        this.syncFooterYear();
         this.setDate(this.todayIso());
         this.updateThemeButtonLabel(initialTheme);
         this.bindHandlers();
@@ -82,36 +80,6 @@ export class HomeController {
         document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
         document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
         document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
-    }
-    bindFooterInteractions() {
-        const authorLink = document.getElementById("footerAuthorLink");
-        const toast = document.getElementById("footerToast");
-        if (!authorLink || !toast)
-            return;
-        let toastTimer;
-        const showToast = () => {
-            window.clearTimeout(toastTimer);
-            toast.textContent = "Clique para abrir o GitHub do autor.";
-            toast.classList.add("is-visible");
-            authorLink.classList.add("is-highlighted");
-            toastTimer = window.setTimeout(() => {
-                toast.classList.remove("is-visible");
-                authorLink.classList.remove("is-highlighted");
-            }, 1800);
-        };
-        authorLink.addEventListener("mouseenter", showToast);
-        authorLink.addEventListener("focus", showToast);
-        authorLink.addEventListener("mouseleave", () => {
-            window.clearTimeout(toastTimer);
-            toast.classList.remove("is-visible");
-            authorLink.classList.remove("is-highlighted");
-        });
-    }
-    syncFooterYear() {
-        const yearNode = document.getElementById("footerYear");
-        if (!yearNode)
-            return;
-        yearNode.textContent = `© ${new Date().getFullYear()}`;
     }
     importContent(content) {
         const lines = this.parseContent(content);

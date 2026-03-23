@@ -44,9 +44,11 @@
     border-radius: var(--fh-r-1);
     background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
     color: var(--fh-text);
-    padding: 10px 16px;
+    min-height: 34px;
+    padding: 8px 12px;
     cursor: pointer;
     font-weight: 700;
+    font-size: 0.88rem;
     transition: transform 0.18s ease, filter 0.18s ease;
 }
 
