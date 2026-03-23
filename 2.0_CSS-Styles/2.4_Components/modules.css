@@ -1,13 +1,13 @@
 .fh-modules {
-    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
-    margin: 0 auto;
+    width: 100%;
     background: var(--fh-surface);
-    border: 1px solid var(--fh-border);
+    border: 2px solid var(--fh-border);
     border-radius: var(--fh-r-3);
-    padding: var(--fh-s-4);
+    padding: var(--fh-s-5);
     box-shadow: var(--fh-shadow);
     display: grid;
     gap: var(--fh-s-3);
+    justify-items: center;
 }
 
 .fh-subtitle {
@@ -16,20 +16,22 @@
 
 .fh-modules-grid {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--fh-s-3);
+    width: 100%;
 }
 
 .fh-module-card {
-    padding: var(--fh-s-4) var(--fh-s-3);
-    border-radius: var(--fh-r-2);
-    border: 1px solid var(--fh-border);
+    padding: var(--fh-s-5) var(--fh-s-4);
+    border-radius: var(--fh-r-3);
+    border: 2px solid var(--fh-border);
     background: linear-gradient(180deg, var(--fh-surface-2), var(--fh-surface));
     text-align: center;
     cursor: pointer;
     font-weight: 700;
     color: var(--fh-text);
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    min-height: 150px;
 }
 
 .fh-module-card:hover {
@@ -71,12 +73,6 @@
 }
 
 @media (max-width: 760px) {
-    .fh-modules-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 540px) {
     .fh-modules-grid {
         grid-template-columns: 1fr;
     }

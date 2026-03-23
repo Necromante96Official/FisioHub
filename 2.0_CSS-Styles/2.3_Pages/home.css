@@ -3,13 +3,14 @@
     grid-template-rows: auto auto auto auto auto auto;
     gap: var(--fh-s-4);
     min-height: 100vh;
-    padding-bottom: var(--fh-s-5);
+    width: 100%;
+    padding: var(--fh-s-4) 0 var(--fh-s-5);
+    justify-items: center;
 }
 
 .fh-separator {
-    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
+    width: 100%;
     height: 1px;
-    margin: 0 auto;
     background: linear-gradient(90deg, transparent 0%, var(--fh-border) 15%, var(--fh-border) 85%, transparent 100%);
 }
 

@@ -1,6 +1,5 @@
 .fh-panel-wrap {
-    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
-    margin: 0 auto;
+    width: 100%;
     display: grid;
     gap: var(--fh-s-3);
 }
@@ -12,30 +11,45 @@
 
 .fh-panel {
     background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
-    border: 1px solid var(--fh-border);
+    border: 2px solid var(--fh-border);
     border-radius: var(--fh-r-3);
     box-shadow: var(--fh-shadow);
-    padding: var(--fh-s-4);
+    padding: var(--fh-s-5);
     display: grid;
     gap: var(--fh-s-3);
-    min-height: 320px;
+    min-height: 360px;
+    text-align: center;
+    justify-items: center;
+    width: 100%;
 }
 
 .fh-data-list {
-    list-style: none;
+    list-style: disc;
+    list-style-position: inside;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: var(--fh-s-2);
-    max-height: 340px;
+    gap: 0;
+    max-height: 320px;
     overflow: auto;
+    width: 100%;
 }
 
 .fh-data-item {
-    border: 1px solid var(--fh-border);
-    border-radius: var(--fh-r-1);
-    background: var(--fh-surface);
-    padding: var(--fh-s-2) var(--fh-s-3);
+    border-bottom: 1px solid var(--fh-border);
+    background: transparent;
+    padding: var(--fh-s-3) 0 var(--fh-s-3) var(--fh-s-2);
+    min-height: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    text-align: left;
+    box-shadow: none;
+    border-left: 0;
+}
+
+.fh-data-item:first-child {
+    border-top: 1px solid var(--fh-border);
 }
 
 .fh-empty-state {

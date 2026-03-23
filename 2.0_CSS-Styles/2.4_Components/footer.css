@@ -1,6 +1,5 @@
 .fh-footer {
-    width: min(1120px, calc(100% - var(--fh-s-4) * 2));
-    margin: 0 auto;
+    width: 100%;
     border: 1px solid var(--fh-border);
     background: var(--fh-surface);
     border-radius: var(--fh-r-2);
