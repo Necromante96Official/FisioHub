@@ -21,13 +21,16 @@ export class HomeController {
         app.innerHTML = html;
     }
     async resolveIncludes() {
-        const nodes = Array.from(document.querySelectorAll("[data-include]"));
-        for (const node of nodes) {
-            const path = node.getAttribute("data-include");
-            if (!path)
-                continue;
-            const html = await fetch(path).then((r) => r.text());
-            node.outerHTML = html;
+        let nodes = Array.from(document.querySelectorAll("[data-include]"));
+        while (nodes.length > 0) {
+            for (const node of nodes) {
+                const path = node.getAttribute("data-include");
+                if (!path)
+                    continue;
+                const html = await fetch(path).then((r) => r.text());
+                node.outerHTML = html;
+            }
+            nodes = Array.from(document.querySelectorAll("[data-include]"));
         }
     }
     bindHandlers() {
@@ -84,9 +87,9 @@ export class HomeController {
             .map((line) => line.trim())
             .filter((line) => line.length > 0)
             .map((line) => ({
-            raw: line,
-            dateIso: this.extractIsoDate(line)
-        }));
+                raw: line,
+                dateIso: this.extractIsoDate(line)
+            }));
         this.importedItems = mapped;
         this.renderImportedData();
     }
@@ -176,7 +179,11 @@ export class HomeController {
         const themeBtn = document.getElementById("themeToggleBtn");
         if (!themeBtn)
             return;
-        themeBtn.textContent = theme === "dark" ? "Tema: Escuro" : "Tema: Claro";
+        const icon = theme === "dark" ? "☀" : "☾";
+        const ariaLabel = theme === "dark" ? "Alternar para tema claro" : "Alternar para tema escuro";
+        themeBtn.textContent = icon;
+        themeBtn.setAttribute("aria-label", ariaLabel);
+        themeBtn.title = ariaLabel;
     }
 }
 //# sourceMappingURL=home-controller.js.map

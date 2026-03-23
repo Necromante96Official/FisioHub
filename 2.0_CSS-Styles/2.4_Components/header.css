@@ -25,6 +25,11 @@
     border-top: 0;
 }
 
+.fh-header-tabs {
+    border-radius: var(--fh-r-2);
+    padding-block: var(--fh-s-2);
+}
+
 .fh-header-bottom {
     margin-top: var(--fh-s-2);
     border-radius: var(--fh-r-2);
@@ -48,8 +53,9 @@
 
 .fh-theme-toggle {
     min-width: 48px;
+    width: 48px;
     padding-inline: 0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     line-height: 1;
 }
 
@@ -105,6 +111,10 @@
 
     .fh-header-top .fh-btn-ghost {
         margin-left: auto;
+    }
+
+    .fh-header-tabs {
+        padding-inline: var(--fh-s-2);
     }
 
     .fh-date-nav {
