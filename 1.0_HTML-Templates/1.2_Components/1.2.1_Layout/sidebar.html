@@ -1,18 +1,20 @@
 <section class="fh-panel-wrap">
-  <div class="fh-panel-head">
-    <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
-    <input id="importFileInput" type="file" accept=".txt,.json" hidden>
-  </div>
-
   <article class="fh-panel" aria-live="polite">
-    <h2>Dados importados</h2>
-    <p class="fh-subtitle">A lista abaixo responde ao filtro da data de referência.</p>
-    <ul id="importedDataList" class="fh-data-list"></ul>
-    <p id="emptyState" class="fh-empty-state">Nenhum dado importado ainda.</p>
+    <div class="fh-panel-headline">
+      <h2>Dados importados</h2>
+      <p class="fh-subtitle">A lista abaixo responde ao filtro da data de referência.</p>
+    </div>
+
+    <div class="fh-panel-body">
+      <ul id="importedDataList" class="fh-data-list"></ul>
+      <p id="emptyState" class="fh-empty-state">Nenhum dado importado ainda.</p>
+    </div>
   </article>
 
   <div class="fh-panel-actions">
+    <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
     <button id="processBtn" class="fh-btn" type="button">Processar</button>
     <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
+    <input id="importFileInput" type="file" accept=".txt,.json" hidden>
   </div>
 </section>

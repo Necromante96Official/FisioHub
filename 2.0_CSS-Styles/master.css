@@ -7,3 +7,24 @@
 @import url("2.4_Components/modules.css");
 @import url("2.4_Components/footer.css");
 @import url("2.3_Pages/home.css");
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--fh-primary-2) 34%, transparent) color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+body::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}

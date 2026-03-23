@@ -15,6 +15,8 @@ export class HomeController {
         const initialTheme = this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
+        this.bindFooterInteractions();
+        this.syncFooterYear();
         this.setDate(this.todayIso());
         this.updateThemeButtonLabel(initialTheme);
         this.bindHandlers();
@@ -96,6 +98,39 @@ export class HomeController {
         document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
         document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
         document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
+    }
+
+    private bindFooterInteractions(): void {
+        const authorLink = document.getElementById("footerAuthorLink") as HTMLAnchorElement | null;
+        const toast = document.getElementById("footerToast") as HTMLDivElement | null;
+        if (!authorLink || !toast) return;
+
+        let toastTimer: number | undefined;
+
+        const showToast = (): void => {
+            window.clearTimeout(toastTimer);
+            toast.textContent = "Clique para abrir o GitHub do autor.";
+            toast.classList.add("is-visible");
+            authorLink.classList.add("is-highlighted");
+            toastTimer = window.setTimeout(() => {
+                toast.classList.remove("is-visible");
+                authorLink.classList.remove("is-highlighted");
+            }, 1800);
+        };
+
+        authorLink.addEventListener("mouseenter", showToast);
+        authorLink.addEventListener("focus", showToast);
+        authorLink.addEventListener("mouseleave", () => {
+            window.clearTimeout(toastTimer);
+            toast.classList.remove("is-visible");
+            authorLink.classList.remove("is-highlighted");
+        });
+    }
+
+    private syncFooterYear(): void {
+        const yearNode = document.getElementById("footerYear");
+        if (!yearNode) return;
+        yearNode.textContent = `© ${new Date().getFullYear()}`;
     }
 
     private importContent(content: string): void {
@@ -200,12 +235,73 @@ export class HomeController {
         }
 
         emptyState.style.display = "none";
-        filtered.forEach((item) => {
-            const li = document.createElement("li");
-            li.className = "fh-data-item";
-            li.textContent = item.raw;
-            list.appendChild(li);
+        filtered.forEach((item, index) => {
+            list.appendChild(this.createDataListItem(item.raw, index));
         });
+    }
+
+    private createDataListItem(raw: string, index: number): HTMLLIElement {
+        const item = document.createElement("li");
+        item.className = "fh-data-item";
+
+        const parsed = this.parseDataLine(raw);
+        item.dataset.kind = parsed.kind;
+
+        if (parsed.kind === "divider") {
+            item.setAttribute("aria-hidden", "true");
+            return item;
+        }
+
+        if (parsed.kind === "heading") {
+            item.appendChild(this.createTextSpan(parsed.text ?? raw, "fh-data-text"));
+            return item;
+        }
+
+        if (parsed.kind === "kv") {
+            item.appendChild(this.createTextSpan(parsed.label ?? "", "fh-data-label"));
+            item.appendChild(this.createTextSpan(parsed.value ?? "", "fh-data-value"));
+            return item;
+        }
+
+        item.classList.add("fh-data-text");
+        item.appendChild(this.createTextSpan(raw, "fh-data-value"));
+        return item;
+    }
+
+    private createTextSpan(text: string, className: string): HTMLSpanElement {
+        const span = document.createElement("span");
+        span.className = className;
+        span.textContent = text;
+        return span;
+    }
+
+    private parseDataLine(raw: string): { kind: "divider" | "heading" | "kv" | "text"; label?: string; value?: string; text?: string } {
+        const trimmed = raw.trim();
+
+        if (/^[=-]{8,}$/.test(trimmed)) {
+            return { kind: "divider" };
+        }
+
+        const headingMatch = trimmed.match(/^---\s*(.+?)\s*---$/);
+        if (headingMatch) {
+            return { kind: "heading", text: headingMatch[1] };
+        }
+
+        const titleLike = trimmed.length <= 72 && /^[A-ZÀ-Ý0-9][A-ZÀ-Ý0-9\s\-()\/.,]+$/.test(trimmed);
+        if (titleLike) {
+            return { kind: "heading", text: trimmed };
+        }
+
+        const kvMatch = trimmed.match(/^([^:]{2,40}):\s*(.+)$/);
+        if (kvMatch) {
+            return {
+                kind: "kv",
+                label: kvMatch[1].trim(),
+                value: kvMatch[2].trim()
+            };
+        }
+
+        return { kind: "text" };
     }
 
     private updateThemeButtonLabel(theme: string): void {

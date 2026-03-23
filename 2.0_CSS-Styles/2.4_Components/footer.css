@@ -1,9 +1,76 @@
 .fh-footer {
     width: 100%;
     border: 1px solid var(--fh-border);
-    background: var(--fh-surface);
+    background: linear-gradient(180deg, var(--fh-surface), color-mix(in srgb, var(--fh-surface-2) 92%, transparent));
     border-radius: var(--fh-r-2);
-    padding: var(--fh-s-3) var(--fh-s-4);
+    padding: 10px var(--fh-s-3) 8px;
     color: var(--fh-muted);
     text-align: center;
+    box-shadow: var(--fh-shadow);
+    font-size: 0.82rem;
+    line-height: 1.15;
+    display: grid;
+    gap: 2px;
+    justify-items: center;
+}
+
+.fh-footer-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fh-footer-line-top {
+    color: var(--fh-text);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.fh-footer-brand,
+.fh-footer-year,
+.fh-footer-version {
+    white-space: nowrap;
+}
+
+.fh-footer-author {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--fh-muted);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    transition: transform 0.18s ease, color 0.18s ease, text-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.fh-footer-author:hover,
+.fh-footer-author:focus-visible,
+.fh-footer-author.is-highlighted {
+    color: var(--fh-primary-2);
+    text-shadow: 0 0 10px var(--fh-glow), 0 0 22px var(--fh-glow);
+    filter: brightness(1.08);
+    transform: translateY(-1px) scale(1.01);
+}
+
+.fh-footer-version {
+    color: var(--fh-muted);
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fh-footer-toast {
+    min-height: 16px;
+    font-size: 0.74rem;
+    color: var(--fh-primary-2);
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fh-footer-toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }

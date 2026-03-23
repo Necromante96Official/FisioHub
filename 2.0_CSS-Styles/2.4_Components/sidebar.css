@@ -1,59 +1,151 @@
 .fh-panel-wrap {
     width: 100%;
     display: grid;
-    gap: var(--fh-s-3);
-}
-
-.fh-panel-head {
-    display: flex;
-    justify-content: center;
+    gap: var(--fh-s-2);
+    padding-top: var(--fh-s-2);
 }
 
 .fh-panel {
-    background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
-    border: 2px solid var(--fh-border);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 96%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent)),
+        repeating-linear-gradient(180deg,
+            transparent 0,
+            transparent 28px,
+            color-mix(in srgb, var(--fh-border) 22%, transparent) 29px,
+            transparent 30px);
+    border: 1px solid var(--fh-border);
     border-radius: var(--fh-r-3);
     box-shadow: var(--fh-shadow);
-    padding: var(--fh-s-5);
+    padding: var(--fh-s-3);
     display: grid;
-    gap: var(--fh-s-3);
-    min-height: 360px;
+    gap: var(--fh-s-2);
+    min-height: 0;
     text-align: center;
     justify-items: center;
     width: 100%;
 }
 
+.fh-panel-headline {
+    display: grid;
+    gap: var(--fh-s-1);
+    justify-items: center;
+}
+
+.fh-panel h2 {
+    margin: 0;
+    font-size: 1.06rem;
+    letter-spacing: 0.01em;
+}
+
+.fh-subtitle {
+    margin: 0;
+    max-width: 54ch;
+    color: var(--fh-muted);
+    font-size: 0.88rem;
+    line-height: 1.35;
+}
+
 .fh-data-list {
-    list-style: disc;
-    list-style-position: inside;
+    list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
     gap: 0;
-    max-height: 320px;
+    max-height: min(48vh, 420px);
     overflow: auto;
     width: 100%;
+    text-align: left;
+    scrollbar-gutter: stable;
 }
 
 .fh-data-item {
-    border-bottom: 1px solid var(--fh-border);
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
     background: transparent;
-    padding: var(--fh-s-3) 0 var(--fh-s-3) var(--fh-s-2);
+    padding: 7px var(--fh-s-2);
     min-height: 0;
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    align-items: center;
     justify-content: flex-start;
     text-align: left;
     box-shadow: none;
     border-left: 0;
+    line-height: 1.32;
+    font-size: 0.9rem;
+    position: relative;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-radius: 10px;
+    margin-bottom: 4px;
 }
 
 .fh-data-item:first-child {
-    border-top: 1px solid var(--fh-border);
+    border-top: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+}
+
+.fh-data-item:hover {
+    background: color-mix(in srgb, var(--fh-primary-2) 8%, transparent);
+}
+
+.fh-data-item[data-kind="heading"] {
+    margin-top: 6px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    font-weight: 700;
+    color: var(--fh-text);
+    background: color-mix(in srgb, var(--fh-primary) 7%, transparent);
+    border-left: 3px solid var(--fh-primary-2);
+}
+
+.fh-data-item[data-kind="divider"] {
+    min-height: 12px;
+    padding: 0;
+    margin: 6px 0;
+    border-bottom: 0;
+    background: transparent;
+}
+
+.fh-data-item[data-kind="divider"]::before {
+    content: "";
+}
+
+.fh-data-item[data-kind="kv"] {
+    grid-template-columns: minmax(100px, 180px) minmax(0, 1fr);
+    column-gap: var(--fh-s-2);
+    align-items: start;
+}
+
+.fh-data-label {
+    color: var(--fh-primary-2);
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.fh-data-value {
+    color: var(--fh-text);
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.fh-data-text {
+    color: var(--fh-text);
 }
 
 .fh-empty-state {
     color: var(--fh-muted);
+    margin: 0;
+    padding: var(--fh-s-1) 0;
+    font-size: 0.88rem;
+}
+
+.fh-panel-body {
+    width: 100%;
+    padding: var(--fh-s-2);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 78%, transparent);
+    border-radius: var(--fh-r-2);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 96%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .fh-panel-actions {
@@ -61,4 +153,30 @@
     justify-content: center;
     gap: var(--fh-s-2);
     flex-wrap: wrap;
+}
+
+.fh-data-list::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.fh-data-list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.fh-data-list::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+.fh-data-list {
+    scrollbar-color: color-mix(in srgb, var(--fh-primary-2) 34%, transparent) color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+@supports not (background: color-mix(in srgb, #000 50%, transparent)) {
+    .fh-panel {
+        background: linear-gradient(180deg, var(--fh-surface), var(--fh-surface-2));
+    }
 }
