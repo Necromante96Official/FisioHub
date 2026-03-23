@@ -1,4 +1,4 @@
-import { ThemeManager } from "../3.1_Core/theme-manager";
+import { ThemeManager } from "../3.1_Core/theme-manager.js";
 
 type ImportedItem = {
     raw: string;
