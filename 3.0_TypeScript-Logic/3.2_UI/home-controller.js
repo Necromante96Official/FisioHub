@@ -193,6 +193,6 @@ export class HomeController {
     updateThemeButtonLabel(theme) {
         const themeBtn = document.getElementById("themeToggleBtn");
         if (!themeBtn) return;
-        themeBtn.textContent = theme === "dark" ? "Tema: Escuro" : "Tema: Claro";
+        themeBtn.textContent = theme === "dark" ? "☀" : "☾";
     }
 }

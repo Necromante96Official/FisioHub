@@ -19,7 +19,8 @@
 }
 
 .fh-header-top {
-    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     border-radius: 0 0 var(--fh-r-2) var(--fh-r-2);
     border-top: 0;
 }
@@ -35,13 +36,21 @@
     color: var(--fh-text);
     text-shadow: 0 0 0 transparent;
     animation: fhPulseGlow 2.8s ease-in-out infinite;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    grid-column: 2;
+    justify-self: center;
 }
 
 .fh-header-top .fh-btn-ghost {
+    grid-column: 3;
+    justify-self: end;
     margin-left: auto;
+}
+
+.fh-theme-toggle {
+    min-width: 48px;
+    padding-inline: 0;
+    font-size: 1.1rem;
+    line-height: 1;
 }
 
 .fh-date-nav {
@@ -81,12 +90,21 @@
 
 @media (max-width: 940px) {
     .fh-header-top {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         min-height: 64px;
+        position: relative;
     }
 
     .fh-brand-title {
-        position: static;
-        transform: none;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .fh-header-top .fh-btn-ghost {
+        margin-left: auto;
     }
 
     .fh-date-nav {
