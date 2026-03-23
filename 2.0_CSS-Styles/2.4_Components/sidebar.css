@@ -1,0 +1,29 @@
+.fh-sidebar {
+    background: var(--fh-surface);
+    border: 1px solid var(--fh-border);
+    border-radius: var(--fh-r-2);
+    padding: var(--fh-s-4);
+    box-shadow: var(--fh-shadow);
+    display: grid;
+    gap: var(--fh-s-3);
+}
+
+.fh-sidebar h2 {
+    font-size: 1.1rem;
+}
+
+.fh-date-box,
+.fh-input-box {
+    display: grid;
+    gap: var(--fh-s-2);
+}
+
+#rawInput {
+    min-height: 260px;
+    resize: vertical;
+    border: 1px solid var(--fh-border);
+    border-radius: var(--fh-r-1);
+    padding: var(--fh-s-2);
+    background: var(--fh-surface-2);
+    color: var(--fh-text);
+}

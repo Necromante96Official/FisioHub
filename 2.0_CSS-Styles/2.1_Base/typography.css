@@ -1,0 +1,10 @@
+body {
+    font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    line-height: 1.4;
+}
+
+h1,
+h2,
+p {
+    margin: 0;
+}

@@ -1,0 +1,7 @@
+.fh-footer {
+    border: 1px solid var(--fh-border);
+    background: var(--fh-surface);
+    border-radius: var(--fh-r-2);
+    padding: var(--fh-s-3) var(--fh-s-4);
+    color: var(--fh-muted);
+}
