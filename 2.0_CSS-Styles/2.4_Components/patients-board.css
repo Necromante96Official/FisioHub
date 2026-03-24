@@ -52,7 +52,7 @@
 
 .fh-patients-toolbar {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 180px;
+    grid-template-columns: minmax(0, 1fr) 180px 180px;
     gap: 10px;
 }
 
@@ -162,7 +162,7 @@
     overflow: hidden;
 }
 
-.fh-patient-details-surface > header {
+.fh-patient-details-surface>header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -193,14 +193,14 @@
     background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
 }
 
-.fh-patient-detail-row > span {
+.fh-patient-detail-row>span {
     font-size: 0.74rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--fh-primary-2);
 }
 
-.fh-patient-detail-row > strong {
+.fh-patient-detail-row>strong {
     line-height: 1.35;
 }
 

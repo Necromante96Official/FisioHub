@@ -7,6 +7,7 @@ export class PatientsController {
     patientRecords = [];
     activeSearch = "";
     activeStatusFilter = "all";
+    activeOrderFilter = "az";
     async bootstrap() {
         this.theme.init();
         await this.loadPage();
@@ -70,6 +71,14 @@ export class PatientsController {
             const value = statusFilter.value;
             if (value === "all" || value === "pagante" || value === "isento") {
                 this.activeStatusFilter = value;
+                this.render();
+            }
+        });
+        const orderFilter = document.getElementById("patientsOrderFilter");
+        orderFilter?.addEventListener("change", () => {
+            const value = orderFilter.value;
+            if (value === "az" || value === "za") {
+                this.activeOrderFilter = value;
                 this.render();
             }
         });
@@ -279,7 +288,7 @@ export class PatientsController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 260);
+        }, 420);
         const onAnimationEnd = () => {
             window.clearTimeout(fallback);
             if (surface) {
@@ -294,13 +303,18 @@ export class PatientsController {
         finalizeClose();
     }
     getFilteredRecords() {
-        return this.patientRecords.filter((record) => {
+        const filtered = this.patientRecords.filter((record) => {
             const statusKind = record.statusFinanceiro.toLowerCase();
             const statusMatches = this.activeStatusFilter === "all" || statusKind === this.activeStatusFilter;
             const searchBase = `${record.nome} ${record.fisioterapeuta} ${record.convenio} ${record.celular}`.toLowerCase();
             const searchMatches = !this.activeSearch || searchBase.includes(this.activeSearch);
             return statusMatches && searchMatches;
         });
+        filtered.sort((a, b) => {
+            const factor = this.activeOrderFilter === "za" ? -1 : 1;
+            return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }) * factor;
+        });
+        return filtered;
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");

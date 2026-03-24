@@ -100,11 +100,11 @@
 .fh-terms-dialog {
     border: 0;
     padding: 0;
-    width: min(760px, calc(100vw - 30px));
-    max-height: min(76vh, 640px);
+    width: min(920px, calc(100vw - 30px));
+    max-height: min(88dvh, 760px);
     border-radius: calc(var(--fh-r-2) + 4px);
     background: transparent;
-    overflow: hidden;
+    overflow: visible;
     color: var(--fh-text);
     box-shadow: 0 28px 54px rgba(0, 0, 0, 0.5);
     transform-origin: center top;
@@ -113,28 +113,32 @@
 .fh-terms-dialog::backdrop {
     background: linear-gradient(145deg, rgba(4, 11, 22, 0.46), rgba(7, 18, 34, 0.64));
     backdrop-filter: blur(4px);
-    animation: fhTermsBackdropIn 0.2s ease-out both;
+    animation: fhTermsBackdropIn 0.3s ease-out both;
 }
 
 .fh-terms-dialog[open] {
-    animation: fhTermsDialogEnter 0.22s ease-out both;
+    animation: fhTermsDialogEnter 0.32s cubic-bezier(0.24, 0.92, 0.24, 1) both;
 }
 
 .fh-terms-dialog.is-opening {
-    animation: fhTermsDialogEnter 0.24s cubic-bezier(0.24, 0.92, 0.24, 1) both;
+    animation: fhTermsDialogEnter 0.32s cubic-bezier(0.24, 0.92, 0.24, 1) both;
 }
 
 .fh-terms-dialog.is-closing {
-    animation: fhTermsDialogExit 0.18s ease-in both;
+    animation: fhTermsDialogExit 0.24s ease-in both;
+}
+
+.fh-terms-dialog.is-closing::backdrop {
+    animation: fhTermsBackdropOut 0.24s ease-in both;
 }
 
 .fh-terms-dialog[open] .fh-terms-surface,
 .fh-terms-dialog.is-opening .fh-terms-surface {
-    animation: fhTermsSurfaceIn 0.22s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation: fhTermsSurfaceIn 0.32s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .fh-terms-dialog.is-closing .fh-terms-surface {
-    animation: fhTermsSurfaceOut 0.18s ease-in both;
+    animation: fhTermsSurfaceOut 0.24s ease-in both;
 }
 
 .fh-terms-surface {
@@ -145,6 +149,8 @@
         linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent)),
         radial-gradient(circle at 12% 6%, color-mix(in srgb, var(--fh-primary-2) 16%, transparent) 0%, transparent 54%);
     border: 1px solid color-mix(in srgb, var(--fh-border) 88%, transparent);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    overflow: hidden;
 }
 
 .fh-terms-header {
@@ -175,6 +181,8 @@
     padding: 14px 16px 16px;
     display: grid;
     gap: 12px;
+    grid-template-columns: minmax(210px, 260px) minmax(0, 1fr);
+    align-items: start;
 }
 
 .fh-terms-brand {
@@ -186,20 +194,27 @@
     border-radius: 12px;
     padding: 12px;
     background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
+    position: sticky;
+    top: 0;
 }
 
 .fh-terms-brand img {
-    width: 236px;
-    height: 236px;
+    width: min(200px, 100%);
+    height: auto;
     object-fit: contain;
     border-radius: 10px;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
 }
 
+.fh-terms-details {
+    display: grid;
+    gap: 12px;
+}
+
 .fh-site-notifications {
     position: fixed;
     right: 18px;
-    bottom: 18px;
+    bottom: 136px;
     display: grid;
     gap: 8px;
     z-index: 999;
@@ -222,6 +237,50 @@
 
 .fh-site-toast.is-leaving {
     animation: fhToastOut 0.2s ease-in both;
+}
+
+.fh-floating-home-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 74px;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 64%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--fh-primary) 54%, transparent), color-mix(in srgb, var(--fh-primary-2) 68%, transparent));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #ffffff;
+    z-index: 1001;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 10px 22px rgba(0, 0, 0, 0.42);
+    animation: fhFloatingHomeGlow 2.8s ease-in-out infinite;
+}
+
+.fh-floating-home-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.fh-floating-home-toast {
+    position: fixed;
+    right: 20px;
+    bottom: 132px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 52%, transparent);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 95%, transparent));
+    color: #f3f9ff;
+    font-size: 0.76rem;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.34);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+    animation: fhFloatingHomeToastPulse 5s ease-in-out infinite;
 }
 
 @keyframes fhToastIn {
@@ -278,7 +337,7 @@
 @keyframes fhTermsDialogEnter {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(0.98);
+        transform: translateY(14px) scale(0.975);
     }
 
     to {
@@ -295,14 +354,14 @@
 
     to {
         opacity: 0;
-        transform: translateY(8px) scale(0.98);
+        transform: translateY(10px) scale(0.98);
     }
 }
 
 @keyframes fhTermsSurfaceIn {
     from {
         opacity: 0;
-        transform: translateY(10px) scale(0.985);
+        transform: translateY(12px) scale(0.985);
     }
 
     to {
@@ -319,7 +378,7 @@
 
     to {
         opacity: 0;
-        transform: translateY(8px) scale(0.985);
+        transform: translateY(10px) scale(0.985);
     }
 }
 
@@ -330,6 +389,46 @@
 
     to {
         opacity: 1;
+    }
+}
+
+@keyframes fhTermsBackdropOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fhFloatingHomeGlow {
+    0%,
+    100% {
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 10px 22px rgba(0, 0, 0, 0.42);
+    }
+
+    50% {
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 44%, transparent), 0 0 20px color-mix(in srgb, var(--fh-primary-2) 30%, transparent), 0 12px 28px rgba(0, 0, 0, 0.46);
+    }
+}
+
+@keyframes fhFloatingHomeToastPulse {
+    0%,
+    68% {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    74%,
+    90% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(6px) scale(0.985);
     }
 }
 
@@ -397,9 +496,29 @@
         justify-self: center;
     }
 
+    .fh-terms-content {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-terms-brand {
+        position: static;
+    }
+
     .fh-terms-brand img {
-        width: min(236px, 62vw);
-        height: min(236px, 62vw);
+        width: min(200px, 62vw);
+    }
+
+    .fh-floating-home-btn {
+        width: 48px;
+        height: 48px;
+        right: 14px;
+        bottom: 72px;
+    }
+
+    .fh-floating-home-toast {
+        right: 14px;
+        bottom: 126px;
+        font-size: 0.72rem;
     }
 }
 
@@ -414,6 +533,11 @@
     .fh-terms-dialog[open] .fh-terms-surface,
     .fh-terms-dialog.is-closing .fh-terms-surface,
     .fh-terms-dialog::backdrop {
+        animation: none;
+    }
+
+    .fh-floating-home-btn,
+    .fh-floating-home-toast {
         animation: none;
     }
 }

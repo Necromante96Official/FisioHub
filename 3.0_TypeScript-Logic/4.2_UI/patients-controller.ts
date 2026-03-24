@@ -18,6 +18,7 @@ export class PatientsController {
     private patientRecords: PatientRecord[] = [];
     private activeSearch = "";
     private activeStatusFilter: "all" | "pagante" | "isento" = "all";
+    private activeOrderFilter: "az" | "za" = "az";
 
     async bootstrap(): Promise<void> {
         this.theme.init();
@@ -90,6 +91,15 @@ export class PatientsController {
             const value = statusFilter.value;
             if (value === "all" || value === "pagante" || value === "isento") {
                 this.activeStatusFilter = value;
+                this.render();
+            }
+        });
+
+        const orderFilter = document.getElementById("patientsOrderFilter") as HTMLSelectElement | null;
+        orderFilter?.addEventListener("change", () => {
+            const value = orderFilter.value;
+            if (value === "az" || value === "za") {
+                this.activeOrderFilter = value;
                 this.render();
             }
         });
@@ -339,7 +349,7 @@ export class PatientsController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 260);
+        }, 420);
 
         const onAnimationEnd = (): void => {
             window.clearTimeout(fallback);
@@ -360,7 +370,7 @@ export class PatientsController {
     }
 
     private getFilteredRecords(): PatientRecord[] {
-        return this.patientRecords.filter((record) => {
+        const filtered = this.patientRecords.filter((record) => {
             const statusKind = record.statusFinanceiro.toLowerCase() as "pagante" | "isento";
             const statusMatches = this.activeStatusFilter === "all" || statusKind === this.activeStatusFilter;
 
@@ -369,6 +379,13 @@ export class PatientsController {
 
             return statusMatches && searchMatches;
         });
+
+        filtered.sort((a, b) => {
+            const factor = this.activeOrderFilter === "za" ? -1 : 1;
+            return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }) * factor;
+        });
+
+        return filtered;
     }
 
     private showSiteNotification(message: string): void {

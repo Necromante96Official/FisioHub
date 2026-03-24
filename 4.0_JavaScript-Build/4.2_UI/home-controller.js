@@ -119,6 +119,7 @@ export class HomeController {
             return;
         }
         dialog.dataset.closing = "true";
+        dialog.classList.remove("is-opening");
         dialog.classList.add("is-closing");
         const surface = dialog.querySelector(".fh-terms-surface");
         const finalizeClose = () => {
@@ -133,7 +134,7 @@ export class HomeController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 260);
+        }, 420);
         const onAnimationEnd = () => {
             window.clearTimeout(fallback);
             if (surface) {
