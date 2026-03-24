@@ -134,7 +134,9 @@ export class PatientsController {
                 termsDialog.showModal();
 
                 window.requestAnimationFrame(() => {
-                    termsDialog.classList.add("is-opening");
+                    window.requestAnimationFrame(() => {
+                        termsDialog.classList.add("is-opening");
+                    });
                 });
 
                 const onOpenAnimationEnd = (): void => {
@@ -442,6 +444,7 @@ export class PatientsController {
         }
 
         toast.dataset.started = "true";
+        const intervalMs = 15000;
 
         const pulse = (): void => {
             toast.classList.remove("is-visible");
@@ -449,8 +452,18 @@ export class PatientsController {
             toast.classList.add("is-visible");
         };
 
-        window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 15000);
+        let nextTick = performance.now() + intervalMs;
+
+        const scheduleNext = (): void => {
+            const delay = Math.max(0, nextTick - performance.now());
+            window.setTimeout(() => {
+                pulse();
+                nextTick += intervalMs;
+                scheduleNext();
+            }, delay);
+        };
+
+        scheduleNext();
     }
 
     private showSiteNotification(message: string): void {

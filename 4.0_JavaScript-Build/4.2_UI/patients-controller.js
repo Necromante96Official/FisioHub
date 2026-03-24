@@ -107,7 +107,9 @@ export class PatientsController {
                 termsDialog.removeAttribute("data-closing");
                 termsDialog.showModal();
                 window.requestAnimationFrame(() => {
-                    termsDialog.classList.add("is-opening");
+                    window.requestAnimationFrame(() => {
+                        termsDialog.classList.add("is-opening");
+                    });
                 });
                 const onOpenAnimationEnd = () => {
                     termsDialog.classList.remove("is-opening");
@@ -364,13 +366,22 @@ export class PatientsController {
             return;
         }
         toast.dataset.started = "true";
+        const intervalMs = 15000;
         const pulse = () => {
             toast.classList.remove("is-visible");
             void toast.offsetWidth;
             toast.classList.add("is-visible");
         };
-        window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 15000);
+        let nextTick = performance.now() + intervalMs;
+        const scheduleNext = () => {
+            const delay = Math.max(0, nextTick - performance.now());
+            window.setTimeout(() => {
+                pulse();
+                nextTick += intervalMs;
+                scheduleNext();
+            }, delay);
+        };
+        scheduleNext();
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");

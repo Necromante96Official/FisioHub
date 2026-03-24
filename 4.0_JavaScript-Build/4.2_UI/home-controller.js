@@ -64,10 +64,7 @@ export class HomeController {
         });
         const clearBtn = document.getElementById("clearDataBtn");
         clearBtn?.addEventListener("click", () => {
-            this.importedItems = [];
-            this.saveStagingDataToStorage();
-            this.renderImportedData();
-            this.showSiteNotification("Rascunho de dados limpo.");
+            this.clearAllStoredData();
         });
         const clearAllDataBtn = document.getElementById("clearAllDataBtn");
         clearAllDataBtn?.addEventListener("click", () => {
@@ -105,7 +102,9 @@ export class HomeController {
                 termsDialog.removeAttribute("data-closing");
                 termsDialog.showModal();
                 window.requestAnimationFrame(() => {
-                    termsDialog.classList.add("is-opening");
+                    window.requestAnimationFrame(() => {
+                        termsDialog.classList.add("is-opening");
+                    });
                 });
                 const onOpenAnimationEnd = () => {
                     termsDialog.classList.remove("is-opening");
@@ -314,6 +313,9 @@ export class HomeController {
     }
     clearPatientsListOnly() {
         localStorage.removeItem(this.patientsRecordsStorageKey);
+        localStorage.removeItem(this.processedDataStorageKey);
+        localStorage.removeItem(this.processedMetaStorageKey);
+        localStorage.removeItem(this.legacyImportedDataStorageKey);
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
     }
     async pickBackupFile() {
@@ -563,13 +565,22 @@ export class HomeController {
             return;
         }
         toast.dataset.started = "true";
+        const intervalMs = 15000;
         const pulse = () => {
             toast.classList.remove("is-visible");
             void toast.offsetWidth;
             toast.classList.add("is-visible");
         };
-        window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 15000);
+        let nextTick = performance.now() + intervalMs;
+        const scheduleNext = () => {
+            const delay = Math.max(0, nextTick - performance.now());
+            window.setTimeout(() => {
+                pulse();
+                nextTick += intervalMs;
+                scheduleNext();
+            }, delay);
+        };
+        scheduleNext();
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");

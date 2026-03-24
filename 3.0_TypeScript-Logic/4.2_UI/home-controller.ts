@@ -104,10 +104,7 @@ export class HomeController {
 
         const clearBtn = document.getElementById("clearDataBtn");
         clearBtn?.addEventListener("click", () => {
-            this.importedItems = [];
-            this.saveStagingDataToStorage();
-            this.renderImportedData();
-            this.showSiteNotification("Rascunho de dados limpo.");
+            this.clearAllStoredData();
         });
 
         const clearAllDataBtn = document.getElementById("clearAllDataBtn");
@@ -155,7 +152,9 @@ export class HomeController {
                 termsDialog.showModal();
 
                 window.requestAnimationFrame(() => {
-                    termsDialog.classList.add("is-opening");
+                    window.requestAnimationFrame(() => {
+                        termsDialog.classList.add("is-opening");
+                    });
                 });
 
                 const onOpenAnimationEnd = (): void => {
@@ -417,6 +416,9 @@ export class HomeController {
 
     private clearPatientsListOnly(): void {
         localStorage.removeItem(this.patientsRecordsStorageKey);
+        localStorage.removeItem(this.processedDataStorageKey);
+        localStorage.removeItem(this.processedMetaStorageKey);
+        localStorage.removeItem(this.legacyImportedDataStorageKey);
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
     }
 
@@ -701,6 +703,7 @@ export class HomeController {
         }
 
         toast.dataset.started = "true";
+        const intervalMs = 15000;
 
         const pulse = (): void => {
             toast.classList.remove("is-visible");
@@ -708,8 +711,18 @@ export class HomeController {
             toast.classList.add("is-visible");
         };
 
-        window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 15000);
+        let nextTick = performance.now() + intervalMs;
+
+        const scheduleNext = (): void => {
+            const delay = Math.max(0, nextTick - performance.now());
+            window.setTimeout(() => {
+                pulse();
+                nextTick += intervalMs;
+                scheduleNext();
+            }, delay);
+        };
+
+        scheduleNext();
     }
 
     private showSiteNotification(message: string): void {
