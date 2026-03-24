@@ -200,7 +200,7 @@ export class PatientsController {
                     fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
                     celular: typeof candidate.celular === "string" ? candidate.celular : "-",
                     convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
-                    procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+                    procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-"
                 };
             }).filter((record) => record.nome.trim().length > 0);
         }
@@ -245,7 +245,7 @@ export class PatientsController {
             if (key === "convenio")
                 draft.convenio = value;
             if (key === "procedimentos")
-                draft.procedimentos = value;
+                draft.procedimentos = this.sanitizeProcedimentosValue(value);
         });
         pushDraft();
         return records.map((record) => ({
@@ -273,6 +273,9 @@ export class PatientsController {
     }
     isIsento(record) {
         return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
+    }
+    sanitizeProcedimentosValue(value) {
+        return value.split(/\bobservacoes\s*:/i)[0].trim();
     }
     getWhatsappLink(phone) {
         const onlyDigits = phone.replace(/\D/g, "");
@@ -367,7 +370,7 @@ export class PatientsController {
             toast.classList.add("is-visible");
         };
         window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 5000);
+        window.setInterval(pulse, 15000);
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");

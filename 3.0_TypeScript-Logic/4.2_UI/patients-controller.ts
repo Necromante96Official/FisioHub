@@ -246,7 +246,7 @@ export class PatientsController {
                     fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
                     celular: typeof candidate.celular === "string" ? candidate.celular : "-",
                     convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
-                    procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+                    procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-"
                 };
             }).filter((record) => record.nome.trim().length > 0);
         } catch {
@@ -292,7 +292,7 @@ export class PatientsController {
             if (key === "paciente") draft.nome = value;
             if (key === "celular") draft.celular = value;
             if (key === "convenio") draft.convenio = value;
-            if (key === "procedimentos") draft.procedimentos = value;
+            if (key === "procedimentos") draft.procedimentos = this.sanitizeProcedimentosValue(value);
         });
 
         pushDraft();
@@ -325,6 +325,10 @@ export class PatientsController {
 
     private isIsento(record: PatientRecord): boolean {
         return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
+    }
+
+    private sanitizeProcedimentosValue(value: string): string {
+        return value.split(/\bobservacoes\s*:/i)[0].trim();
     }
 
     private getWhatsappLink(phone: string): string | null {
@@ -446,7 +450,7 @@ export class PatientsController {
         };
 
         window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 5000);
+        window.setInterval(pulse, 15000);
     }
 
     private showSiteNotification(message: string): void {

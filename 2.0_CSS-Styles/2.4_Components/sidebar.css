@@ -118,7 +118,12 @@
     padding-bottom: var(--fh-s-1);
 }
 
-#openBackupsBtn {
+#openBackupsBtn,
+#clearAllDataBtn {
+    margin-right: 0;
+}
+
+#clearPatientsListBtn {
     margin-right: auto;
 }
 
@@ -162,8 +167,26 @@
 .fh-backups-content {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
     padding: 14px 16px 16px;
+}
+
+.fh-backups-column {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--fh-surface-2) 32%, transparent);
+}
+
+.fh-backups-column h4 {
+    margin: 0;
+    font-size: 0.84rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--fh-primary-2) 72%, #ffffff);
 }
 
 .fh-backups-content .fh-btn {
@@ -186,7 +209,9 @@
         justify-content: center;
     }
 
-    #openBackupsBtn {
+    #openBackupsBtn,
+    #clearAllDataBtn,
+    #clearPatientsListBtn {
         margin-right: 0;
     }
 

@@ -13,6 +13,8 @@
 
   <div class="fh-panel-actions">
     <button id="openBackupsBtn" class="fh-btn fh-btn-ghost" type="button">Backups</button>
+    <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Todos os Dados</button>
+    <button id="clearPatientsListBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Lista de Pacientes</button>
     <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
     <button id="processBtn" class="fh-btn" type="button">Processar</button>
     <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
@@ -28,14 +30,21 @@
       </header>
 
       <div class="fh-backups-content">
-        <button id="exportAllDataBtn" class="fh-btn" type="button">Exportar Todos os Dados</button>
-        <button id="exportPatientsOnlyBtn" class="fh-btn" type="button">Exportar Lista de Pacientes</button>
-        <button id="exportAllWithoutPatientsBtn" class="fh-btn" type="button">Exportar Todos os Dados sem Lista de
-          Pacientes</button>
-        <button id="importAllDataBtn" class="fh-btn" type="button">Importar Todos os Dados</button>
-        <button id="importPatientsOnlyBtn" class="fh-btn" type="button">Importar Lista de Pacientes</button>
-        <button id="importAllWithoutPatientsBtn" class="fh-btn" type="button">Importar Todos os Dados sem Lista de
-          Pacientes</button>
+        <section class="fh-backups-column" aria-label="Exportar backups">
+          <h4>Exportar</h4>
+          <button id="exportAllDataBtn" class="fh-btn" type="button">Exportar Todos os Dados</button>
+          <button id="exportPatientsOnlyBtn" class="fh-btn" type="button">Exportar Lista de Pacientes</button>
+          <button id="exportAllWithoutPatientsBtn" class="fh-btn" type="button">Exportar Todos os Dados sem Lista de
+            Pacientes</button>
+        </section>
+
+        <section class="fh-backups-column" aria-label="Importar backups">
+          <h4>Importar</h4>
+          <button id="importAllDataBtn" class="fh-btn" type="button">Importar Todos os Dados</button>
+          <button id="importPatientsOnlyBtn" class="fh-btn" type="button">Importar Lista de Pacientes</button>
+          <button id="importAllWithoutPatientsBtn" class="fh-btn" type="button">Importar Todos os Dados sem Lista de
+            Pacientes</button>
+        </section>
       </div>
     </article>
   </dialog>

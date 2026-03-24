@@ -110,6 +110,16 @@ export class HomeController {
             this.showSiteNotification("Rascunho de dados limpo.");
         });
 
+        const clearAllDataBtn = document.getElementById("clearAllDataBtn");
+        clearAllDataBtn?.addEventListener("click", () => {
+            this.clearAllStoredData();
+        });
+
+        const clearPatientsListBtn = document.getElementById("clearPatientsListBtn");
+        clearPatientsListBtn?.addEventListener("click", () => {
+            this.clearPatientsListOnly();
+        });
+
         const importedDataEditor = document.getElementById("importedDataEditor") as HTMLTextAreaElement | null;
         importedDataEditor?.addEventListener("input", () => {
             this.syncImportedDataFromEditor(importedDataEditor.value);
@@ -393,6 +403,23 @@ export class HomeController {
         this.showSiteNotification("Backup importado com sucesso.");
     }
 
+    private clearAllStoredData(): void {
+        localStorage.removeItem(this.legacyImportedDataStorageKey);
+        localStorage.removeItem(this.stagingDataStorageKey);
+        localStorage.removeItem(this.processedDataStorageKey);
+        localStorage.removeItem(this.patientsRecordsStorageKey);
+        localStorage.removeItem(this.processedMetaStorageKey);
+
+        this.importedItems = [];
+        this.renderImportedData();
+        this.showSiteNotification("Todos os dados locais foram limpos.");
+    }
+
+    private clearPatientsListOnly(): void {
+        localStorage.removeItem(this.patientsRecordsStorageKey);
+        this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+    }
+
     private async pickBackupFile(): Promise<Partial<BackupPayload> | null> {
         const input = document.createElement("input");
         input.type = "file";
@@ -466,7 +493,7 @@ export class HomeController {
             if (key === "paciente") draft.nome = value;
             if (key === "celular") draft.celular = value;
             if (key === "convenio") draft.convenio = value;
-            if (key === "procedimentos") draft.procedimentos = value;
+            if (key === "procedimentos") draft.procedimentos = this.sanitizeProcedimentosValue(value);
         });
 
         pushDraft();
@@ -499,6 +526,10 @@ export class HomeController {
 
     private isIsento(record: PatientRecord): boolean {
         return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
+    }
+
+    private sanitizeProcedimentosValue(value: string): string {
+        return value.split(/\bobservacoes\s*:/i)[0].trim();
     }
 
     private extractIsoDate(value: string): string | null {
@@ -658,7 +689,7 @@ export class HomeController {
                 fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
                 celular: typeof candidate.celular === "string" ? candidate.celular : "-",
                 convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
-                procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+                procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-"
             };
         }).filter((record) => record.nome.trim().length > 0);
     }
@@ -678,7 +709,7 @@ export class HomeController {
         };
 
         window.setTimeout(pulse, 1200);
-        window.setInterval(pulse, 5000);
+        window.setInterval(pulse, 15000);
     }
 
     private showSiteNotification(message: string): void {
