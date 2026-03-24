@@ -120,11 +120,16 @@
     animation: fhTermsDialogEnter 0.22s ease-out both;
 }
 
+.fh-terms-dialog.is-opening {
+    animation: fhTermsDialogEnter 0.24s cubic-bezier(0.24, 0.92, 0.24, 1) both;
+}
+
 .fh-terms-dialog.is-closing {
     animation: fhTermsDialogExit 0.18s ease-in both;
 }
 
-.fh-terms-dialog[open] .fh-terms-surface {
+.fh-terms-dialog[open] .fh-terms-surface,
+.fh-terms-dialog.is-opening .fh-terms-surface {
     animation: fhTermsSurfaceIn 0.22s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
@@ -184,11 +189,63 @@
 }
 
 .fh-terms-brand img {
-    width: 200px;
-    height: 200px;
+    width: 236px;
+    height: 236px;
     object-fit: contain;
     border-radius: 10px;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+}
+
+.fh-site-notifications {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    display: grid;
+    gap: 8px;
+    z-index: 999;
+    pointer-events: none;
+    width: min(340px, calc(100vw - 28px));
+}
+
+.fh-site-toast {
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 52%, transparent);
+    border-radius: 12px;
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 94%, transparent));
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38);
+    padding: 10px 12px;
+    color: #f3f9ff;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    animation: fhToastIn 0.24s ease-out both;
+    pointer-events: auto;
+}
+
+.fh-site-toast.is-leaving {
+    animation: fhToastOut 0.2s ease-in both;
+}
+
+@keyframes fhToastIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fhToastOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(6px) scale(0.98);
+    }
 }
 
 .fh-terms-brand p {
@@ -341,14 +398,15 @@
     }
 
     .fh-terms-brand img {
-        width: min(200px, 58vw);
-        height: min(200px, 58vw);
+        width: min(236px, 62vw);
+        height: min(236px, 62vw);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
 
     .fh-terms-dialog[open],
+    .fh-terms-dialog.is-opening,
     .fh-terms-dialog.is-closing {
         animation: none;
     }

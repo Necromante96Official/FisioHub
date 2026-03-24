@@ -5,6 +5,8 @@ export class PatientsController {
     importedDataStorageKey = "fisiohub-imported-data-lines-v1";
     theme = new ThemeManager();
     patientRecords = [];
+    activeSearch = "";
+    activeStatusFilter = "all";
     async bootstrap() {
         this.theme.init();
         await this.loadPage();
@@ -12,6 +14,9 @@ export class PatientsController {
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
         this.render();
+        if (this.patientRecords.length === 0) {
+            this.showSiteNotification("Nenhum paciente encontrado. Importe dados na página inicial.");
+        }
     }
     async loadPage() {
         const app = document.getElementById(this.appId);
@@ -55,6 +60,19 @@ export class PatientsController {
                 return;
             this.openDetails(record);
         });
+        const searchInput = document.getElementById("patientsSearchInput");
+        searchInput?.addEventListener("input", () => {
+            this.activeSearch = searchInput.value.trim().toLowerCase();
+            this.render();
+        });
+        const statusFilter = document.getElementById("patientsStatusFilter");
+        statusFilter?.addEventListener("change", () => {
+            const value = statusFilter.value;
+            if (value === "all" || value === "pagante" || value === "isento") {
+                this.activeStatusFilter = value;
+                this.render();
+            }
+        });
         const dialog = this.getDetailsDialog();
         const closeButton = document.getElementById("closePatientDetailsDialogBtn");
         closeButton?.addEventListener("click", () => {
@@ -67,10 +85,36 @@ export class PatientsController {
                 dialog.close();
             }
         });
+        const termsButton = document.getElementById("termsBtn");
+        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
+        const termsDialog = this.getTermsDialog();
+        termsButton?.addEventListener("click", () => {
+            if (!termsDialog.open) {
+                termsDialog.classList.remove("is-opening");
+                termsDialog.classList.remove("is-closing");
+                termsDialog.removeAttribute("data-closing");
+                termsDialog.showModal();
+                window.requestAnimationFrame(() => {
+                    termsDialog.classList.add("is-opening");
+                });
+                const onOpenAnimationEnd = () => {
+                    termsDialog.classList.remove("is-opening");
+                    termsDialog.removeEventListener("animationend", onOpenAnimationEnd);
+                };
+                termsDialog.addEventListener("animationend", onOpenAnimationEnd);
+            }
+        });
+        closeTermsButton?.addEventListener("click", () => {
+            this.requestTermsClose(termsDialog);
+        });
+        termsDialog?.addEventListener("cancel", (event) => {
+            this.requestTermsClose(termsDialog, event);
+        });
     }
     render() {
-        const total = this.patientRecords.length;
-        const isentos = this.patientRecords.filter((record) => record.statusFinanceiro === "Isento").length;
+        const visibleRecords = this.getFilteredRecords();
+        const total = visibleRecords.length;
+        const isentos = visibleRecords.filter((record) => record.statusFinanceiro === "Isento").length;
         const pagantes = total - isentos;
         this.setText("patientsTotalCount", String(total));
         this.setText("patientsPagantesCount", String(pagantes));
@@ -79,17 +123,17 @@ export class PatientsController {
         if (!tableBody)
             return;
         tableBody.innerHTML = "";
-        if (this.patientRecords.length === 0) {
+        if (visibleRecords.length === 0) {
             const row = document.createElement("tr");
             const cell = document.createElement("td");
             cell.colSpan = 3;
             cell.className = "fh-patients-empty";
-            cell.textContent = "Nenhum paciente disponível. Importe os dados na página inicial.";
+            cell.textContent = "Nenhum paciente encontrado para o filtro atual.";
             row.appendChild(cell);
             tableBody.appendChild(row);
             return;
         }
-        this.patientRecords.forEach((record, index) => {
+        visibleRecords.forEach((record, index) => {
             const row = document.createElement("tr");
             const nameCell = document.createElement("td");
             nameCell.textContent = record.nome;
@@ -103,7 +147,7 @@ export class PatientsController {
             const detailsButton = document.createElement("button");
             detailsButton.type = "button";
             detailsButton.className = "fh-patient-details-btn";
-            detailsButton.dataset.index = String(index);
+            detailsButton.dataset.index = String(this.patientRecords.indexOf(record));
             detailsButton.textContent = "Detalhes";
             actionCell.appendChild(detailsButton);
             row.appendChild(nameCell);
@@ -210,6 +254,71 @@ export class PatientsController {
     }
     getDetailsDialog() {
         return document.getElementById("patientDetailsDialog");
+    }
+    getTermsDialog() {
+        return document.getElementById("termsDialog");
+    }
+    requestTermsClose(dialog, event) {
+        event?.preventDefault();
+        if (!dialog.open || dialog.dataset.closing === "true") {
+            return;
+        }
+        dialog.dataset.closing = "true";
+        dialog.classList.remove("is-opening");
+        dialog.classList.add("is-closing");
+        const surface = dialog.querySelector(".fh-terms-surface");
+        const finalizeClose = () => {
+            dialog.classList.remove("is-closing");
+            dialog.removeAttribute("data-closing");
+            if (dialog.open) {
+                dialog.close();
+            }
+        };
+        const fallback = window.setTimeout(() => {
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
+            }
+            finalizeClose();
+        }, 260);
+        const onAnimationEnd = () => {
+            window.clearTimeout(fallback);
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
+            }
+            finalizeClose();
+        };
+        if (surface) {
+            surface.addEventListener("animationend", onAnimationEnd, { once: true });
+            return;
+        }
+        finalizeClose();
+    }
+    getFilteredRecords() {
+        return this.patientRecords.filter((record) => {
+            const statusKind = record.statusFinanceiro.toLowerCase();
+            const statusMatches = this.activeStatusFilter === "all" || statusKind === this.activeStatusFilter;
+            const searchBase = `${record.nome} ${record.fisioterapeuta} ${record.convenio} ${record.celular}`.toLowerCase();
+            const searchMatches = !this.activeSearch || searchBase.includes(this.activeSearch);
+            return statusMatches && searchMatches;
+        });
+    }
+    showSiteNotification(message) {
+        const container = document.getElementById("siteNotifications");
+        if (!container)
+            return;
+        const toast = document.createElement("div");
+        toast.className = "fh-site-toast";
+        toast.textContent = message;
+        container.appendChild(toast);
+        const beginClose = () => {
+            toast.classList.add("is-leaving");
+            const remove = () => {
+                toast.removeEventListener("animationend", remove);
+                toast.remove();
+            };
+            toast.addEventListener("animationend", remove);
+        };
+        window.setTimeout(beginClose, 2600);
     }
     setText(id, text) {
         const element = document.getElementById(id);
