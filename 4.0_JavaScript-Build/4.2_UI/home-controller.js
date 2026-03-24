@@ -1,4 +1,4 @@
-import { ThemeManager } from "../3.1_Core/theme-manager.js";
+import { ThemeManager } from "../4.1_Core/theme-manager.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";

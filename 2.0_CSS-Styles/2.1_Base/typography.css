@@ -1,7 +1,7 @@
 body {
-    font-family: "Tahoma", "Verdana", "Segoe UI", sans-serif;
+    font-family: "Sora", "Space Grotesk", "Segoe UI", sans-serif;
     line-height: 1.5;
-    letter-spacing: 0.1px;
+    letter-spacing: 0.14px;
 }
 
 h1,
@@ -13,11 +13,13 @@ p {
 h1 {
     font-size: clamp(1.45rem, 2.5vw, 2.1rem);
     font-weight: 800;
+    letter-spacing: 0.02em;
 }
 
 h2 {
     font-size: clamp(1.05rem, 1.8vw, 1.35rem);
     font-weight: 700;
+    letter-spacing: 0.015em;
 }
 
 small {

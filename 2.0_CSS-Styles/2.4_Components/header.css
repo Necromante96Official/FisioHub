@@ -1,7 +1,7 @@
 .fh-header-wrap {
     position: sticky;
-    top: 0;
-    z-index: 10;
+    top: 8px;
+    z-index: 16;
     width: 100%;
     display: grid;
     gap: var(--fh-s-2);
@@ -9,66 +9,77 @@
 
 .fh-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     gap: var(--fh-s-3);
-    padding: var(--fh-s-2) var(--fh-s-3);
-    background: linear-gradient(145deg, var(--fh-surface), var(--fh-surface-2));
-    border: 1px solid var(--fh-border);
-    box-shadow: var(--fh-shadow);
+    padding: clamp(10px, 1.6vw, 16px) clamp(14px, 2.2vw, 28px);
+    background:
+        linear-gradient(130deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent)),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.025), transparent 56%);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 86%, transparent);
+    box-shadow: 0 20px 36px rgba(0, 0, 0, 0.36), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    border-radius: var(--fh-r-2);
+    backdrop-filter: blur(5px);
 }
 
 .fh-header-top {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    position: relative;
-    border-radius: 0 0 var(--fh-r-2) var(--fh-r-2);
-    border-top: 0;
+    min-height: 72px;
+    padding-block: clamp(8px, 1.2vw, 12px);
 }
 
 .fh-header-bottom {
-    margin-top: var(--fh-s-2);
-    border-radius: var(--fh-r-2);
     justify-content: center;
-    padding-block: var(--fh-s-2);
+    padding-block: clamp(8px, 1.2vw, 14px);
 }
 
-.fh-brand-logo {
-    width: 34px;
-    height: 34px;
-    object-fit: contain;
-    flex: 0 0 auto;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+.fh-brand-block {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
 }
 
 .fh-brand-title {
     margin: 0;
     color: var(--fh-text);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-    animation: fhPulseGlow 2.8s ease-in-out infinite;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 22px rgba(102, 169, 255, 0.18);
+    position: static;
+    transform: none;
+    width: max-content;
+    margin-inline: auto;
+    letter-spacing: 0.01em;
+}
+
+.fh-brand-subtitle {
+    margin: 0;
+    color: color-mix(in srgb, var(--fh-muted) 88%, #ffffff 12%);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
 }
 
 .fh-date-nav {
     width: 100%;
     display: grid;
-    grid-template-columns: auto auto minmax(160px, 210px) auto auto auto;
-    gap: var(--fh-s-1);
+    grid-template-columns: auto auto minmax(170px, 220px) auto auto auto;
+    gap: 8px;
     justify-content: center;
     align-items: center;
+    padding: 6px;
+    border-radius: calc(var(--fh-r-1) + 2px);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 82%, transparent), color-mix(in srgb, var(--fh-surface-2) 90%, transparent));
 }
 
 #refDate {
-    min-height: 36px;
-    border: 1px solid var(--fh-border);
+    min-height: 38px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
     border-radius: var(--fh-r-1);
-    background: var(--fh-surface);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 88%, transparent), color-mix(in srgb, var(--fh-surface-2) 94%, transparent));
     color: var(--fh-text);
     padding: 0 var(--fh-s-2);
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.42);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 #refDate::-webkit-calendar-picker-indicator {
@@ -76,27 +87,10 @@
     opacity: 0.9;
 }
 
-@keyframes fhPulseGlow {
-    0% {
-        transform: scale(1);
-        text-shadow: 0 0 0 transparent;
-    }
-
-    50% {
-        transform: scale(1.02);
-        text-shadow: 0 0 12px var(--fh-glow), 0 0 28px var(--fh-glow);
-    }
-
-    100% {
-        transform: scale(1);
-        text-shadow: 0 0 0 transparent;
-    }
-}
-
 @media (max-width: 940px) {
     .fh-header-top {
-        justify-content: flex-start;
-        min-height: 64px;
+        justify-content: center;
+        min-height: 68px;
     }
 
     .fh-date-nav {
@@ -106,15 +100,17 @@
 }
 
 .fh-header .fh-btn {
-    min-height: 36px;
-    padding: 8px 12px;
+    min-height: 38px;
+    padding: 8px 14px;
     font-size: 0.9rem;
     border-radius: var(--fh-r-1);
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+    border-color: color-mix(in srgb, var(--fh-border) 78%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .fh-header .fh-btn-primary {
-    box-shadow: 0 6px 14px color-mix(in srgb, var(--fh-primary-2) 20%, transparent);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--fh-primary-2) 24%, transparent);
 }
 
 .fh-header .fh-btn:hover,
@@ -130,13 +126,13 @@
 }
 
 .fh-tabs {
-    padding: 0 var(--fh-s-2);
+    padding: 0;
 }
 
 .fh-tab {
-    min-height: 44px;
+    min-height: 46px;
     padding: 10px 14px;
     font-size: 0.92rem;
-    border-radius: var(--fh-r-1);
+    border-radius: calc(var(--fh-r-1) + 2px);
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
