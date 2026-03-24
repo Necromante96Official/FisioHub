@@ -277,7 +277,7 @@ export class PatientsController {
         return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
     }
     sanitizeProcedimentosValue(value) {
-        return value.split(/\bobservacoes\s*:/i)[0].trim();
+        return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
     }
     getWhatsappLink(phone) {
         const onlyDigits = phone.replace(/\D/g, "");

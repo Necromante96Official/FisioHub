@@ -419,6 +419,9 @@ export class HomeController {
         localStorage.removeItem(this.processedDataStorageKey);
         localStorage.removeItem(this.processedMetaStorageKey);
         localStorage.removeItem(this.legacyImportedDataStorageKey);
+        this.importedItems = [];
+        this.saveStagingDataToStorage();
+        this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
     }
 
@@ -488,7 +491,7 @@ export class HomeController {
             }
 
             const key = this.normalizeKey(entryMatch[1]);
-            const value = entryMatch[2].trim();
+            const value = this.sanitizeProcedimentosValue(entryMatch[2].trim());
 
             if (key === "horario") draft.horario = value;
             if (key === "fisioterapeuta") draft.fisioterapeuta = value;
@@ -531,7 +534,7 @@ export class HomeController {
     }
 
     private sanitizeProcedimentosValue(value: string): string {
-        return value.split(/\bobservacoes\s*:/i)[0].trim();
+        return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
     }
 
     private extractIsoDate(value: string): string | null {

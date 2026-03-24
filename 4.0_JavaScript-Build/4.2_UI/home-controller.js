@@ -316,6 +316,9 @@ export class HomeController {
         localStorage.removeItem(this.processedDataStorageKey);
         localStorage.removeItem(this.processedMetaStorageKey);
         localStorage.removeItem(this.legacyImportedDataStorageKey);
+        this.importedItems = [];
+        this.saveStagingDataToStorage();
+        this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
     }
     async pickBackupFile() {
@@ -376,7 +379,7 @@ export class HomeController {
                 return;
             }
             const key = this.normalizeKey(entryMatch[1]);
-            const value = entryMatch[2].trim();
+            const value = this.sanitizeProcedimentosValue(entryMatch[2].trim());
             if (key === "horario")
                 draft.horario = value;
             if (key === "fisioterapeuta")
@@ -418,7 +421,7 @@ export class HomeController {
         return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
     }
     sanitizeProcedimentosValue(value) {
-        return value.split(/\bobservacoes\s*:/i)[0].trim();
+        return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
     }
     extractIsoDate(value) {
         const isoMatch = value.match(/(\d{4})-(\d{2})-(\d{2})/);

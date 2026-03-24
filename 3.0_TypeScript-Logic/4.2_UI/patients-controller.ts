@@ -330,7 +330,7 @@ export class PatientsController {
     }
 
     private sanitizeProcedimentosValue(value: string): string {
-        return value.split(/\bobservacoes\s*:/i)[0].trim();
+        return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
     }
 
     private getWhatsappLink(phone: string): string | null {
