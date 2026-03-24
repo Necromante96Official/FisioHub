@@ -4,10 +4,20 @@
     grid-template-rows: auto 1fr auto;
     gap: var(--fh-s-3);
     min-height: 100vh;
+    min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     width: 100%;
     padding: clamp(12px, 2.4vw, 22px) clamp(12px, 2.8vw, 34px) var(--fh-s-2);
     overflow: hidden;
     isolation: isolate;
+    background:
+        radial-gradient(120% 90% at 10% 8%, color-mix(in srgb, var(--fh-primary) 14%, transparent) 0%, transparent 62%),
+        radial-gradient(95% 80% at 82% 12%, color-mix(in srgb, var(--fh-primary-2) 18%, transparent) 0%, transparent 64%),
+        linear-gradient(140deg, color-mix(in srgb, var(--fh-bg) 94%, #02070f 6%), color-mix(in srgb, var(--fh-bg-2) 88%, #02070f 12%));
+    background-size: 170% 170%, 150% 150%, 100% 100%;
+    animation: fhGalaxyDrift 34s ease-in-out infinite alternate;
     --fh-aurora-a: radial-gradient(58% 46% at 14% 12%, color-mix(in srgb, var(--fh-primary-2) 38%, transparent) 0%, transparent 72%);
     --fh-aurora-b: radial-gradient(62% 50% at 86% 16%, color-mix(in srgb, var(--fh-primary) 34%, transparent) 0%, transparent 74%);
     --fh-aurora-c: radial-gradient(50% 44% at 50% 86%, color-mix(in srgb, var(--fh-primary-2) 28%, transparent) 0%, transparent 76%);
@@ -28,9 +38,9 @@
     right: -180px;
     top: -260px;
     background: var(--fh-aurora-a), var(--fh-aurora-b);
-    filter: blur(14px) saturate(1.15);
-    opacity: 0.92;
-    animation: fhAuroraFloatA 22s linear infinite alternate;
+    filter: blur(16px) saturate(1.2);
+    opacity: 0.96;
+    animation: fhAuroraFloatA 14s ease-in-out infinite alternate;
 }
 
 .home-layout::after {
@@ -39,9 +49,9 @@
     left: -210px;
     bottom: -290px;
     background: var(--fh-aurora-c), var(--fh-aurora-b);
-    filter: blur(16px) saturate(1.18);
-    opacity: 0.86;
-    animation: fhAuroraFloatB 28s linear infinite alternate;
+    filter: blur(18px) saturate(1.26);
+    opacity: 0.9;
+    animation: fhAuroraFloatB 18s ease-in-out infinite alternate;
 }
 
 .home-layout>main {
@@ -51,6 +61,26 @@
     overflow: hidden;
 }
 
+.home-layout>.fh-panel-wrap {
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+}
+
+@keyframes fhGalaxyDrift {
+    0% {
+        background-position: 0% 8%, 86% 12%, 50% 50%;
+    }
+
+    50% {
+        background-position: 10% 0%, 78% 20%, 54% 48%;
+    }
+
+    100% {
+        background-position: 2% 12%, 90% 8%, 48% 52%;
+    }
+}
+
 @keyframes fhAuroraFloatA {
     0% {
         transform: translate3d(0, 0, 0) scale(1);
@@ -58,13 +88,13 @@
     }
 
     50% {
-        transform: translate3d(-54px, 20px, 0) scale(1.06);
+        transform: translate3d(-70px, 24px, 0) scale(1.1) rotate(-1.5deg);
         opacity: 0.98;
     }
 
     100% {
-        transform: translate3d(42px, -18px, 0) scale(1.02);
-        opacity: 0.9;
+        transform: translate3d(56px, -22px, 0) scale(1.04) rotate(1.5deg);
+        opacity: 0.92;
     }
 }
 
@@ -75,13 +105,13 @@
     }
 
     50% {
-        transform: translate3d(48px, -22px, 0) scale(1.08);
-        opacity: 0.94;
+        transform: translate3d(60px, -30px, 0) scale(1.12) rotate(1deg);
+        opacity: 0.96;
     }
 
     100% {
-        transform: translate3d(-38px, 14px, 0) scale(1.04);
-        opacity: 0.88;
+        transform: translate3d(-48px, 18px, 0) scale(1.06) rotate(-1deg);
+        opacity: 0.9;
     }
 }
 
@@ -93,6 +123,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
+    .home-layout {
+        animation: none;
+    }
 
     .home-layout::before,
     .home-layout::after {

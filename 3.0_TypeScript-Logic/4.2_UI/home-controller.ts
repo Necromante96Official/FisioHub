@@ -96,17 +96,60 @@ export class HomeController {
 
         termsButton?.addEventListener("click", () => {
             if (!termsDialog.open) {
+                termsDialog.classList.remove("is-closing");
+                termsDialog.removeAttribute("data-closing");
                 termsDialog.showModal();
             }
         });
 
         closeTermsButton?.addEventListener("click", () => {
-            termsDialog.close();
+            this.requestTermsClose(termsDialog);
+        });
+
+        termsDialog?.addEventListener("cancel", (event) => {
+            this.requestTermsClose(termsDialog, event);
         });
     }
 
     private getTermsDialog(): HTMLDialogElement {
         return document.getElementById("termsDialog") as HTMLDialogElement;
+    }
+
+    private requestTermsClose(dialog: HTMLDialogElement, event?: Event): void {
+        event?.preventDefault();
+
+        if (!dialog.open || dialog.dataset.closing === "true") {
+            return;
+        }
+
+        dialog.dataset.closing = "true";
+        dialog.classList.add("is-closing");
+
+        const finalizeClose = (): void => {
+            dialog.classList.remove("is-closing");
+            dialog.removeAttribute("data-closing");
+
+            if (dialog.open) {
+                dialog.close();
+            }
+        };
+
+        const fallback = window.setTimeout(() => {
+            dialog.removeEventListener("animationend", onAnimationEnd);
+            finalizeClose();
+        }, 260);
+
+        const onAnimationEnd = (animationEvent: AnimationEvent): void => {
+            if (animationEvent.target !== dialog) {
+                return;
+            }
+
+            window.clearTimeout(fallback);
+            dialog.removeEventListener("animationend", onAnimationEnd);
+            finalizeClose();
+        };
+
+        dialog.addEventListener("animationend", onAnimationEnd);
     }
 
     private importContent(content: string): void {

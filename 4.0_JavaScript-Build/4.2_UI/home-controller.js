@@ -79,15 +79,48 @@ export class HomeController {
         const termsDialog = this.getTermsDialog();
         termsButton?.addEventListener("click", () => {
             if (!termsDialog.open) {
+                termsDialog.classList.remove("is-closing");
+                termsDialog.removeAttribute("data-closing");
                 termsDialog.showModal();
             }
         });
         closeTermsButton?.addEventListener("click", () => {
-            termsDialog.close();
+            this.requestTermsClose(termsDialog);
+        });
+        termsDialog?.addEventListener("cancel", (event) => {
+            this.requestTermsClose(termsDialog, event);
         });
     }
     getTermsDialog() {
         return document.getElementById("termsDialog");
+    }
+    requestTermsClose(dialog, event) {
+        event?.preventDefault();
+        if (!dialog.open || dialog.dataset.closing === "true") {
+            return;
+        }
+        dialog.dataset.closing = "true";
+        dialog.classList.add("is-closing");
+        const finalizeClose = () => {
+            dialog.classList.remove("is-closing");
+            dialog.removeAttribute("data-closing");
+            if (dialog.open) {
+                dialog.close();
+            }
+        };
+        const fallback = window.setTimeout(() => {
+            dialog.removeEventListener("animationend", onAnimationEnd);
+            finalizeClose();
+        }, 260);
+        const onAnimationEnd = (animationEvent) => {
+            if (animationEvent.target !== dialog) {
+                return;
+            }
+            window.clearTimeout(fallback);
+            dialog.removeEventListener("animationend", onAnimationEnd);
+            finalizeClose();
+        };
+        dialog.addEventListener("animationend", onAnimationEnd);
     }
     importContent(content) {
         const lines = this.parseContent(content);
