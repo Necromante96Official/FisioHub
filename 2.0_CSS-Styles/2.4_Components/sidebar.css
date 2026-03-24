@@ -163,6 +163,7 @@
     gap: var(--fh-s-2);
     flex-wrap: wrap;
     margin-top: auto;
+    padding-top: var(--fh-s-3);
     padding-bottom: var(--fh-s-1);
 }
 

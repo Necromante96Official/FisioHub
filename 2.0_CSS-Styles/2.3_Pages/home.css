@@ -10,7 +10,7 @@
     overflow: hidden;
 }
 
-.home-layout>section:nth-of-type(2) {
+.home-layout>main {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
