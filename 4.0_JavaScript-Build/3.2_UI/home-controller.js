@@ -5,11 +5,11 @@ export class HomeController {
     theme = new ThemeManager();
     importedItems = [];
     async bootstrap() {
-        const initialTheme = this.theme.init();
+        this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
         this.setDate(this.todayIso());
-        this.updateThemeButtonLabel(initialTheme);
+        this.updateThemeButtonLabel();
         this.bindHandlers();
         this.renderImportedData();
     }
@@ -34,11 +34,6 @@ export class HomeController {
         }
     }
     bindHandlers() {
-        const themeBtn = document.getElementById("themeToggleBtn");
-        themeBtn?.addEventListener("click", () => {
-            const next = this.theme.toggle();
-            this.updateThemeButtonLabel(next);
-        });
         const modules = Array.from(document.querySelectorAll(".fh-module-card"));
         modules.forEach((btn) => {
             btn.addEventListener("click", () => {
@@ -223,15 +218,16 @@ export class HomeController {
         }
         return { kind: "text" };
     }
-    updateThemeButtonLabel(theme) {
+    updateThemeButtonLabel() {
         const themeBtn = document.getElementById("themeToggleBtn");
         if (!themeBtn)
             return;
-        const icon = theme === "dark" ? "☀" : "☾";
-        const ariaLabel = theme === "dark" ? "Alternar para tema claro" : "Alternar para tema escuro";
+        const icon = "☾";
+        const ariaLabel = "Modo escuro ativo";
         themeBtn.textContent = icon;
         themeBtn.setAttribute("aria-label", ariaLabel);
         themeBtn.title = ariaLabel;
+        themeBtn.disabled = true;
     }
 }
 //# sourceMappingURL=home-controller.js.map

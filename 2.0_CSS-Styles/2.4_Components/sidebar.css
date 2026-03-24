@@ -1,5 +1,7 @@
 .fh-panel-wrap {
     width: 100%;
+    max-width: min(1320px, calc(100vw - 48px));
+    margin-inline: auto;
     display: flex;
     flex-direction: column;
     gap: var(--fh-s-1);

@@ -12,11 +12,11 @@ export class HomeController {
     private importedItems: ImportedItem[] = [];
 
     async bootstrap(): Promise<void> {
-        const initialTheme = this.theme.init();
+        this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
         this.setDate(this.todayIso());
-        this.updateThemeButtonLabel(initialTheme);
+        this.updateThemeButtonLabel();
         this.bindHandlers();
         this.renderImportedData();
     }
@@ -45,12 +45,6 @@ export class HomeController {
     }
 
     private bindHandlers(): void {
-        const themeBtn = document.getElementById("themeToggleBtn");
-        themeBtn?.addEventListener("click", () => {
-            const next = this.theme.toggle();
-            this.updateThemeButtonLabel(next);
-        });
-
         const modules = Array.from(document.querySelectorAll(".fh-module-card")) as HTMLButtonElement[];
         modules.forEach((btn: HTMLButtonElement) => {
             btn.addEventListener("click", () => {
@@ -269,14 +263,15 @@ export class HomeController {
         return { kind: "text" };
     }
 
-    private updateThemeButtonLabel(theme: string): void {
+    private updateThemeButtonLabel(): void {
         const themeBtn = document.getElementById("themeToggleBtn") as HTMLButtonElement | null;
         if (!themeBtn) return;
-        const icon = theme === "dark" ? "☀" : "☾";
-        const ariaLabel = theme === "dark" ? "Alternar para tema claro" : "Alternar para tema escuro";
+        const icon = "☾";
+        const ariaLabel = "Modo escuro ativo";
 
         themeBtn.textContent = icon;
         themeBtn.setAttribute("aria-label", ariaLabel);
         themeBtn.title = ariaLabel;
+        themeBtn.disabled = true;
     }
 }
