@@ -113,32 +113,32 @@
 .fh-terms-dialog::backdrop {
     background: linear-gradient(145deg, rgba(4, 11, 22, 0.46), rgba(7, 18, 34, 0.64));
     backdrop-filter: blur(4px);
-    animation: fhTermsBackdropIn 0.3s ease-out both;
+    animation: fhTermsBackdropIn 0.38s ease-out both;
 }
 
 .fh-terms-dialog[open] {
-    animation: fhTermsDialogEnter 0.32s cubic-bezier(0.24, 0.92, 0.24, 1) both;
+    animation: fhTermsDialogEnter 0.4s cubic-bezier(0.2, 0.92, 0.22, 1) both;
 }
 
 .fh-terms-dialog.is-opening {
-    animation: fhTermsDialogEnter 0.32s cubic-bezier(0.24, 0.92, 0.24, 1) both;
+    animation: fhTermsDialogEnter 0.4s cubic-bezier(0.2, 0.92, 0.22, 1) both;
 }
 
 .fh-terms-dialog.is-closing {
-    animation: fhTermsDialogExit 0.24s ease-in both;
+    animation: fhTermsDialogExit 0.32s ease-in both;
 }
 
 .fh-terms-dialog.is-closing::backdrop {
-    animation: fhTermsBackdropOut 0.24s ease-in both;
+    animation: fhTermsBackdropOut 0.32s ease-in both;
 }
 
 .fh-terms-dialog[open] .fh-terms-surface,
 .fh-terms-dialog.is-opening .fh-terms-surface {
-    animation: fhTermsSurfaceIn 0.32s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+    animation: fhTermsSurfaceIn 0.4s cubic-bezier(0.2, 0.9, 0.2, 1) both;
 }
 
 .fh-terms-dialog.is-closing .fh-terms-surface {
-    animation: fhTermsSurfaceOut 0.24s ease-in both;
+    animation: fhTermsSurfaceOut 0.32s ease-in both;
 }
 
 .fh-terms-surface {
@@ -242,7 +242,7 @@
 .fh-floating-home-btn {
     position: fixed;
     right: 20px;
-    bottom: 74px;
+    bottom: 96px;
     width: 52px;
     height: 52px;
     border-radius: 999px;
@@ -259,14 +259,16 @@
 }
 
 .fh-floating-home-icon {
-    font-size: 1.35rem;
-    line-height: 1;
+    width: 24px;
+    height: 24px;
+    display: block;
+    filter: brightness(0) invert(1);
 }
 
 .fh-floating-home-toast {
     position: fixed;
     right: 20px;
-    bottom: 132px;
+    bottom: 156px;
     padding: 8px 10px;
     border-radius: 10px;
     border: 1px solid color-mix(in srgb, var(--fh-primary-2) 52%, transparent);
@@ -280,7 +282,10 @@
     z-index: 1000;
     opacity: 0;
     transform: translateY(8px) scale(0.98);
-    animation: fhFloatingHomeToastPulse 5s ease-in-out infinite;
+}
+
+.fh-floating-home-toast.is-visible {
+    animation: fhFloatingHomeToastPulse 1.9s ease-in-out both;
 }
 
 @keyframes fhToastIn {
@@ -337,7 +342,7 @@
 @keyframes fhTermsDialogEnter {
     from {
         opacity: 0;
-        transform: translateY(14px) scale(0.975);
+        transform: translateY(9px) scale(0.988);
     }
 
     to {
@@ -354,14 +359,14 @@
 
     to {
         opacity: 0;
-        transform: translateY(10px) scale(0.98);
+        transform: translateY(7px) scale(0.988);
     }
 }
 
 @keyframes fhTermsSurfaceIn {
     from {
         opacity: 0;
-        transform: translateY(12px) scale(0.985);
+        transform: translateY(8px) scale(0.99);
     }
 
     to {
@@ -378,7 +383,7 @@
 
     to {
         opacity: 0;
-        transform: translateY(10px) scale(0.985);
+        transform: translateY(8px) scale(0.99);
     }
 }
 
@@ -403,6 +408,7 @@
 }
 
 @keyframes fhFloatingHomeGlow {
+
     0%,
     100% {
         box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 10px 22px rgba(0, 0, 0, 0.42);
@@ -414,14 +420,15 @@
 }
 
 @keyframes fhFloatingHomeToastPulse {
+
     0%,
-    68% {
+    22% {
         opacity: 0;
         transform: translateY(8px) scale(0.98);
     }
 
-    74%,
-    90% {
+    30%,
+    76% {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
@@ -512,12 +519,12 @@
         width: 48px;
         height: 48px;
         right: 14px;
-        bottom: 72px;
+        bottom: 92px;
     }
 
     .fh-floating-home-toast {
         right: 14px;
-        bottom: 126px;
+        bottom: 148px;
         font-size: 0.72rem;
     }
 }

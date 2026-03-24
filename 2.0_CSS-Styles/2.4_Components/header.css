@@ -25,7 +25,7 @@
 .fh-header-top {
     min-height: 72px;
     padding-block: clamp(8px, 1.2vw, 12px);
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .fh-header-bottom {
@@ -79,30 +79,6 @@
     animation: fhBrandSweep 7.2s ease-in-out infinite reverse;
 }
 
-.fh-home-return-btn {
-    min-height: 36px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 14px;
-    border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 76%, transparent);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--fh-primary) 36%, transparent), color-mix(in srgb, var(--fh-primary-2) 52%, transparent));
-    color: #f4fbff;
-    text-decoration: none;
-    font-size: 0.78rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 0 16px color-mix(in srgb, var(--fh-primary-2) 30%, transparent);
-    animation: fhBackButtonGlow 2.6s ease-in-out infinite;
-}
-
-.fh-home-return-btn:hover,
-.fh-home-return-btn:focus-visible {
-    transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--fh-primary-2) 94%, #ffffff);
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 38%, transparent), 0 0 24px color-mix(in srgb, var(--fh-primary-2) 44%, transparent);
-}
 
 .fh-brand-subtitle {
     margin: 0;
@@ -222,17 +198,5 @@
     50% {
         transform: translate(-50%, -50%) scaleX(1.08);
         opacity: 0.82;
-    }
-}
-
-@keyframes fhBackButtonGlow {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 0 14px color-mix(in srgb, var(--fh-primary-2) 24%, transparent);
-    }
-
-    50% {
-        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 42%, transparent), 0 0 24px color-mix(in srgb, var(--fh-primary-2) 36%, transparent);
     }
 }

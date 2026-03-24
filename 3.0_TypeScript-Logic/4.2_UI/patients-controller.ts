@@ -13,7 +13,9 @@ type PatientRecord = {
 export class PatientsController {
     private readonly appId = "app";
     private readonly pageTemplate = "1.0_HTML-Templates/1.1_Pages/pacientes.html";
-    private readonly importedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    private readonly processedDataStorageKey = "fisiohub-processed-data-v2";
+    private readonly patientsRecordsStorageKey = "fisiohub-patients-records-v2";
+    private readonly legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
     private readonly theme = new ThemeManager();
     private patientRecords: PatientRecord[] = [];
     private activeSearch = "";
@@ -27,9 +29,10 @@ export class PatientsController {
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
         this.render();
+        this.startFloatingHomeHint();
 
         if (this.patientRecords.length === 0) {
-            this.showSiteNotification("Nenhum paciente encontrado. Importe dados na página inicial.");
+            this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
         }
     }
 
@@ -178,7 +181,7 @@ export class PatientsController {
             return;
         }
 
-        visibleRecords.forEach((record, index) => {
+        visibleRecords.forEach((record) => {
             const row = document.createElement("tr");
 
             const nameCell = document.createElement("td");
@@ -207,11 +210,51 @@ export class PatientsController {
     }
 
     private parsePatientsFromStorage(): PatientRecord[] {
-        const raw = localStorage.getItem(this.importedDataStorageKey) ?? "";
-        if (!raw.trim()) {
-            return [];
+        const fromRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        if (fromRecords.length > 0) {
+            return fromRecords;
         }
 
+        const processedRaw = localStorage.getItem(this.processedDataStorageKey) ?? "";
+        if (processedRaw.trim()) {
+            return this.parsePatientsFromLines(processedRaw);
+        }
+
+        const legacyRaw = localStorage.getItem(this.legacyImportedDataStorageKey) ?? "";
+        if (legacyRaw.trim()) {
+            return this.parsePatientsFromLines(legacyRaw);
+        }
+
+        return [];
+    }
+
+    private parsePatientsRecords(raw: string | null): PatientRecord[] {
+        if (!raw) return [];
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+
+            return parsed.map((item) => {
+                const candidate = item as Partial<PatientRecord>;
+                const status: PatientRecord["statusFinanceiro"] = candidate.statusFinanceiro === "Isento" ? "Isento" : "Pagante";
+
+                return {
+                    nome: typeof candidate.nome === "string" ? candidate.nome : "",
+                    statusFinanceiro: status,
+                    horario: typeof candidate.horario === "string" ? candidate.horario : "-",
+                    fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
+                    celular: typeof candidate.celular === "string" ? candidate.celular : "-",
+                    convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
+                    procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+                };
+            }).filter((record) => record.nome.trim().length > 0);
+        } catch {
+            return [];
+        }
+    }
+
+    private parsePatientsFromLines(raw: string): PatientRecord[] {
         const lines = raw
             .split(/\r?\n/)
             .map((line) => line.trim())
@@ -349,7 +392,7 @@ export class PatientsController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 420);
+        }, 560);
 
         const onAnimationEnd = (): void => {
             window.clearTimeout(fallback);
@@ -386,6 +429,24 @@ export class PatientsController {
         });
 
         return filtered;
+    }
+
+    private startFloatingHomeHint(): void {
+        const toast = document.querySelector(".fh-floating-home-toast") as HTMLElement | null;
+        if (!toast || toast.dataset.started === "true") {
+            return;
+        }
+
+        toast.dataset.started = "true";
+
+        const pulse = (): void => {
+            toast.classList.remove("is-visible");
+            void toast.offsetWidth;
+            toast.classList.add("is-visible");
+        };
+
+        window.setTimeout(pulse, 1200);
+        window.setInterval(pulse, 5000);
     }
 
     private showSiteNotification(message: string): void {

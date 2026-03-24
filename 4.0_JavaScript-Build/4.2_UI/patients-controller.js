@@ -2,7 +2,9 @@ import { ThemeManager } from "../4.1_Core/theme-manager.js";
 export class PatientsController {
     appId = "app";
     pageTemplate = "1.0_HTML-Templates/1.1_Pages/pacientes.html";
-    importedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    processedDataStorageKey = "fisiohub-processed-data-v2";
+    patientsRecordsStorageKey = "fisiohub-patients-records-v2";
+    legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
     theme = new ThemeManager();
     patientRecords = [];
     activeSearch = "";
@@ -15,8 +17,9 @@ export class PatientsController {
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
         this.render();
+        this.startFloatingHomeHint();
         if (this.patientRecords.length === 0) {
-            this.showSiteNotification("Nenhum paciente encontrado. Importe dados na página inicial.");
+            this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
         }
     }
     async loadPage() {
@@ -142,7 +145,7 @@ export class PatientsController {
             tableBody.appendChild(row);
             return;
         }
-        visibleRecords.forEach((record, index) => {
+        visibleRecords.forEach((record) => {
             const row = document.createElement("tr");
             const nameCell = document.createElement("td");
             nameCell.textContent = record.nome;
@@ -166,10 +169,46 @@ export class PatientsController {
         });
     }
     parsePatientsFromStorage() {
-        const raw = localStorage.getItem(this.importedDataStorageKey) ?? "";
-        if (!raw.trim()) {
+        const fromRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        if (fromRecords.length > 0) {
+            return fromRecords;
+        }
+        const processedRaw = localStorage.getItem(this.processedDataStorageKey) ?? "";
+        if (processedRaw.trim()) {
+            return this.parsePatientsFromLines(processedRaw);
+        }
+        const legacyRaw = localStorage.getItem(this.legacyImportedDataStorageKey) ?? "";
+        if (legacyRaw.trim()) {
+            return this.parsePatientsFromLines(legacyRaw);
+        }
+        return [];
+    }
+    parsePatientsRecords(raw) {
+        if (!raw)
+            return [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed))
+                return [];
+            return parsed.map((item) => {
+                const candidate = item;
+                const status = candidate.statusFinanceiro === "Isento" ? "Isento" : "Pagante";
+                return {
+                    nome: typeof candidate.nome === "string" ? candidate.nome : "",
+                    statusFinanceiro: status,
+                    horario: typeof candidate.horario === "string" ? candidate.horario : "-",
+                    fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
+                    celular: typeof candidate.celular === "string" ? candidate.celular : "-",
+                    convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
+                    procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+                };
+            }).filter((record) => record.nome.trim().length > 0);
+        }
+        catch {
             return [];
         }
+    }
+    parsePatientsFromLines(raw) {
         const lines = raw
             .split(/\r?\n/)
             .map((line) => line.trim())
@@ -288,7 +327,7 @@ export class PatientsController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 420);
+        }, 560);
         const onAnimationEnd = () => {
             window.clearTimeout(fallback);
             if (surface) {
@@ -315,6 +354,20 @@ export class PatientsController {
             return a.nome.localeCompare(b.nome, "pt-BR", { sensitivity: "base" }) * factor;
         });
         return filtered;
+    }
+    startFloatingHomeHint() {
+        const toast = document.querySelector(".fh-floating-home-toast");
+        if (!toast || toast.dataset.started === "true") {
+            return;
+        }
+        toast.dataset.started = "true";
+        const pulse = () => {
+            toast.classList.remove("is-visible");
+            void toast.offsetWidth;
+            toast.classList.add("is-visible");
+        };
+        window.setTimeout(pulse, 1200);
+        window.setInterval(pulse, 5000);
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");

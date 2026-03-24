@@ -2,7 +2,11 @@ import { ThemeManager } from "../4.1_Core/theme-manager.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
-    importedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    stagingDataStorageKey = "fisiohub-staging-data-v2";
+    processedDataStorageKey = "fisiohub-processed-data-v2";
+    patientsRecordsStorageKey = "fisiohub-patients-records-v2";
+    processedMetaStorageKey = "fisiohub-processed-meta-v2";
     theme = new ThemeManager();
     importedItems = [];
     nextItemId = 1;
@@ -11,9 +15,10 @@ export class HomeController {
         await this.loadHome();
         await this.resolveIncludes();
         this.setDate(this.todayIso());
-        this.loadImportedDataFromStorage();
+        this.loadStagingDataFromStorage();
         this.bindHandlers();
         this.renderImportedData();
+        this.startFloatingHomeHint();
     }
     async loadHome() {
         const app = document.getElementById(this.appId);
@@ -53,16 +58,16 @@ export class HomeController {
             if (!file)
                 return;
             const content = await file.text();
-            this.importContent(content);
+            this.saveStagingContent(content);
             fileInput.value = "";
-            this.showSiteNotification("Dados importados com sucesso.");
+            this.showSiteNotification("Dados importados para rascunho. Clique em Processar para consolidar.");
         });
         const clearBtn = document.getElementById("clearDataBtn");
         clearBtn?.addEventListener("click", () => {
             this.importedItems = [];
-            this.saveImportedDataToStorage();
+            this.saveStagingDataToStorage();
             this.renderImportedData();
-            this.showSiteNotification("Dados importados foram limpos.");
+            this.showSiteNotification("Rascunho de dados limpo.");
         });
         const importedDataEditor = document.getElementById("importedDataEditor");
         importedDataEditor?.addEventListener("input", () => {
@@ -70,9 +75,7 @@ export class HomeController {
         });
         const processBtn = document.getElementById("processBtn");
         processBtn?.addEventListener("click", () => {
-            const date = this.getCurrentDate();
-            const filtered = this.getFilteredItems(date);
-            this.showSiteNotification(`Processamento conectado para ${filtered.length} registro(s) na data ${date}.`);
+            this.processAndPersistData();
         });
         const dateInput = this.getDateInput();
         dateInput?.addEventListener("change", () => this.renderImportedData());
@@ -109,9 +112,47 @@ export class HomeController {
         termsDialog?.addEventListener("cancel", (event) => {
             this.requestTermsClose(termsDialog, event);
         });
+        const openBackupsBtn = document.getElementById("openBackupsBtn");
+        const backupsDialog = this.getBackupsDialog();
+        const closeBackupsBtn = document.getElementById("closeBackupsDialogBtn");
+        openBackupsBtn?.addEventListener("click", () => {
+            if (!backupsDialog.open) {
+                backupsDialog.showModal();
+            }
+        });
+        closeBackupsBtn?.addEventListener("click", () => {
+            if (backupsDialog.open)
+                backupsDialog.close();
+        });
+        backupsDialog?.addEventListener("click", (event) => {
+            if (event.target === backupsDialog) {
+                backupsDialog.close();
+            }
+        });
+        document.getElementById("exportAllDataBtn")?.addEventListener("click", () => {
+            this.exportBackup("all");
+        });
+        document.getElementById("exportPatientsOnlyBtn")?.addEventListener("click", () => {
+            this.exportBackup("patients-only");
+        });
+        document.getElementById("exportAllWithoutPatientsBtn")?.addEventListener("click", () => {
+            this.exportBackup("all-without-patients");
+        });
+        document.getElementById("importAllDataBtn")?.addEventListener("click", async () => {
+            await this.importBackup("all");
+        });
+        document.getElementById("importPatientsOnlyBtn")?.addEventListener("click", async () => {
+            await this.importBackup("patients-only");
+        });
+        document.getElementById("importAllWithoutPatientsBtn")?.addEventListener("click", async () => {
+            await this.importBackup("all-without-patients");
+        });
     }
     getTermsDialog() {
         return document.getElementById("termsDialog");
+    }
+    getBackupsDialog() {
+        return document.getElementById("backupsDialog");
     }
     requestTermsClose(dialog, event) {
         event?.preventDefault();
@@ -134,7 +175,7 @@ export class HomeController {
                 surface.removeEventListener("animationend", onAnimationEnd);
             }
             finalizeClose();
-        }, 420);
+        }, 560);
         const onAnimationEnd = () => {
             window.clearTimeout(fallback);
             if (surface) {
@@ -148,20 +189,132 @@ export class HomeController {
         }
         finalizeClose();
     }
-    importContent(content) {
-        const lines = this.parseContent(content);
-        const mapped = lines
+    processAndPersistData() {
+        const stagedLines = this.importedItems.map((item) => item.raw.trim()).filter((line) => line.length > 0);
+        if (stagedLines.length === 0) {
+            this.showSiteNotification("Nenhum dado em rascunho para processar.");
+            return;
+        }
+        const date = this.getCurrentDate();
+        const filtered = stagedLines.filter((line) => {
+            const extracted = this.extractIsoDate(line);
+            return !extracted || extracted === date;
+        });
+        const patientRecords = this.parsePatientsFromLines(stagedLines);
+        const processedMeta = {
+            processedAtIso: new Date().toISOString(),
+            referenceDateIso: date,
+            totalImportedLines: stagedLines.length,
+            totalPatients: patientRecords.length,
+            totalForReferenceDate: filtered.length
+        };
+        localStorage.setItem(this.processedDataStorageKey, stagedLines.join("\n"));
+        localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(patientRecords));
+        localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(processedMeta));
+        this.importedItems = [];
+        this.saveStagingDataToStorage();
+        this.renderImportedData();
+        this.showSiteNotification(`Processamento concluido: ${patientRecords.length} paciente(s) salvos com precisao local.`);
+    }
+    saveStagingContent(content) {
+        const lines = this.parseContent(content)
             .map((line) => line.trim())
             .filter((line) => !/^[=\-_*]{6,}$/.test(line))
-            .filter((line) => line.length > 0)
-            .map((line) => ({
+            .filter((line) => line.length > 0);
+        this.importedItems = lines.map((line) => ({
             id: this.nextItemId++,
             raw: line,
             dateIso: this.extractIsoDate(line)
         }));
-        this.importedItems = mapped;
-        this.saveImportedDataToStorage();
+        this.saveStagingDataToStorage();
         this.renderImportedData();
+    }
+    exportBackup(kind) {
+        const stagingData = localStorage.getItem(this.stagingDataStorageKey) ?? "";
+        const processedData = localStorage.getItem(this.processedDataStorageKey) ?? "";
+        const processedMeta = this.parseProcessedMeta(localStorage.getItem(this.processedMetaStorageKey));
+        const patientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        const payload = {
+            schema: "fisiohub-backup-v2",
+            kind,
+            createdAtIso: new Date().toISOString()
+        };
+        if (kind === "all") {
+            payload.stagingData = stagingData;
+            payload.processedData = processedData;
+            payload.patientsRecords = patientsRecords;
+            payload.processedMeta = processedMeta;
+        }
+        if (kind === "patients-only") {
+            payload.patientsRecords = patientsRecords;
+            payload.processedMeta = processedMeta;
+        }
+        if (kind === "all-without-patients") {
+            payload.stagingData = stagingData;
+            payload.processedData = processedData;
+            payload.processedMeta = processedMeta;
+        }
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const fileName = `fisiohub-backup-${kind}-${this.todayIso()}.json`;
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        this.showSiteNotification("Backup exportado com sucesso.");
+    }
+    async importBackup(kind) {
+        const payload = await this.pickBackupFile();
+        if (!payload) {
+            this.showSiteNotification("Importacao cancelada.");
+            return;
+        }
+        if (kind === "all") {
+            localStorage.setItem(this.stagingDataStorageKey, this.toSafeText(payload.stagingData));
+            localStorage.setItem(this.processedDataStorageKey, this.toSafeText(payload.processedData));
+            localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.toSafePatientsRecords(payload.patientsRecords)));
+            localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
+        }
+        if (kind === "patients-only") {
+            localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.toSafePatientsRecords(payload.patientsRecords)));
+            if (payload.processedMeta) {
+                localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
+            }
+        }
+        if (kind === "all-without-patients") {
+            localStorage.setItem(this.stagingDataStorageKey, this.toSafeText(payload.stagingData));
+            localStorage.setItem(this.processedDataStorageKey, this.toSafeText(payload.processedData));
+            localStorage.removeItem(this.patientsRecordsStorageKey);
+            localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
+        }
+        this.loadStagingDataFromStorage();
+        this.renderImportedData();
+        this.showSiteNotification("Backup importado com sucesso.");
+    }
+    async pickBackupFile() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        const file = await new Promise((resolve) => {
+            input.addEventListener("change", () => {
+                resolve(input.files?.[0] ?? null);
+            }, { once: true });
+            input.click();
+        });
+        if (!file)
+            return null;
+        try {
+            const raw = await file.text();
+            const parsed = JSON.parse(raw);
+            return parsed;
+        }
+        catch {
+            this.showSiteNotification("Arquivo de backup invalido.");
+            return null;
+        }
     }
     parseContent(content) {
         try {
@@ -177,6 +330,68 @@ export class HomeController {
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
+    }
+    parsePatientsFromLines(lines) {
+        const records = [];
+        let draft = this.createEmptyPatientDraft();
+        const pushDraft = () => {
+            if (!draft.nome) {
+                draft = this.createEmptyPatientDraft();
+                return;
+            }
+            records.push({ ...draft });
+            draft = this.createEmptyPatientDraft();
+        };
+        lines.forEach((line) => {
+            if (/^---\s*agendamento\s+\d+/i.test(line)) {
+                pushDraft();
+                return;
+            }
+            const entryMatch = line.match(/^([^:]+):\s*(.+)$/);
+            if (!entryMatch) {
+                return;
+            }
+            const key = this.normalizeKey(entryMatch[1]);
+            const value = entryMatch[2].trim();
+            if (key === "horario")
+                draft.horario = value;
+            if (key === "fisioterapeuta")
+                draft.fisioterapeuta = value;
+            if (key === "paciente")
+                draft.nome = value;
+            if (key === "celular")
+                draft.celular = value;
+            if (key === "convenio")
+                draft.convenio = value;
+            if (key === "procedimentos")
+                draft.procedimentos = value;
+        });
+        pushDraft();
+        return records.map((record) => ({
+            ...record,
+            statusFinanceiro: this.isIsento(record) ? "Isento" : "Pagante"
+        }));
+    }
+    createEmptyPatientDraft() {
+        return {
+            nome: "",
+            statusFinanceiro: "Pagante",
+            horario: "-",
+            fisioterapeuta: "-",
+            celular: "-",
+            convenio: "-",
+            procedimentos: "-"
+        };
+    }
+    normalizeKey(value) {
+        return value
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+    }
+    isIsento(record) {
+        return /isento/i.test(record.convenio) || /isento/i.test(record.procedimentos);
     }
     extractIsoDate(value) {
         const isoMatch = value.match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -223,9 +438,6 @@ export class HomeController {
     todayIso() {
         return this.toIso(new Date());
     }
-    getFilteredItems(dateIso) {
-        return this.importedItems.filter((item) => !item.dateIso || item.dateIso === dateIso);
-    }
     renderImportedData() {
         const editor = document.getElementById("importedDataEditor");
         if (!editor)
@@ -242,18 +454,24 @@ export class HomeController {
             raw: line,
             dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
         }));
-        this.saveImportedDataToStorage();
+        this.saveStagingDataToStorage();
     }
-    saveImportedDataToStorage() {
+    saveStagingDataToStorage() {
         const serialized = this.importedItems.map((item) => item.raw).join("\n");
-        localStorage.setItem(this.importedDataStorageKey, serialized);
+        localStorage.setItem(this.stagingDataStorageKey, serialized);
     }
-    loadImportedDataFromStorage() {
-        const stored = localStorage.getItem(this.importedDataStorageKey);
-        if (!stored) {
+    loadStagingDataFromStorage() {
+        const staged = localStorage.getItem(this.stagingDataStorageKey);
+        const legacy = localStorage.getItem(this.legacyImportedDataStorageKey);
+        const source = staged ?? legacy ?? "";
+        if (!source.trim()) {
+            this.importedItems = [];
             return;
         }
-        const lines = stored
+        if (!staged && legacy) {
+            localStorage.setItem(this.stagingDataStorageKey, legacy);
+        }
+        const lines = source
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
@@ -262,6 +480,71 @@ export class HomeController {
             raw: line,
             dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
         }));
+    }
+    parsePatientsRecords(raw) {
+        if (!raw)
+            return [];
+        try {
+            const parsed = JSON.parse(raw);
+            return this.toSafePatientsRecords(parsed);
+        }
+        catch {
+            return [];
+        }
+    }
+    parseProcessedMeta(raw) {
+        if (!raw)
+            return this.toSafeProcessedMeta(undefined);
+        try {
+            const parsed = JSON.parse(raw);
+            return this.toSafeProcessedMeta(parsed);
+        }
+        catch {
+            return this.toSafeProcessedMeta(undefined);
+        }
+    }
+    toSafeText(value) {
+        return typeof value === "string" ? value : "";
+    }
+    toSafeProcessedMeta(value) {
+        return {
+            processedAtIso: typeof value?.processedAtIso === "string" ? value.processedAtIso : new Date().toISOString(),
+            referenceDateIso: typeof value?.referenceDateIso === "string" ? value.referenceDateIso : this.todayIso(),
+            totalImportedLines: Number.isFinite(value?.totalImportedLines) ? Number(value?.totalImportedLines) : 0,
+            totalPatients: Number.isFinite(value?.totalPatients) ? Number(value?.totalPatients) : 0,
+            totalForReferenceDate: Number.isFinite(value?.totalForReferenceDate) ? Number(value?.totalForReferenceDate) : 0
+        };
+    }
+    toSafePatientsRecords(value) {
+        if (!Array.isArray(value))
+            return [];
+        return value.map((item) => {
+            const candidate = item;
+            const status = candidate.statusFinanceiro === "Isento" ? "Isento" : "Pagante";
+            return {
+                nome: typeof candidate.nome === "string" ? candidate.nome : "",
+                statusFinanceiro: status,
+                horario: typeof candidate.horario === "string" ? candidate.horario : "-",
+                fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
+                celular: typeof candidate.celular === "string" ? candidate.celular : "-",
+                convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
+                procedimentos: typeof candidate.procedimentos === "string" ? candidate.procedimentos : "-"
+            };
+        }).filter((record) => record.nome.trim().length > 0);
+    }
+    startFloatingHomeHint() {
+        const toast = document.querySelector(".fh-floating-home-toast");
+        if (!toast || toast.dataset.started === "true") {
+            return;
+        }
+        toast.dataset.started = "true";
+        const pulse = () => {
+            toast.classList.remove("is-visible");
+            void toast.offsetWidth;
+            toast.classList.add("is-visible");
+        };
+        window.setTimeout(pulse, 1200);
+        window.setInterval(pulse, 5000);
     }
     showSiteNotification(message) {
         const container = document.getElementById("siteNotifications");
