@@ -80,7 +80,7 @@ export class HomeController {
         });
         const processBtn = document.getElementById("processBtn");
         processBtn?.addEventListener("click", () => {
-            this.processAndPersistData();
+            void this.processAndPersistData();
         });
         const dateInput = this.getDateInput();
         dateInput?.addEventListener("change", () => this.renderImportedData());
@@ -196,7 +196,7 @@ export class HomeController {
         }
         finalizeClose();
     }
-    processAndPersistData() {
+    async processAndPersistData() {
         const stagedLines = this.importedItems.map((item) => item.raw.trim()).filter((line) => line.length > 0);
         if (stagedLines.length === 0) {
             this.showSiteNotification("Nenhum dado em rascunho para processar.");
@@ -208,20 +208,21 @@ export class HomeController {
             return !extracted || extracted === date;
         });
         const patientRecords = this.parsePatientsFromLines(stagedLines);
+        const mergedPatients = await this.mergePatientsWithConflictResolution(patientRecords);
         const processedMeta = {
             processedAtIso: new Date().toISOString(),
             referenceDateIso: date,
             totalImportedLines: stagedLines.length,
-            totalPatients: patientRecords.length,
+            totalPatients: mergedPatients.length,
             totalForReferenceDate: filtered.length
         };
         localStorage.setItem(this.processedDataStorageKey, stagedLines.join("\n"));
-        localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(patientRecords));
+        localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(mergedPatients));
         localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(processedMeta));
         this.importedItems = [];
         this.saveStagingDataToStorage();
         this.renderImportedData();
-        this.showSiteNotification(`Processamento concluido: ${patientRecords.length} paciente(s) salvos com precisao local.`);
+        this.showSiteNotification(`Processamento concluido: ${mergedPatients.length} paciente(s) salvos com precisao local.`);
     }
     saveStagingContent(content) {
         const lines = this.parseContent(content)
@@ -361,12 +362,13 @@ export class HomeController {
     parsePatientsFromLines(lines) {
         const records = [];
         let draft = this.createEmptyPatientDraft();
+        const nowIso = new Date().toISOString();
         const pushDraft = () => {
             if (!draft.nome) {
                 draft = this.createEmptyPatientDraft();
                 return;
             }
-            records.push({ ...draft });
+            records.push({ ...draft, createdAtIso: nowIso, updatedAtIso: nowIso });
             draft = this.createEmptyPatientDraft();
         };
         lines.forEach((line) => {
@@ -400,6 +402,7 @@ export class HomeController {
         }));
     }
     createEmptyPatientDraft() {
+        const nowIso = new Date().toISOString();
         return {
             nome: "",
             statusFinanceiro: "Pagante",
@@ -407,8 +410,128 @@ export class HomeController {
             fisioterapeuta: "-",
             celular: "-",
             convenio: "-",
-            procedimentos: "-"
+            procedimentos: "-",
+            createdAtIso: nowIso,
+            updatedAtIso: nowIso
         };
+    }
+    async mergePatientsWithConflictResolution(incomingRecords) {
+        const currentRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        const merged = [...currentRecords];
+        const conflicts = [];
+        incomingRecords.forEach((incoming) => {
+            const key = this.normalizePatientKey(incoming);
+            const foundIndex = merged.findIndex((record) => this.normalizePatientKey(record) === key);
+            if (foundIndex === -1) {
+                merged.push(incoming);
+                return;
+            }
+            const existing = merged[foundIndex];
+            if (this.areRecordsEquivalent(existing, incoming)) {
+                return;
+            }
+            conflicts.push({
+                index: foundIndex,
+                existing,
+                incoming
+            });
+        });
+        for (const conflict of conflicts) {
+            const choice = await this.askConflictChoice(conflict.existing, conflict.incoming);
+            if (choice === "incoming") {
+                merged[conflict.index] = {
+                    ...conflict.incoming,
+                    createdAtIso: conflict.existing.createdAtIso,
+                    updatedAtIso: new Date().toISOString()
+                };
+            }
+        }
+        return merged;
+    }
+    normalizePatientKey(record) {
+        const normalizedName = record.nome
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .trim();
+        const normalizedPhone = record.celular.replace(/\D/g, "");
+        return `${normalizedName}|${normalizedPhone}`;
+    }
+    areRecordsEquivalent(existing, incoming) {
+        return existing.nome === incoming.nome
+            && existing.statusFinanceiro === incoming.statusFinanceiro
+            && existing.horario === incoming.horario
+            && existing.fisioterapeuta === incoming.fisioterapeuta
+            && existing.celular === incoming.celular
+            && existing.convenio === incoming.convenio
+            && existing.procedimentos === incoming.procedimentos;
+    }
+    askConflictChoice(existing, incoming) {
+        const dialog = document.getElementById("patientConflictDialog");
+        const message = document.getElementById("patientConflictMessage");
+        const existingPre = document.getElementById("patientConflictExisting");
+        const incomingPre = document.getElementById("patientConflictIncoming");
+        const keepExistingBtn = document.getElementById("keepExistingPatientBtn");
+        const keepIncomingBtn = document.getElementById("keepIncomingPatientBtn");
+        if (!dialog || !message || !existingPre || !incomingPre || !keepExistingBtn || !keepIncomingBtn) {
+            return Promise.resolve("existing");
+        }
+        message.textContent = `Paciente ${incoming.nome} ja existe com dados diferentes. Escolha qual versao deseja manter.`;
+        existingPre.textContent = this.describeRecord(existing);
+        incomingPre.textContent = this.describeRecord(incoming);
+        return new Promise((resolve) => {
+            let resolved = false;
+            const cleanup = () => {
+                keepExistingBtn.removeEventListener("click", onKeepExisting);
+                keepIncomingBtn.removeEventListener("click", onKeepIncoming);
+                dialog.removeEventListener("cancel", onCancel);
+                dialog.removeEventListener("close", onClose);
+            };
+            const resolveOnce = (choice) => {
+                if (resolved)
+                    return;
+                resolved = true;
+                cleanup();
+                resolve(choice);
+            };
+            const onKeepExisting = () => {
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce("existing");
+            };
+            const onKeepIncoming = () => {
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce("incoming");
+            };
+            const onCancel = (event) => {
+                event.preventDefault();
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce("existing");
+            };
+            const onClose = () => {
+                resolveOnce("existing");
+            };
+            keepExistingBtn.addEventListener("click", onKeepExisting, { once: true });
+            keepIncomingBtn.addEventListener("click", onKeepIncoming, { once: true });
+            dialog.addEventListener("cancel", onCancel);
+            dialog.addEventListener("close", onClose);
+            if (!dialog.open) {
+                dialog.showModal();
+            }
+        });
+    }
+    describeRecord(record) {
+        return [
+            `Nome: ${record.nome}`,
+            `Status: ${record.statusFinanceiro}`,
+            `Horario: ${record.horario}`,
+            `Fisioterapeuta: ${record.fisioterapeuta}`,
+            `Celular: ${record.celular}`,
+            `Convenio: ${record.convenio}`,
+            `Procedimentos: ${record.procedimentos}`
+        ].join("\n");
     }
     normalizeKey(value) {
         return value
@@ -558,7 +681,9 @@ export class HomeController {
                 fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
                 celular: typeof candidate.celular === "string" ? candidate.celular : "-",
                 convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
-                procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-"
+                procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-",
+                createdAtIso: typeof candidate.createdAtIso === "string" ? candidate.createdAtIso : new Date().toISOString(),
+                updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString()
             };
         }).filter((record) => record.nome.trim().length > 0);
     }

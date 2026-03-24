@@ -57,25 +57,33 @@
         <article class="fh-patient-details-surface">
             <header>
                 <h3 id="patientDetailsTitle">Detalhes do Paciente</h3>
-                <button id="closePatientDetailsDialogBtn" type="button" class="fh-btn">Fechar</button>
+                <div class="fh-patient-details-actions">
+                    <button id="editPatientDetailsBtn" type="button" class="fh-btn fh-btn-ghost">Editar</button>
+                    <button id="savePatientDetailsBtn" type="button" class="fh-btn" disabled>Salvar Alteracoes</button>
+                    <button id="closePatientDetailsDialogBtn" type="button" class="fh-btn">Fechar</button>
+                </div>
             </header>
 
             <div class="fh-patient-details-content">
                 <div class="fh-patient-detail-row">
                     <span>Horario</span>
-                    <strong id="detailHorario">-</strong>
+                    <strong id="detailHorario" class="fh-patient-detail-value" data-field="horario"
+                        contenteditable="false">-</strong>
                 </div>
                 <div class="fh-patient-detail-row">
                     <span>Fisioterapeuta</span>
-                    <strong id="detailFisioterapeuta">-</strong>
+                    <strong id="detailFisioterapeuta" class="fh-patient-detail-value" data-field="fisioterapeuta"
+                        contenteditable="false">-</strong>
                 </div>
                 <div class="fh-patient-detail-row">
                     <span>Paciente</span>
-                    <strong id="detailPaciente">-</strong>
+                    <strong id="detailPaciente" class="fh-patient-detail-value" data-field="nome"
+                        contenteditable="false">-</strong>
                 </div>
                 <div class="fh-patient-detail-row fh-patient-phone-row">
                     <span>Celular</span>
-                    <strong id="detailCelular">-</strong>
+                    <strong id="detailCelular" class="fh-patient-detail-value" data-field="celular"
+                        contenteditable="false">-</strong>
                     <a id="detailWhatsappLink" class="fh-whatsapp-link" href="#" target="_blank"
                         rel="noopener noreferrer" aria-label="Abrir conversa no WhatsApp">
                         <img src="5.0_Assets/5.1_Images/whatsapp.svg" alt="WhatsApp" width="20" height="20">
@@ -83,11 +91,21 @@
                 </div>
                 <div class="fh-patient-detail-row">
                     <span>Convenio</span>
-                    <strong id="detailConvenio">-</strong>
+                    <strong id="detailConvenio" class="fh-patient-detail-value" data-field="convenio"
+                        contenteditable="false">-</strong>
                 </div>
                 <div class="fh-patient-detail-row">
                     <span>Procedimento</span>
-                    <strong id="detailProcedimentos">-</strong>
+                    <strong id="detailProcedimentos" class="fh-patient-detail-value" data-field="procedimentos"
+                        contenteditable="false">-</strong>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Data de Cadastro</span>
+                    <strong id="detailCreatedAt">-</strong>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Ultima Alteracao</span>
+                    <strong id="detailUpdatedAt">-</strong>
                 </div>
             </div>
         </article>

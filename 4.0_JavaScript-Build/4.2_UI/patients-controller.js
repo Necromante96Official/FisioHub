@@ -10,6 +10,8 @@ export class PatientsController {
     activeSearch = "";
     activeStatusFilter = "all";
     activeOrderFilter = "az";
+    selectedRecordIndex = null;
+    isEditingDetails = false;
     async bootstrap() {
         this.theme.init();
         await this.loadPage();
@@ -87,15 +89,27 @@ export class PatientsController {
         });
         const dialog = this.getDetailsDialog();
         const closeButton = document.getElementById("closePatientDetailsDialogBtn");
+        const editButton = document.getElementById("editPatientDetailsBtn");
+        const saveButton = document.getElementById("savePatientDetailsBtn");
         closeButton?.addEventListener("click", () => {
             if (dialog.open) {
                 dialog.close();
             }
         });
+        editButton?.addEventListener("click", () => {
+            this.setDetailsEditMode(true);
+        });
+        saveButton?.addEventListener("click", () => {
+            this.savePatientDetails();
+        });
         dialog.addEventListener("click", (event) => {
             if (event.target === dialog) {
                 dialog.close();
             }
+        });
+        dialog.addEventListener("close", () => {
+            this.setDetailsEditMode(false);
+            this.selectedRecordIndex = null;
         });
         const termsButton = document.getElementById("termsBtn");
         const closeTermsButton = document.getElementById("closeTermsDialogBtn");
@@ -202,7 +216,9 @@ export class PatientsController {
                     fisioterapeuta: typeof candidate.fisioterapeuta === "string" ? candidate.fisioterapeuta : "-",
                     celular: typeof candidate.celular === "string" ? candidate.celular : "-",
                     convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
-                    procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-"
+                    procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-",
+                    createdAtIso: typeof candidate.createdAtIso === "string" ? candidate.createdAtIso : new Date().toISOString(),
+                    updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString()
                 };
             }).filter((record) => record.nome.trim().length > 0);
         }
@@ -211,6 +227,7 @@ export class PatientsController {
         }
     }
     parsePatientsFromLines(raw) {
+        const nowIso = new Date().toISOString();
         const lines = raw
             .split(/\r?\n/)
             .map((line) => line.trim())
@@ -222,7 +239,7 @@ export class PatientsController {
                 draft = this.createEmptyDraft();
                 return;
             }
-            records.push({ ...draft });
+            records.push({ ...draft, createdAtIso: nowIso, updatedAtIso: nowIso });
             draft = this.createEmptyDraft();
         };
         lines.forEach((line) => {
@@ -256,6 +273,7 @@ export class PatientsController {
         }));
     }
     createEmptyDraft() {
+        const nowIso = new Date().toISOString();
         return {
             nome: "",
             statusFinanceiro: "Pagante",
@@ -263,7 +281,9 @@ export class PatientsController {
             fisioterapeuta: "-",
             celular: "-",
             convenio: "-",
-            procedimentos: "-"
+            procedimentos: "-",
+            createdAtIso: nowIso,
+            updatedAtIso: nowIso
         };
     }
     normalizeKey(value) {
@@ -288,12 +308,16 @@ export class PatientsController {
         return `https://wa.me/${withCountryCode}`;
     }
     openDetails(record) {
+        this.selectedRecordIndex = this.patientRecords.indexOf(record);
         this.setText("detailHorario", record.horario || "-");
         this.setText("detailFisioterapeuta", record.fisioterapeuta || "-");
         this.setText("detailPaciente", record.nome || "-");
         this.setText("detailCelular", record.celular || "-");
         this.setText("detailConvenio", record.convenio || "-");
         this.setText("detailProcedimentos", record.procedimentos || "-");
+        this.setText("detailCreatedAt", this.formatDateTime(record.createdAtIso));
+        this.setText("detailUpdatedAt", this.formatDateTime(record.updatedAtIso));
+        this.setDetailsEditMode(false);
         const whatsappLink = document.getElementById("detailWhatsappLink");
         if (whatsappLink) {
             const href = this.getWhatsappLink(record.celular);
@@ -304,6 +328,56 @@ export class PatientsController {
         if (!dialog.open) {
             dialog.showModal();
         }
+    }
+    setDetailsEditMode(enabled) {
+        this.isEditingDetails = enabled;
+        const editableFields = Array.from(document.querySelectorAll(".fh-patient-detail-value"));
+        editableFields.forEach((field) => {
+            field.contentEditable = enabled ? "true" : "false";
+            field.dataset.editing = enabled ? "true" : "false";
+        });
+        const editButton = document.getElementById("editPatientDetailsBtn");
+        const saveButton = document.getElementById("savePatientDetailsBtn");
+        if (editButton)
+            editButton.disabled = enabled;
+        if (saveButton)
+            saveButton.disabled = !enabled;
+    }
+    savePatientDetails() {
+        if (!this.isEditingDetails || this.selectedRecordIndex === null) {
+            return;
+        }
+        const record = this.patientRecords[this.selectedRecordIndex];
+        if (!record) {
+            return;
+        }
+        const readField = (id) => {
+            const element = document.getElementById(id);
+            return element?.textContent?.trim() || "-";
+        };
+        record.horario = readField("detailHorario");
+        record.fisioterapeuta = readField("detailFisioterapeuta");
+        record.nome = readField("detailPaciente");
+        record.celular = readField("detailCelular");
+        record.convenio = readField("detailConvenio");
+        record.procedimentos = this.sanitizeProcedimentosValue(readField("detailProcedimentos"));
+        record.statusFinanceiro = this.isIsento(record) ? "Isento" : "Pagante";
+        record.updatedAtIso = new Date().toISOString();
+        localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.patientRecords));
+        this.setText("detailUpdatedAt", this.formatDateTime(record.updatedAtIso));
+        this.setDetailsEditMode(false);
+        this.render();
+        this.showSiteNotification("Detalhes do paciente atualizados com sucesso.");
+    }
+    formatDateTime(value) {
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) {
+            return "-";
+        }
+        return new Intl.DateTimeFormat("pt-BR", {
+            dateStyle: "short",
+            timeStyle: "short"
+        }).format(date);
     }
     getDetailsDialog() {
         return document.getElementById("patientDetailsDialog");

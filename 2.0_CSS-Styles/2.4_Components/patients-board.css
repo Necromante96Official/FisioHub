@@ -176,6 +176,13 @@
     font-size: 0.98rem;
 }
 
+.fh-patient-details-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .fh-patient-details-content {
     display: grid;
     gap: 8px;
@@ -202,6 +209,18 @@
 
 .fh-patient-detail-row>strong {
     line-height: 1.35;
+}
+
+.fh-patient-detail-value {
+    border-radius: 8px;
+    outline: none;
+    min-height: 24px;
+    padding: 2px 4px;
+}
+
+.fh-patient-detail-value[data-editing="true"] {
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 62%, transparent);
+    background: color-mix(in srgb, var(--fh-surface) 90%, transparent);
 }
 
 .fh-patient-phone-row {

@@ -195,6 +195,90 @@
     text-align: center;
 }
 
+.fh-conflict-dialog {
+    border: 0;
+    padding: 0;
+    width: min(840px, calc(100vw - 26px));
+    border-radius: calc(var(--fh-r-2) + 4px);
+    background: transparent;
+    color: var(--fh-text);
+    box-shadow: 0 28px 54px rgba(0, 0, 0, 0.5);
+}
+
+.fh-conflict-dialog::backdrop {
+    background: rgba(4, 11, 22, 0.64);
+    backdrop-filter: blur(4px);
+}
+
+.fh-conflict-surface {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 88%, transparent);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    overflow: hidden;
+}
+
+.fh-conflict-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+}
+
+.fh-conflict-header h3 {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+}
+
+.fh-conflict-content {
+    display: grid;
+    gap: 12px;
+    padding: 14px 16px 16px;
+}
+
+.fh-conflict-message {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.84rem;
+}
+
+.fh-conflict-columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.fh-conflict-columns section {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    border-radius: 10px;
+    padding: 10px;
+    background: color-mix(in srgb, var(--fh-surface-2) 32%, transparent);
+    display: grid;
+    gap: 8px;
+}
+
+.fh-conflict-columns h4 {
+    margin: 0;
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--fh-primary-2) 72%, #ffffff);
+}
+
+.fh-conflict-pre {
+    margin: 0;
+    max-height: 260px;
+    overflow: auto;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.fh-conflict-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 0 16px 16px;
+}
+
 @media (max-width: 760px) {
     .fh-panel-wrap {
         max-width: 100%;
@@ -217,6 +301,15 @@
 
     .fh-backups-content {
         grid-template-columns: 1fr;
+    }
+
+    .fh-conflict-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-conflict-actions {
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .fh-data-editor {
