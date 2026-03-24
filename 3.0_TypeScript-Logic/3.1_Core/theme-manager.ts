@@ -11,10 +11,6 @@ export class ThemeManager {
         return "dark";
     }
 
-    getCurrentTheme(): string {
-        return "dark";
-    }
-
     private applyTheme(theme: string): void {
         this.root.setAttribute("data-theme", theme);
         localStorage.setItem(this.storageKey, theme);

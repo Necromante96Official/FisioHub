@@ -1,1 +1,15 @@
 :root {
+    --fh-bg: #091018;
+    --fh-bg-accent: radial-gradient(circle at 8% 6%, rgba(39, 72, 99, 0.45) 0%, rgba(39, 72, 99, 0) 44%), radial-gradient(circle at 94% 0%, rgba(19, 76, 113, 0.38) 0%, rgba(19, 76, 113, 0) 43%);
+    --fh-surface: #101d29;
+    --fh-surface-2: #172837;
+    --fh-text: #ecf5fd;
+    --fh-muted: #b0c2d1;
+    --fh-primary: #4dd0c8;
+    --fh-primary-2: #66a9ff;
+    --fh-danger: #ff8a76;
+    --fh-border: #294358;
+    --fh-focus: #ffd166;
+    --fh-glow: rgba(102, 169, 255, 0.35);
+    --fh-shadow: 0 20px 46px rgba(0, 0, 0, 0.45);
+}

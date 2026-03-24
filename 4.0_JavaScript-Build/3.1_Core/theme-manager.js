@@ -8,9 +8,6 @@ export class ThemeManager {
         this.applyTheme("dark");
         return "dark";
     }
-    getCurrentTheme() {
-        return "dark";
-    }
     applyTheme(theme) {
         this.root.setAttribute("data-theme", theme);
         localStorage.setItem(this.storageKey, theme);

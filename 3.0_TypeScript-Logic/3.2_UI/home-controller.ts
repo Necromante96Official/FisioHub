@@ -16,7 +16,6 @@ export class HomeController {
         await this.loadHome();
         await this.resolveIncludes();
         this.setDate(this.todayIso());
-        this.updateThemeButtonLabel();
         this.bindHandlers();
         this.renderImportedData();
     }
@@ -263,15 +262,4 @@ export class HomeController {
         return { kind: "text" };
     }
 
-    private updateThemeButtonLabel(): void {
-        const themeBtn = document.getElementById("themeToggleBtn") as HTMLButtonElement | null;
-        if (!themeBtn) return;
-        const icon = "☾";
-        const ariaLabel = "Modo escuro ativo";
-
-        themeBtn.textContent = icon;
-        themeBtn.setAttribute("aria-label", ariaLabel);
-        themeBtn.title = ariaLabel;
-        themeBtn.disabled = true;
-    }
 }
