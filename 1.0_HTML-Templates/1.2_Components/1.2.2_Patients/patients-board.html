@@ -21,6 +21,16 @@
         </article>
     </div>
 
+    <div class="fh-patients-toolbar" role="search">
+        <input id="patientsSearchInput" type="search" class="fh-patients-search"
+            placeholder="Buscar por nome, fisioterapeuta, convenio ou celular..." aria-label="Buscar pacientes">
+        <select id="patientsStatusFilter" class="fh-patients-filter" aria-label="Filtrar por status">
+            <option value="all">Todos</option>
+            <option value="pagante">Pagantes</option>
+            <option value="isento">Isentos</option>
+        </select>
+    </div>
+
     <div class="fh-patients-table-wrap">
         <table class="fh-patients-table">
             <thead>
@@ -64,7 +74,7 @@
                     <strong id="detailCelular">-</strong>
                     <a id="detailWhatsappLink" class="fh-whatsapp-link" href="#" target="_blank"
                         rel="noopener noreferrer" aria-label="Abrir conversa no WhatsApp">
-                        <img src="4.0_Assets/4.1_Images/whatsapp.svg" alt="WhatsApp" width="20" height="20">
+                        <img src="5.0_Assets/5.1_Images/whatsapp.svg" alt="WhatsApp" width="20" height="20">
                     </a>
                 </div>
                 <div class="fh-patient-detail-row">

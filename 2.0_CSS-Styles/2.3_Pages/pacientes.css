@@ -5,14 +5,19 @@
     gap: var(--fh-s-3);
     min-height: 100vh;
     min-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100dvh;
     width: 100%;
     padding: clamp(12px, 2.4vw, 22px) clamp(12px, 2.8vw, 34px) var(--fh-s-2);
     background: linear-gradient(140deg, color-mix(in srgb, var(--fh-bg) 94%, #02070f 6%), color-mix(in srgb, var(--fh-bg-2) 88%, #02070f 12%));
+    overflow: hidden;
 }
 
 .pacientes-layout>main {
     min-height: 0;
     display: flex;
+    overflow: hidden;
 }
 
 .pacientes-layout .fh-header-bottom {

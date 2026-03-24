@@ -66,6 +66,7 @@ export class HomeController {
             const content = await file.text();
             this.importContent(content);
             fileInput.value = "";
+            this.showSiteNotification("Dados importados com sucesso.");
         });
 
         const clearBtn = document.getElementById("clearDataBtn");
@@ -73,6 +74,7 @@ export class HomeController {
             this.importedItems = [];
             this.saveImportedDataToStorage();
             this.renderImportedData();
+            this.showSiteNotification("Dados importados foram limpos.");
         });
 
         const importedDataEditor = document.getElementById("importedDataEditor") as HTMLTextAreaElement | null;
@@ -84,7 +86,7 @@ export class HomeController {
         processBtn?.addEventListener("click", () => {
             const date = this.getCurrentDate();
             const filtered = this.getFilteredItems(date);
-            window.alert(`Processamento conectado para ${filtered.length} registro(s) na data ${date}.`);
+            this.showSiteNotification(`Processamento conectado para ${filtered.length} registro(s) na data ${date}.`);
         });
 
         const dateInput = this.getDateInput();
@@ -106,9 +108,21 @@ export class HomeController {
 
         termsButton?.addEventListener("click", () => {
             if (!termsDialog.open) {
+                termsDialog.classList.remove("is-opening");
                 termsDialog.classList.remove("is-closing");
                 termsDialog.removeAttribute("data-closing");
                 termsDialog.showModal();
+
+                window.requestAnimationFrame(() => {
+                    termsDialog.classList.add("is-opening");
+                });
+
+                const onOpenAnimationEnd = (): void => {
+                    termsDialog.classList.remove("is-opening");
+                    termsDialog.removeEventListener("animationend", onOpenAnimationEnd);
+                };
+
+                termsDialog.addEventListener("animationend", onOpenAnimationEnd);
             }
         });
 
@@ -304,6 +318,28 @@ export class HomeController {
             raw: line,
             dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
         }));
+    }
+
+    private showSiteNotification(message: string): void {
+        const container = document.getElementById("siteNotifications");
+        if (!container) return;
+
+        const toast = document.createElement("div");
+        toast.className = "fh-site-toast";
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        const beginClose = (): void => {
+            toast.classList.add("is-leaving");
+            const remove = (): void => {
+                toast.removeEventListener("animationend", remove);
+                toast.remove();
+            };
+
+            toast.addEventListener("animationend", remove);
+        };
+
+        window.setTimeout(beginClose, 2600);
     }
 
 }

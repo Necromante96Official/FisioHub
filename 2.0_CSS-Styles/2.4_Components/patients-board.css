@@ -9,6 +9,9 @@
     box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
     display: grid;
     gap: var(--fh-s-3);
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
 }
 
 .fh-patients-headline {
@@ -47,10 +50,30 @@
     font-size: clamp(1.3rem, 2vw, 1.8rem);
 }
 
+.fh-patients-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 180px;
+    gap: 10px;
+}
+
+.fh-patients-search,
+.fh-patients-filter {
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    background: color-mix(in srgb, var(--fh-surface) 88%, transparent);
+    color: var(--fh-text);
+    padding: 8px 10px;
+    font-size: 0.84rem;
+}
+
 .fh-patients-table-wrap {
     border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
     border-radius: var(--fh-r-2);
     overflow: auto;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
 }
 
 .fh-patients-table {
@@ -139,7 +162,7 @@
     overflow: hidden;
 }
 
-.fh-patient-details-surface>header {
+.fh-patient-details-surface > header {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -170,14 +193,14 @@
     background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
 }
 
-.fh-patient-detail-row>span {
+.fh-patient-detail-row > span {
     font-size: 0.74rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--fh-primary-2);
 }
 
-.fh-patient-detail-row>strong {
+.fh-patient-detail-row > strong {
     line-height: 1.35;
 }
 
@@ -186,14 +209,22 @@
 }
 
 .fh-whatsapp-link {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    border: 1px solid color-mix(in srgb, #56d8a6 64%, transparent);
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, #31d66f 72%, transparent);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: color-mix(in srgb, #56d8a6 14%, transparent);
+    background: radial-gradient(circle at 28% 24%, color-mix(in srgb, #62f693 62%, transparent), color-mix(in srgb, #1faa53 72%, transparent));
+    color: #ffffff;
+    box-shadow: 0 6px 16px rgba(17, 88, 45, 0.35);
+}
+
+.fh-whatsapp-link img {
+    width: 18px;
+    height: 18px;
+    filter: brightness(0) invert(1);
 }
 
 .fh-whatsapp-link[aria-disabled="true"] {
@@ -202,7 +233,15 @@
 }
 
 @media (max-width: 900px) {
+    .fh-patients-board {
+        grid-template-rows: auto auto auto minmax(0, 1fr);
+    }
+
     .fh-patients-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-patients-toolbar {
         grid-template-columns: 1fr;
     }
 

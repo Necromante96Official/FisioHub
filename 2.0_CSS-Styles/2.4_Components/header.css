@@ -25,6 +25,7 @@
 .fh-header-top {
     min-height: 72px;
     padding-block: clamp(8px, 1.2vw, 12px);
+    justify-content: space-between;
 }
 
 .fh-header-bottom {
@@ -41,13 +42,13 @@
 .fh-brand-title {
     margin: 0;
     color: var(--fh-text);
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 22px rgba(102, 169, 255, 0.18);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 14px rgba(77, 208, 200, 0.16), 0 0 22px rgba(102, 169, 255, 0.2);
     position: relative;
     transform: none;
     width: max-content;
     margin-inline: auto;
     letter-spacing: 0.01em;
-    animation: fhBrandBreathing 2.8s ease-in-out infinite;
+    animation: fhBrandBreathing 5.2s ease-in-out infinite;
     isolation: isolate;
     will-change: transform, text-shadow, filter;
 }
@@ -76,6 +77,31 @@
     filter: blur(12px);
     opacity: 0.5;
     animation: fhBrandSweep 7.2s ease-in-out infinite reverse;
+}
+
+.fh-home-return-btn {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 76%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--fh-primary) 36%, transparent), color-mix(in srgb, var(--fh-primary-2) 52%, transparent));
+    color: #f4fbff;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 0 16px color-mix(in srgb, var(--fh-primary-2) 30%, transparent);
+    animation: fhBackButtonGlow 2.6s ease-in-out infinite;
+}
+
+.fh-home-return-btn:hover,
+.fh-home-return-btn:focus-visible {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--fh-primary-2) 94%, #ffffff);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 38%, transparent), 0 0 24px color-mix(in srgb, var(--fh-primary-2) 44%, transparent);
 }
 
 .fh-brand-subtitle {
@@ -119,6 +145,7 @@
 @media (max-width: 940px) {
     .fh-header-top {
         justify-content: center;
+        flex-direction: column;
         min-height: 68px;
     }
 
@@ -170,17 +197,17 @@
 
     0%,
     100% {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 16px rgba(77, 208, 200, 0.22), 0 0 26px rgba(102, 169, 255, 0.26);
-        filter: saturate(1);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 14px rgba(77, 208, 200, 0.16), 0 0 22px rgba(102, 169, 255, 0.2);
+        filter: saturate(1) brightness(1);
         transform: translateY(0) scale(1);
         letter-spacing: 0.01em;
     }
 
     50% {
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 28px rgba(77, 208, 200, 0.56), 0 0 46px rgba(102, 169, 255, 0.62);
-        filter: saturate(1.22) brightness(1.08);
-        transform: translateY(-2px) scale(1.06);
-        letter-spacing: 0.025em;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.46), 0 0 18px rgba(77, 208, 200, 0.22), 0 0 28px rgba(102, 169, 255, 0.28);
+        filter: saturate(1.08) brightness(1.03);
+        transform: translateY(-1px) scale(1.022);
+        letter-spacing: 0.013em;
     }
 }
 
@@ -195,5 +222,17 @@
     50% {
         transform: translate(-50%, -50%) scaleX(1.08);
         opacity: 0.82;
+    }
+}
+
+@keyframes fhBackButtonGlow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 0 14px color-mix(in srgb, var(--fh-primary-2) 24%, transparent);
+    }
+
+    50% {
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 42%, transparent), 0 0 24px color-mix(in srgb, var(--fh-primary-2) 36%, transparent);
     }
 }
