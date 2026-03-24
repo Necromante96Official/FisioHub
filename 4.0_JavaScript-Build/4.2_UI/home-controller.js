@@ -74,6 +74,20 @@ export class HomeController {
         document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
         document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
         document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
+        const termsButton = document.getElementById("termsBtn");
+        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
+        const termsDialog = this.getTermsDialog();
+        termsButton?.addEventListener("click", () => {
+            if (!termsDialog.open) {
+                termsDialog.showModal();
+            }
+        });
+        closeTermsButton?.addEventListener("click", () => {
+            termsDialog.close();
+        });
+    }
+    getTermsDialog() {
+        return document.getElementById("termsDialog");
     }
     importContent(content) {
         const lines = this.parseContent(content);

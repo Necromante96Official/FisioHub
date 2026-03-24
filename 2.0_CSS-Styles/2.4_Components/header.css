@@ -42,11 +42,39 @@
     margin: 0;
     color: var(--fh-text);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 22px rgba(102, 169, 255, 0.18);
-    position: static;
+    position: relative;
     transform: none;
     width: max-content;
     margin-inline: auto;
     letter-spacing: 0.01em;
+    animation: fhBrandPulse 5.6s ease-in-out infinite;
+    isolation: isolate;
+}
+
+.fh-brand-title::before,
+.fh-brand-title::after {
+    content: "";
+    position: absolute;
+    inset: 56% auto auto 50%;
+    width: 220px;
+    height: 18px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.fh-brand-title::before {
+    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--fh-primary) 58%, transparent) 0%, transparent 72%);
+    filter: blur(9px);
+    opacity: 0.6;
+    animation: fhBrandSweep 7.2s ease-in-out infinite;
+}
+
+.fh-brand-title::after {
+    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--fh-primary-2) 62%, transparent) 0%, transparent 76%);
+    filter: blur(12px);
+    opacity: 0.5;
+    animation: fhBrandSweep 7.2s ease-in-out infinite reverse;
 }
 
 .fh-brand-subtitle {
@@ -135,4 +163,41 @@
     font-size: 0.92rem;
     border-radius: calc(var(--fh-r-1) + 2px);
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
+}
+
+@keyframes fhBrandPulse {
+
+    0%,
+    100% {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 14px rgba(77, 208, 200, 0.15), 0 0 22px rgba(102, 169, 255, 0.18);
+        filter: saturate(1);
+    }
+
+    50% {
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45), 0 0 20px rgba(77, 208, 200, 0.35), 0 0 34px rgba(102, 169, 255, 0.4);
+        filter: saturate(1.08);
+    }
+}
+
+@keyframes fhBrandSweep {
+
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scaleX(0.78);
+        opacity: 0.42;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scaleX(1.08);
+        opacity: 0.82;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fh-brand-title,
+    .fh-brand-title::before,
+    .fh-brand-title::after {
+        animation: none;
+    }
 }

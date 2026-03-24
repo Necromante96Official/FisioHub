@@ -89,6 +89,24 @@ export class HomeController {
         document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
         document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
         document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
+
+        const termsButton = document.getElementById("termsBtn");
+        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
+        const termsDialog = this.getTermsDialog();
+
+        termsButton?.addEventListener("click", () => {
+            if (!termsDialog.open) {
+                termsDialog.showModal();
+            }
+        });
+
+        closeTermsButton?.addEventListener("click", () => {
+            termsDialog.close();
+        });
+    }
+
+    private getTermsDialog(): HTMLDialogElement {
+        return document.getElementById("termsDialog") as HTMLDialogElement;
     }
 
     private importContent(content: string): void {
