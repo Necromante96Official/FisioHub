@@ -4,6 +4,7 @@ export class HomeController {
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
     theme = new ThemeManager();
     importedItems = [];
+    nextItemId = 1;
     async bootstrap() {
         this.theme.init();
         await this.loadHome();
@@ -58,6 +59,10 @@ export class HomeController {
             this.importedItems = [];
             this.renderImportedData();
         });
+        const importedDataEditor = document.getElementById("importedDataEditor");
+        importedDataEditor?.addEventListener("input", () => {
+            this.syncImportedDataFromEditor(importedDataEditor.value);
+        });
         const processBtn = document.getElementById("processBtn");
         processBtn?.addEventListener("click", () => {
             const date = this.getCurrentDate();
@@ -101,6 +106,7 @@ export class HomeController {
         }
         dialog.dataset.closing = "true";
         dialog.classList.add("is-closing");
+        const surface = dialog.querySelector(".fh-terms-surface");
         const finalizeClose = () => {
             dialog.classList.remove("is-closing");
             dialog.removeAttribute("data-closing");
@@ -109,28 +115,35 @@ export class HomeController {
             }
         };
         const fallback = window.setTimeout(() => {
-            dialog.removeEventListener("animationend", onAnimationEnd);
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
+            }
             finalizeClose();
         }, 260);
-        const onAnimationEnd = (animationEvent) => {
-            if (animationEvent.target !== dialog) {
-                return;
-            }
+        const onAnimationEnd = () => {
             window.clearTimeout(fallback);
-            dialog.removeEventListener("animationend", onAnimationEnd);
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
+            }
             finalizeClose();
         };
-        dialog.addEventListener("animationend", onAnimationEnd);
+        if (surface) {
+            surface.addEventListener("animationend", onAnimationEnd, { once: true });
+            return;
+        }
+        finalizeClose();
     }
     importContent(content) {
         const lines = this.parseContent(content);
         const mapped = lines
             .map((line) => line.trim())
+            .filter((line) => !/^[=\-_*]{6,}$/.test(line))
             .filter((line) => line.length > 0)
             .map((line) => ({
-                raw: line,
-                dateIso: this.extractIsoDate(line)
-            }));
+            id: this.nextItemId++,
+            raw: line,
+            dateIso: this.extractIsoDate(line)
+        }));
         this.importedItems = mapped;
         this.renderImportedData();
     }
@@ -198,71 +211,21 @@ export class HomeController {
         return this.importedItems.filter((item) => !item.dateIso || item.dateIso === dateIso);
     }
     renderImportedData() {
-        const list = document.getElementById("importedDataList");
-        const emptyState = document.getElementById("emptyState");
-        if (!list || !emptyState)
+        const editor = document.getElementById("importedDataEditor");
+        if (!editor)
             return;
-        list.innerHTML = "";
-        const filtered = this.getFilteredItems(this.getCurrentDate());
-        if (filtered.length === 0) {
-            emptyState.style.display = "block";
-            return;
-        }
-        emptyState.style.display = "none";
-        filtered.forEach((item, index) => {
-            list.appendChild(this.createDataListItem(item.raw, index));
-        });
+        editor.value = this.importedItems.map((item) => item.raw).join("\n");
     }
-    createDataListItem(raw, index) {
-        const item = document.createElement("li");
-        item.className = "fh-data-item";
-        const parsed = this.parseDataLine(raw);
-        item.dataset.kind = parsed.kind;
-        if (parsed.kind === "divider") {
-            item.setAttribute("aria-hidden", "true");
-            return item;
-        }
-        if (parsed.kind === "heading") {
-            item.appendChild(this.createTextSpan(parsed.text ?? raw, "fh-data-text"));
-            return item;
-        }
-        if (parsed.kind === "kv") {
-            item.appendChild(this.createTextSpan(parsed.label ?? "", "fh-data-label"));
-            item.appendChild(this.createTextSpan(parsed.value ?? "", "fh-data-value"));
-            return item;
-        }
-        item.classList.add("fh-data-text");
-        item.appendChild(this.createTextSpan(raw, "fh-data-value"));
-        return item;
-    }
-    createTextSpan(text, className) {
-        const span = document.createElement("span");
-        span.className = className;
-        span.textContent = text;
-        return span;
-    }
-    parseDataLine(raw) {
-        const trimmed = raw.trim();
-        if (/^[=-]{8,}$/.test(trimmed)) {
-            return { kind: "divider" };
-        }
-        const headingMatch = trimmed.match(/^---\s*(.+?)\s*---$/);
-        if (headingMatch) {
-            return { kind: "heading", text: headingMatch[1] };
-        }
-        const titleLike = trimmed.length <= 72 && /^[A-ZÀ-Ý0-9][A-ZÀ-Ý0-9\s\-()\/.,]+$/.test(trimmed);
-        if (titleLike) {
-            return { kind: "heading", text: trimmed };
-        }
-        const kvMatch = trimmed.match(/^([^:]{2,40}):\s*(.+)$/);
-        if (kvMatch) {
-            return {
-                kind: "kv",
-                label: kvMatch[1].trim(),
-                value: kvMatch[2].trim()
-            };
-        }
-        return { kind: "text" };
+    syncImportedDataFromEditor(content) {
+        const lines = content
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+        this.importedItems = lines.map((line) => ({
+            id: this.nextItemId++,
+            raw: line,
+            dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
+        }));
     }
 }
 //# sourceMappingURL=home-controller.js.map

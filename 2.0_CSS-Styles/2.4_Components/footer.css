@@ -50,20 +50,30 @@
 
 .fh-footer-bottomline {
     width: 100%;
-    justify-content: center;
-    gap: 9px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 10px;
 }
 
-.fh-footer-actions-line {
-    width: 100%;
-    justify-content: center;
-    margin-top: 2px;
+.fh-footer-spacer {
+    min-width: 1px;
 }
 
 .fh-footer-actions {
     display: inline-flex;
     align-items: center;
-    margin-left: 0;
+    justify-self: end;
+    grid-column: 3;
+}
+
+.fh-footer-meta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    justify-self: center;
+    grid-column: 2;
 }
 
 .fh-terms-btn {
@@ -101,16 +111,25 @@
 }
 
 .fh-terms-dialog::backdrop {
-    background: linear-gradient(145deg, rgba(4, 11, 22, 0.58), rgba(7, 18, 34, 0.72));
+    background: linear-gradient(145deg, rgba(4, 11, 22, 0.46), rgba(7, 18, 34, 0.64));
     backdrop-filter: blur(4px);
+    animation: fhTermsBackdropIn 0.2s ease-out both;
 }
 
 .fh-terms-dialog[open] {
-    animation: fhTermsDialogEnter 0.24s ease-out both;
+    animation: fhTermsDialogEnter 0.22s ease-out both;
 }
 
 .fh-terms-dialog.is-closing {
-    animation: fhTermsDialogExit 0.2s ease-in both;
+    animation: fhTermsDialogExit 0.18s ease-in both;
+}
+
+.fh-terms-dialog[open] .fh-terms-surface {
+    animation: fhTermsSurfaceIn 0.22s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.fh-terms-dialog.is-closing .fh-terms-surface {
+    animation: fhTermsSurfaceOut 0.18s ease-in both;
 }
 
 .fh-terms-surface {
@@ -223,6 +242,40 @@
     }
 }
 
+@keyframes fhTermsSurfaceIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes fhTermsSurfaceOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
+    }
+}
+
+@keyframes fhTermsBackdropIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 .fh-footer-brand,
 .fh-footer-year,
 .fh-footer-version,
@@ -273,11 +326,18 @@
     }
 
     .fh-footer-bottomline {
-        justify-content: center;
+        grid-template-columns: 1fr;
+        justify-items: center;
     }
 
+    .fh-footer-spacer {
+        display: none;
+    }
+
+    .fh-footer-meta,
     .fh-footer-actions {
-        margin-left: 0;
+        grid-column: auto;
+        justify-self: center;
     }
 
     .fh-terms-brand img {
@@ -290,6 +350,12 @@
 
     .fh-terms-dialog[open],
     .fh-terms-dialog.is-closing {
+        animation: none;
+    }
+
+    .fh-terms-dialog[open] .fh-terms-surface,
+    .fh-terms-dialog.is-closing .fh-terms-surface,
+    .fh-terms-dialog::backdrop {
         animation: none;
     }
 }

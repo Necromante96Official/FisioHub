@@ -1,6 +1,7 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 
 type ImportedItem = {
+    id: number;
     raw: string;
     dateIso: string | null;
 };
@@ -10,6 +11,7 @@ export class HomeController {
     private readonly homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
     private readonly theme = new ThemeManager();
     private importedItems: ImportedItem[] = [];
+    private nextItemId = 1;
 
     async bootstrap(): Promise<void> {
         this.theme.init();
@@ -70,6 +72,11 @@ export class HomeController {
             this.renderImportedData();
         });
 
+        const importedDataEditor = document.getElementById("importedDataEditor") as HTMLTextAreaElement | null;
+        importedDataEditor?.addEventListener("input", () => {
+            this.syncImportedDataFromEditor(importedDataEditor.value);
+        });
+
         const processBtn = document.getElementById("processBtn");
         processBtn?.addEventListener("click", () => {
             const date = this.getCurrentDate();
@@ -124,6 +131,7 @@ export class HomeController {
 
         dialog.dataset.closing = "true";
         dialog.classList.add("is-closing");
+        const surface = dialog.querySelector(".fh-terms-surface") as HTMLElement | null;
 
         const finalizeClose = (): void => {
             dialog.classList.remove("is-closing");
@@ -135,29 +143,38 @@ export class HomeController {
         };
 
         const fallback = window.setTimeout(() => {
-            dialog.removeEventListener("animationend", onAnimationEnd);
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
+            }
             finalizeClose();
         }, 260);
 
-        const onAnimationEnd = (animationEvent: AnimationEvent): void => {
-            if (animationEvent.target !== dialog) {
-                return;
+        const onAnimationEnd = (): void => {
+            window.clearTimeout(fallback);
+
+            if (surface) {
+                surface.removeEventListener("animationend", onAnimationEnd);
             }
 
-            window.clearTimeout(fallback);
-            dialog.removeEventListener("animationend", onAnimationEnd);
             finalizeClose();
         };
 
-        dialog.addEventListener("animationend", onAnimationEnd);
+        if (surface) {
+            surface.addEventListener("animationend", onAnimationEnd, { once: true });
+            return;
+        }
+
+        finalizeClose();
     }
 
     private importContent(content: string): void {
         const lines = this.parseContent(content);
         const mapped = lines
             .map((line) => line.trim())
+            .filter((line) => !/^[=\-_*]{6,}$/.test(line))
             .filter((line) => line.length > 0)
             .map((line) => ({
+                id: this.nextItemId++,
                 raw: line,
                 dateIso: this.extractIsoDate(line)
             }));
@@ -241,86 +258,23 @@ export class HomeController {
     }
 
     private renderImportedData(): void {
-        const list = document.getElementById("importedDataList") as HTMLUListElement | null;
-        const emptyState = document.getElementById("emptyState") as HTMLParagraphElement | null;
-        if (!list || !emptyState) return;
+        const editor = document.getElementById("importedDataEditor") as HTMLTextAreaElement | null;
+        if (!editor) return;
 
-        list.innerHTML = "";
-        const filtered = this.getFilteredItems(this.getCurrentDate());
-
-        if (filtered.length === 0) {
-            emptyState.style.display = "block";
-            return;
-        }
-
-        emptyState.style.display = "none";
-        filtered.forEach((item, index) => {
-            list.appendChild(this.createDataListItem(item.raw, index));
-        });
+        editor.value = this.importedItems.map((item) => item.raw).join("\n");
     }
 
-    private createDataListItem(raw: string, index: number): HTMLLIElement {
-        const item = document.createElement("li");
-        item.className = "fh-data-item";
+    private syncImportedDataFromEditor(content: string): void {
+        const lines = content
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
 
-        const parsed = this.parseDataLine(raw);
-        item.dataset.kind = parsed.kind;
-
-        if (parsed.kind === "divider") {
-            item.setAttribute("aria-hidden", "true");
-            return item;
-        }
-
-        if (parsed.kind === "heading") {
-            item.appendChild(this.createTextSpan(parsed.text ?? raw, "fh-data-text"));
-            return item;
-        }
-
-        if (parsed.kind === "kv") {
-            item.appendChild(this.createTextSpan(parsed.label ?? "", "fh-data-label"));
-            item.appendChild(this.createTextSpan(parsed.value ?? "", "fh-data-value"));
-            return item;
-        }
-
-        item.classList.add("fh-data-text");
-        item.appendChild(this.createTextSpan(raw, "fh-data-value"));
-        return item;
-    }
-
-    private createTextSpan(text: string, className: string): HTMLSpanElement {
-        const span = document.createElement("span");
-        span.className = className;
-        span.textContent = text;
-        return span;
-    }
-
-    private parseDataLine(raw: string): { kind: "divider" | "heading" | "kv" | "text"; label?: string; value?: string; text?: string } {
-        const trimmed = raw.trim();
-
-        if (/^[=-]{8,}$/.test(trimmed)) {
-            return { kind: "divider" };
-        }
-
-        const headingMatch = trimmed.match(/^---\s*(.+?)\s*---$/);
-        if (headingMatch) {
-            return { kind: "heading", text: headingMatch[1] };
-        }
-
-        const titleLike = trimmed.length <= 72 && /^[A-ZÀ-Ý0-9][A-ZÀ-Ý0-9\s\-()\/.,]+$/.test(trimmed);
-        if (titleLike) {
-            return { kind: "heading", text: trimmed };
-        }
-
-        const kvMatch = trimmed.match(/^([^:]{2,40}):\s*(.+)$/);
-        if (kvMatch) {
-            return {
-                kind: "kv",
-                label: kvMatch[1].trim(),
-                value: kvMatch[2].trim()
-            };
-        }
-
-        return { kind: "text" };
+        this.importedItems = lines.map((line) => ({
+            id: this.nextItemId++,
+            raw: line,
+            dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
+        }));
     }
 
 }

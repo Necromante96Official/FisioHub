@@ -14,13 +14,7 @@
 }
 
 .fh-panel {
-    background:
-        linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent)),
-        repeating-linear-gradient(180deg,
-            transparent 0,
-            transparent 28px,
-            color-mix(in srgb, var(--fh-border) 22%, transparent) 29px,
-            transparent 30px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
     border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
     border-radius: var(--fh-r-3);
     box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.03);
@@ -57,106 +51,9 @@
     line-height: 1.35;
 }
 
-.fh-data-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0;
-    max-height: none;
-    min-height: 0;
-    flex: 1 1 auto;
-    overflow: auto;
-    width: 100%;
-    text-align: left;
-    scrollbar-gutter: stable;
-    scroll-padding-bottom: 12px;
-}
-
-.fh-data-item {
-    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
-    padding: 6px 10px;
-    min-height: 0;
-    display: grid;
-    align-items: center;
-    justify-content: flex-start;
-    text-align: left;
-    box-shadow: none;
-    border-left: 1px solid color-mix(in srgb, var(--fh-border) 66%, transparent);
-    line-height: 1.32;
-    font-size: 0.88rem;
-    position: relative;
-    white-space: pre-wrap;
-    word-break: break-word;
-    border-radius: 8px;
-    margin-bottom: 4px;
-}
-
-.fh-data-item:first-child {
-    border-top: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-}
-
-.fh-data-item:hover {
-    background: color-mix(in srgb, var(--fh-primary-2) 10%, transparent);
-}
-
-.fh-data-item[data-kind="heading"] {
-    margin-top: 4px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    font-weight: 700;
-    color: var(--fh-text);
-    background: linear-gradient(90deg, color-mix(in srgb, var(--fh-primary) 10%, transparent), color-mix(in srgb, var(--fh-primary-2) 10%, transparent));
-    border-left: 3px solid var(--fh-primary-2);
-}
-
-.fh-data-item[data-kind="divider"] {
-    min-height: 10px;
-    padding: 0;
-    margin: 4px 0;
-    border-bottom: 0;
-    background: transparent;
-}
-
-.fh-data-item[data-kind="divider"]::before {
-    content: "";
-}
-
-.fh-data-item[data-kind="kv"] {
-    grid-template-columns: minmax(100px, 180px) minmax(0, 1fr);
-    column-gap: var(--fh-s-2);
-    align-items: start;
-}
-
-.fh-data-label {
-    color: var(--fh-primary-2);
-    font-weight: 700;
-    font-size: 0.72rem;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
-
-.fh-data-value {
-    color: var(--fh-text);
-    font-size: 0.88rem;
-    line-height: 1.35;
-}
-
-.fh-data-text {
-    color: var(--fh-text);
-}
-
-.fh-empty-state {
-    color: var(--fh-muted);
-    margin: 0;
-    padding: 4px 0;
-    font-size: 0.84rem;
-}
-
 .fh-panel-body {
     width: 100%;
-    padding: 10px 10px 12px;
+    padding: 12px;
     border: 1px solid color-mix(in srgb, var(--fh-border) 78%, transparent);
     border-radius: var(--fh-r-2);
     background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
@@ -168,6 +65,49 @@
     overflow: hidden;
 }
 
+.fh-data-editor {
+    width: 100%;
+    min-height: 0;
+    flex: 1 1 auto;
+    resize: none;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    border-radius: 10px;
+    padding: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 18%, transparent);
+    color: var(--fh-text);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    white-space: pre;
+    overflow: auto;
+    tab-size: 4;
+}
+
+.fh-data-editor:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--fh-primary-2) 60%, transparent);
+    outline-offset: 1px;
+}
+
+.fh-data-editor::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.fh-data-editor::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.fh-data-editor::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+.fh-data-editor {
+    scrollbar-color: color-mix(in srgb, var(--fh-primary-2) 34%, transparent) color-mix(in srgb, var(--fh-border) 18%, transparent);
+    overscroll-behavior: contain;
+}
+
 .fh-panel-actions {
     display: flex;
     justify-content: flex-end;
@@ -176,27 +116,6 @@
     margin-top: auto;
     padding-top: var(--fh-s-2);
     padding-bottom: var(--fh-s-1);
-}
-
-.fh-data-list::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-.fh-data-list::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
-    border-radius: 999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-}
-
-.fh-data-list::-webkit-scrollbar-track {
-    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
-}
-
-.fh-data-list {
-    scrollbar-color: color-mix(in srgb, var(--fh-primary-2) 34%, transparent) color-mix(in srgb, var(--fh-border) 18%, transparent);
-    overscroll-behavior: contain;
 }
 
 @media (max-width: 760px) {
@@ -211,6 +130,10 @@
 
     .fh-panel-actions {
         justify-content: center;
+    }
+
+    .fh-data-editor {
+        font-size: 0.83rem;
     }
 }
 
