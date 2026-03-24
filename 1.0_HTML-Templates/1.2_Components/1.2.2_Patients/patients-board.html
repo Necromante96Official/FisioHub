@@ -1,0 +1,81 @@
+<section class="fh-patients-board" aria-label="Lista de pacientes">
+    <header class="fh-patients-headline">
+        <h2>Lista de Pacientes</h2>
+        <p class="fh-subtitle">Dados gerados automaticamente a partir do conteúdo importado no painel inicial.</p>
+    </header>
+
+    <div class="fh-patients-cards" role="list" aria-label="Indicadores de pacientes">
+        <article class="fh-patient-card" role="listitem">
+            <p>Total de Pacientes</p>
+            <strong id="patientsTotalCount">0</strong>
+        </article>
+
+        <article class="fh-patient-card" role="listitem">
+            <p>Pagantes</p>
+            <strong id="patientsPagantesCount">0</strong>
+        </article>
+
+        <article class="fh-patient-card" role="listitem">
+            <p>Isentos</p>
+            <strong id="patientsIsentosCount">0</strong>
+        </article>
+    </div>
+
+    <div class="fh-patients-table-wrap">
+        <table class="fh-patients-table">
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Ver mais</th>
+                </tr>
+            </thead>
+            <tbody id="patientsTableBody">
+                <tr>
+                    <td colspan="3" class="fh-patients-empty">Nenhum paciente disponível. Importe os dados na página
+                        inicial.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <dialog id="patientDetailsDialog" class="fh-patient-details-dialog" aria-labelledby="patientDetailsTitle">
+        <article class="fh-patient-details-surface">
+            <header>
+                <h3 id="patientDetailsTitle">Detalhes do Paciente</h3>
+                <button id="closePatientDetailsDialogBtn" type="button" class="fh-btn">Fechar</button>
+            </header>
+
+            <div class="fh-patient-details-content">
+                <div class="fh-patient-detail-row">
+                    <span>Horario</span>
+                    <strong id="detailHorario">-</strong>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Fisioterapeuta</span>
+                    <strong id="detailFisioterapeuta">-</strong>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Paciente</span>
+                    <strong id="detailPaciente">-</strong>
+                </div>
+                <div class="fh-patient-detail-row fh-patient-phone-row">
+                    <span>Celular</span>
+                    <strong id="detailCelular">-</strong>
+                    <a id="detailWhatsappLink" class="fh-whatsapp-link" href="#" target="_blank"
+                        rel="noopener noreferrer" aria-label="Abrir conversa no WhatsApp">
+                        <img src="4.0_Assets/4.1_Images/whatsapp.svg" alt="WhatsApp" width="20" height="20">
+                    </a>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Convenio</span>
+                    <strong id="detailConvenio">-</strong>
+                </div>
+                <div class="fh-patient-detail-row">
+                    <span>Procedimento</span>
+                    <strong id="detailProcedimentos">-</strong>
+                </div>
+            </div>
+        </article>
+    </dialog>
+</section>

@@ -2,6 +2,7 @@ import { ThemeManager } from "../4.1_Core/theme-manager.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
+    importedDataStorageKey = "fisiohub-imported-data-lines-v1";
     theme = new ThemeManager();
     importedItems = [];
     nextItemId = 1;
@@ -10,6 +11,7 @@ export class HomeController {
         await this.loadHome();
         await this.resolveIncludes();
         this.setDate(this.todayIso());
+        this.loadImportedDataFromStorage();
         this.bindHandlers();
         this.renderImportedData();
     }
@@ -57,6 +59,7 @@ export class HomeController {
         const clearBtn = document.getElementById("clearDataBtn");
         clearBtn?.addEventListener("click", () => {
             this.importedItems = [];
+            this.saveImportedDataToStorage();
             this.renderImportedData();
         });
         const importedDataEditor = document.getElementById("importedDataEditor");
@@ -145,6 +148,7 @@ export class HomeController {
             dateIso: this.extractIsoDate(line)
         }));
         this.importedItems = mapped;
+        this.saveImportedDataToStorage();
         this.renderImportedData();
     }
     parseContent(content) {
@@ -218,6 +222,26 @@ export class HomeController {
     }
     syncImportedDataFromEditor(content) {
         const lines = content
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+        this.importedItems = lines.map((line) => ({
+            id: this.nextItemId++,
+            raw: line,
+            dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
+        }));
+        this.saveImportedDataToStorage();
+    }
+    saveImportedDataToStorage() {
+        const serialized = this.importedItems.map((item) => item.raw).join("\n");
+        localStorage.setItem(this.importedDataStorageKey, serialized);
+    }
+    loadImportedDataFromStorage() {
+        const stored = localStorage.getItem(this.importedDataStorageKey);
+        if (!stored) {
+            return;
+        }
+        const lines = stored
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line.length > 0);
