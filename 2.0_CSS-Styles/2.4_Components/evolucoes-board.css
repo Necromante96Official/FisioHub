@@ -1,0 +1,116 @@
+.fh-evolucoes-board {
+    width: 100%;
+    max-width: min(1260px, calc(100vw - 48px));
+    margin-inline: auto;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
+    border-radius: var(--fh-r-3);
+    padding: clamp(14px, 2vw, 20px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
+    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
+    display: grid;
+    gap: var(--fh-s-3);
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.fh-evolucoes-headline {
+    display: grid;
+    gap: 4px;
+}
+
+.fh-evolucoes-headline h2 {
+    margin: 0;
+}
+
+.fh-evolucoes-cards {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--fh-s-2);
+}
+
+.fh-evolucao-card {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: var(--fh-r-2);
+    padding: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
+    display: grid;
+    gap: 6px;
+}
+
+.fh-evolucao-card p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--fh-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.fh-evolucao-card strong {
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+}
+
+.fh-evolucoes-reference {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--fh-muted);
+}
+
+.fh-evolucoes-table-wrap {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: var(--fh-r-2);
+    overflow: auto;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+}
+
+.fh-evolucoes-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.fh-evolucoes-table th,
+.fh-evolucoes-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 70%, transparent);
+    text-align: left;
+    font-size: 0.86rem;
+}
+
+.fh-evolucoes-table th {
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fh-primary-2);
+    background: color-mix(in srgb, var(--fh-surface-2) 44%, transparent);
+}
+
+.fh-evolucoes-empty {
+    text-align: center;
+    color: var(--fh-muted);
+}
+
+.fh-evolucao-done-btn {
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    background: color-mix(in srgb, #56d8a6 26%, transparent);
+    color: color-mix(in srgb, #dbfff1 86%, #ffffff 14%);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.fh-evolucao-done-btn:hover,
+.fh-evolucao-done-btn:focus-visible {
+    border-color: color-mix(in srgb, #56d8a6 72%, transparent);
+}
+
+@media (max-width: 900px) {
+    .fh-evolucoes-cards {
+        grid-template-columns: 1fr;
+    }
+}

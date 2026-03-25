@@ -48,7 +48,7 @@
     width: max-content;
     margin-inline: auto;
     letter-spacing: 0.01em;
-    animation: fhBrandBreathing 7.6s ease-in-out infinite;
+    animation: fhBrandBreathing 2.0s ease-in-out infinite;
     isolation: isolate;
     will-change: transform, text-shadow, filter;
 }

@@ -1,0 +1,39 @@
+<section class="fh-evolucoes-board" aria-label="Evolucoes pendentes">
+    <header class="fh-evolucoes-headline">
+        <h2>Evolucoes Pendentes</h2>
+        <p class="fh-subtitle">Pendencias de evolucao com base no processamento mais recente.</p>
+    </header>
+
+    <div class="fh-evolucoes-cards" role="list" aria-label="Indicadores de evolucoes pendentes">
+        <article class="fh-evolucao-card" role="listitem">
+            <p>Pacientes Pendentes</p>
+            <strong id="pendingPatientsCount">0</strong>
+        </article>
+
+        <article class="fh-evolucao-card" role="listitem">
+            <p>Total de Evolucoes Pendentes</p>
+            <strong id="pendingEvolutionsCount">0</strong>
+        </article>
+    </div>
+
+    <p id="pendingReferenceDate" class="fh-evolucoes-reference">Data de referencia: -</p>
+
+    <div class="fh-evolucoes-table-wrap">
+        <table class="fh-evolucoes-table">
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Data</th>
+                    <th scope="col">Horario</th>
+                    <th scope="col">Procedimento</th>
+                    <th scope="col">Acao</th>
+                </tr>
+            </thead>
+            <tbody id="pendingEvolutionsTableBody">
+                <tr>
+                    <td colspan="5" class="fh-evolucoes-empty">Nenhuma evolucao pendente encontrada.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
