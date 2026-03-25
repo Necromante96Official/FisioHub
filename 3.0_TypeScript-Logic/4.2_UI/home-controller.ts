@@ -26,6 +26,12 @@ type ProcessedMeta = {
     totalForReferenceDate: number;
 };
 
+type EvolucoesPendingBatch = {
+    processedAtIso: string;
+    referenceDateIso: string;
+    lines: string[];
+};
+
 type BackupPayload = {
     schema: "fisiohub-backup-v2";
     kind: "all" | "patients-only" | "all-without-patients";
@@ -50,6 +56,8 @@ export class HomeController {
     private readonly legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
     private readonly stagingDataStorageKey = "fisiohub-staging-data-v2";
     private readonly processedDataStorageKey = "fisiohub-processed-data-v2";
+    private readonly evolucoesPendingHistoryStorageKey = "fisiohub-evolucoes-pending-history-v1";
+    private readonly referenceDateStorageKey = "fisiohub-reference-date-v1";
     private readonly patientsRecordsStorageKey = "fisiohub-patients-records-v2";
     private readonly processedMetaStorageKey = "fisiohub-processed-meta-v2";
     private readonly theme = new ThemeManager();
@@ -60,7 +68,7 @@ export class HomeController {
         this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
-        this.setDate(this.todayIso());
+        this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
         this.bindHandlers();
         this.renderImportedData();
@@ -147,7 +155,10 @@ export class HomeController {
         });
 
         const dateInput = this.getDateInput();
-        dateInput?.addEventListener("change", () => this.renderImportedData());
+        dateInput?.addEventListener("change", () => {
+            this.persistReferenceDate(dateInput.value || this.todayIso());
+            this.renderImportedData();
+        });
 
         document.getElementById("todayBtn")?.addEventListener("click", () => {
             this.setDate(this.todayIso());
@@ -323,12 +334,17 @@ export class HomeController {
         localStorage.setItem(this.processedDataStorageKey, stagedLines.join("\n"));
         localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(mergedPatients));
         localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(processedMeta));
+        this.appendEvolucoesPendingBatch({
+            processedAtIso: processedMeta.processedAtIso,
+            referenceDateIso: processedMeta.referenceDateIso,
+            lines: stagedLines
+        });
 
         this.importedItems = [];
         this.saveStagingDataToStorage();
         this.renderImportedData();
 
-        this.showSiteNotification(`Processamento concluido: ${mergedPatients.length} paciente(s) salvos com precisao local.`);
+        this.showSiteNotification(`Processamento concluído: ${mergedPatients.length} paciente(s) salvos com precisão local.`);
     }
 
     private saveStagingContent(content: string): void {
@@ -395,7 +411,7 @@ export class HomeController {
     private async importBackup(kind: BackupPayload["kind"]): Promise<void> {
         const payload = await this.pickBackupFile();
         if (!payload) {
-            this.showSiteNotification("Importacao cancelada.");
+            this.showSiteNotification("Importação cancelada.");
             return;
         }
 
@@ -437,12 +453,48 @@ export class HomeController {
     }
 
     private clearPatientsListOnly(): void {
-        this.clearAllFisioHubStorage();
-        this.importedItems = [];
-        this.nextItemId = 1;
-        this.setDate(this.todayIso());
+        localStorage.removeItem(this.patientsRecordsStorageKey);
+        this.persistReferenceDate(this.getCurrentDate());
         this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+    }
+
+    private appendEvolucoesPendingBatch(batch: EvolucoesPendingBatch): void {
+        const history = this.readEvolucoesPendingHistory();
+        history.push({
+            processedAtIso: batch.processedAtIso,
+            referenceDateIso: batch.referenceDateIso,
+            lines: batch.lines.filter((line) => line.trim().length > 0)
+        });
+
+        localStorage.setItem(this.evolucoesPendingHistoryStorageKey, JSON.stringify(history));
+    }
+
+    private readEvolucoesPendingHistory(): EvolucoesPendingBatch[] {
+        const raw = localStorage.getItem(this.evolucoesPendingHistoryStorageKey);
+        if (!raw) return [];
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed)) return [];
+
+            return parsed
+                .map((entry) => {
+                    const candidate = entry as Partial<EvolucoesPendingBatch>;
+                    const lines = Array.isArray(candidate.lines)
+                        ? candidate.lines.filter((line): line is string => typeof line === "string")
+                        : [];
+
+                    return {
+                        processedAtIso: typeof candidate.processedAtIso === "string" ? candidate.processedAtIso : new Date().toISOString(),
+                        referenceDateIso: typeof candidate.referenceDateIso === "string" ? candidate.referenceDateIso : this.todayIso(),
+                        lines
+                    };
+                })
+                .filter((entry) => entry.lines.length > 0);
+        } catch {
+            return [];
+        }
     }
 
     private clearAllFisioHubStorage(): void {
@@ -856,7 +908,7 @@ export class HomeController {
 
     private getCurrentDate(): string {
         const dateInput = this.getDateInput();
-        return dateInput?.value || this.todayIso();
+        return dateInput?.value || this.getStoredReferenceDate() || this.todayIso();
     }
 
     private getDateInput(): HTMLInputElement | null {
@@ -867,6 +919,29 @@ export class HomeController {
         const dateInput = this.getDateInput();
         if (!dateInput) return;
         dateInput.value = value;
+        this.persistReferenceDate(value);
+    }
+
+    private getStoredReferenceDate(): string | null {
+        const stored = localStorage.getItem(this.referenceDateStorageKey);
+        if (!stored) return null;
+
+        const date = new Date(`${stored}T00:00:00`);
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
+
+        return stored;
+    }
+
+    private persistReferenceDate(value: string): void {
+        const parsed = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) {
+            return;
+        }
+
+        const normalized = this.toIso(parsed);
+        localStorage.setItem(this.referenceDateStorageKey, normalized);
     }
 
     private moveDateByDays(days: number): void {

@@ -5,6 +5,8 @@ export class HomeController {
     legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
     stagingDataStorageKey = "fisiohub-staging-data-v2";
     processedDataStorageKey = "fisiohub-processed-data-v2";
+    evolucoesPendingHistoryStorageKey = "fisiohub-evolucoes-pending-history-v1";
+    referenceDateStorageKey = "fisiohub-reference-date-v1";
     patientsRecordsStorageKey = "fisiohub-patients-records-v2";
     processedMetaStorageKey = "fisiohub-processed-meta-v2";
     theme = new ThemeManager();
@@ -14,7 +16,7 @@ export class HomeController {
         this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
-        this.setDate(this.todayIso());
+        this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
         this.bindHandlers();
         this.renderImportedData();
@@ -90,7 +92,10 @@ export class HomeController {
             void this.processAndPersistData();
         });
         const dateInput = this.getDateInput();
-        dateInput?.addEventListener("change", () => this.renderImportedData());
+        dateInput?.addEventListener("change", () => {
+            this.persistReferenceDate(dateInput.value || this.todayIso());
+            this.renderImportedData();
+        });
         document.getElementById("todayBtn")?.addEventListener("click", () => {
             this.setDate(this.todayIso());
             this.renderImportedData();
@@ -230,10 +235,15 @@ export class HomeController {
         localStorage.setItem(this.processedDataStorageKey, stagedLines.join("\n"));
         localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(mergedPatients));
         localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(processedMeta));
+        this.appendEvolucoesPendingBatch({
+            processedAtIso: processedMeta.processedAtIso,
+            referenceDateIso: processedMeta.referenceDateIso,
+            lines: stagedLines
+        });
         this.importedItems = [];
         this.saveStagingDataToStorage();
         this.renderImportedData();
-        this.showSiteNotification(`Processamento concluido: ${mergedPatients.length} paciente(s) salvos com precisao local.`);
+        this.showSiteNotification(`Processamento concluído: ${mergedPatients.length} paciente(s) salvos com precisão local.`);
     }
     saveStagingContent(content) {
         const lines = this.parseContent(content)
@@ -288,7 +298,7 @@ export class HomeController {
     async importBackup(kind) {
         const payload = await this.pickBackupFile();
         if (!payload) {
-            this.showSiteNotification("Importacao cancelada.");
+            this.showSiteNotification("Importação cancelada.");
             return;
         }
         if (kind === "all") {
@@ -322,12 +332,45 @@ export class HomeController {
         this.showSiteNotification("Todos os dados locais foram limpos.");
     }
     clearPatientsListOnly() {
-        this.clearAllFisioHubStorage();
-        this.importedItems = [];
-        this.nextItemId = 1;
-        this.setDate(this.todayIso());
+        localStorage.removeItem(this.patientsRecordsStorageKey);
+        this.persistReferenceDate(this.getCurrentDate());
         this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+    }
+    appendEvolucoesPendingBatch(batch) {
+        const history = this.readEvolucoesPendingHistory();
+        history.push({
+            processedAtIso: batch.processedAtIso,
+            referenceDateIso: batch.referenceDateIso,
+            lines: batch.lines.filter((line) => line.trim().length > 0)
+        });
+        localStorage.setItem(this.evolucoesPendingHistoryStorageKey, JSON.stringify(history));
+    }
+    readEvolucoesPendingHistory() {
+        const raw = localStorage.getItem(this.evolucoesPendingHistoryStorageKey);
+        if (!raw)
+            return [];
+        try {
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed))
+                return [];
+            return parsed
+                .map((entry) => {
+                const candidate = entry;
+                const lines = Array.isArray(candidate.lines)
+                    ? candidate.lines.filter((line) => typeof line === "string")
+                    : [];
+                return {
+                    processedAtIso: typeof candidate.processedAtIso === "string" ? candidate.processedAtIso : new Date().toISOString(),
+                    referenceDateIso: typeof candidate.referenceDateIso === "string" ? candidate.referenceDateIso : this.todayIso(),
+                    lines
+                };
+            })
+                .filter((entry) => entry.lines.length > 0);
+        }
+        catch {
+            return [];
+        }
     }
     clearAllFisioHubStorage() {
         const keysToRemove = [];
@@ -690,7 +733,7 @@ export class HomeController {
     }
     getCurrentDate() {
         const dateInput = this.getDateInput();
-        return dateInput?.value || this.todayIso();
+        return dateInput?.value || this.getStoredReferenceDate() || this.todayIso();
     }
     getDateInput() {
         return document.getElementById("refDate");
@@ -700,6 +743,25 @@ export class HomeController {
         if (!dateInput)
             return;
         dateInput.value = value;
+        this.persistReferenceDate(value);
+    }
+    getStoredReferenceDate() {
+        const stored = localStorage.getItem(this.referenceDateStorageKey);
+        if (!stored)
+            return null;
+        const date = new Date(`${stored}T00:00:00`);
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
+        return stored;
+    }
+    persistReferenceDate(value) {
+        const parsed = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) {
+            return;
+        }
+        const normalized = this.toIso(parsed);
+        localStorage.setItem(this.referenceDateStorageKey, normalized);
     }
     moveDateByDays(days) {
         const current = new Date(`${this.getCurrentDate()}T00:00:00`);

@@ -1,12 +1,12 @@
 <section class="fh-patients-board" aria-label="Lista de pacientes">
     <header class="fh-patients-headline">
-        <h2>Lista de Pacientes</h2>
+        <h2>Lista de pacientes</h2>
         <p class="fh-subtitle">Dados gerados automaticamente a partir do conteúdo importado no painel inicial.</p>
     </header>
 
     <div class="fh-patients-cards" role="list" aria-label="Indicadores de pacientes">
         <article class="fh-patient-card" role="listitem">
-            <p>Total de Pacientes</p>
+            <p>Total de pacientes</p>
             <strong id="patientsTotalCount">0</strong>
         </article>
 
@@ -23,7 +23,7 @@
 
     <div class="fh-patients-toolbar" role="search">
         <input id="patientsSearchInput" type="search" class="fh-patients-search"
-            placeholder="Buscar por nome, fisioterapeuta, convenio ou celular..." aria-label="Buscar pacientes">
+            placeholder="Buscar por nome, fisioterapeuta, convênio ou celular..." aria-label="Buscar pacientes">
         <select id="patientsStatusFilter" class="fh-patients-filter" aria-label="Filtrar por status">
             <option value="all">Todos</option>
             <option value="pagante">Pagantes</option>
@@ -56,17 +56,17 @@
     <dialog id="patientDetailsDialog" class="fh-patient-details-dialog" aria-labelledby="patientDetailsTitle">
         <article class="fh-patient-details-surface">
             <header>
-                <h3 id="patientDetailsTitle">Detalhes do Paciente</h3>
+                <h3 id="patientDetailsTitle">Detalhes do paciente</h3>
                 <div class="fh-patient-details-actions">
                     <button id="editPatientDetailsBtn" type="button" class="fh-btn fh-btn-ghost">Editar</button>
-                    <button id="savePatientDetailsBtn" type="button" class="fh-btn" disabled>Salvar Alteracoes</button>
+                    <button id="savePatientDetailsBtn" type="button" class="fh-btn" disabled>Salvar alterações</button>
                     <button id="closePatientDetailsDialogBtn" type="button" class="fh-btn">Fechar</button>
                 </div>
             </header>
 
             <div class="fh-patient-details-content">
                 <div class="fh-patient-detail-row">
-                    <span>Horario</span>
+                    <span>Horário</span>
                     <strong id="detailHorario" class="fh-patient-detail-value" data-field="horario"
                         contenteditable="false">-</strong>
                 </div>
@@ -90,7 +90,7 @@
                     </a>
                 </div>
                 <div class="fh-patient-detail-row">
-                    <span>Convenio</span>
+                    <span>Convênio</span>
                     <strong id="detailConvenio" class="fh-patient-detail-value" data-field="convenio"
                         contenteditable="false">-</strong>
                 </div>
@@ -100,11 +100,11 @@
                         contenteditable="false">-</strong>
                 </div>
                 <div class="fh-patient-detail-row">
-                    <span>Data de Cadastro</span>
+                    <span>Data de cadastro</span>
                     <strong id="detailCreatedAt">-</strong>
                 </div>
                 <div class="fh-patient-detail-row">
-                    <span>Ultima Alteracao</span>
+                    <span>Última alteração</span>
                     <strong id="detailUpdatedAt">-</strong>
                 </div>
             </div>

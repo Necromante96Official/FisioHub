@@ -1,22 +1,55 @@
-<section class="fh-evolucoes-board" aria-label="Evolucoes pendentes">
+<section class="fh-evolucoes-board" aria-label="Evoluções pendentes">
     <header class="fh-evolucoes-headline">
-        <h2>Evolucoes Pendentes</h2>
-        <p class="fh-subtitle">Pendencias de evolucao com base no processamento mais recente.</p>
+        <h2>Evoluções pendentes</h2>
+        <p class="fh-subtitle">Pendências de evolução com base no processamento mais recente.</p>
     </header>
 
-    <div class="fh-evolucoes-cards" role="list" aria-label="Indicadores de evolucoes pendentes">
+    <div class="fh-evolucoes-cards" role="list" aria-label="Indicadores de evoluções pendentes">
         <article class="fh-evolucao-card" role="listitem">
             <p>Pacientes Pendentes</p>
             <strong id="pendingPatientsCount">0</strong>
         </article>
 
         <article class="fh-evolucao-card" role="listitem">
-            <p>Total de Evolucoes Pendentes</p>
+            <p>Total de evoluções pendentes</p>
             <strong id="pendingEvolutionsCount">0</strong>
         </article>
     </div>
 
-    <p id="pendingReferenceDate" class="fh-evolucoes-reference">Data de referencia: -</p>
+    <div class="fh-evolucoes-toolbar" role="search">
+        <input id="evolucoesSearchInput" type="search" class="fh-evolucoes-search"
+            placeholder="Busca inteligente: nome, data, horário ou procedimento..."
+            aria-label="Buscar evoluções pendentes">
+
+        <select id="evolucoesDateMode" class="fh-evolucoes-filter" aria-label="Filtrar por data">
+            <option value="all">Todas as datas</option>
+            <option value="specific">Data específica</option>
+            <option value="week">Semana (seg a sex)</option>
+            <option value="month">Mês</option>
+            <option value="year">Ano</option>
+        </select>
+
+        <div id="evolucoesDateControls" class="fh-evolucoes-date-controls">
+            <input id="evolucoesSpecificDate" type="date" class="fh-evolucoes-filter fh-date-mode-field"
+                data-mode="specific" aria-label="Data específica">
+            <input id="evolucoesWeekDate" type="date" class="fh-evolucoes-filter fh-date-mode-field" data-mode="week"
+                aria-label="Data de referência da semana">
+            <input id="evolucoesMonthDate" type="month" class="fh-evolucoes-filter fh-date-mode-field" data-mode="month"
+                aria-label="Mês">
+            <input id="evolucoesYearInput" type="number" min="2020" max="2100"
+                class="fh-evolucoes-filter fh-date-mode-field" data-mode="year" aria-label="Ano">
+        </div>
+
+        <select id="evolucoesProcedureFilter" class="fh-evolucoes-filter" aria-label="Filtrar por procedimento">
+            <option value="all">Todos os procedimentos</option>
+        </select>
+
+        <select id="evolucoesSortSelect" class="fh-evolucoes-filter" aria-label="Ordenar evoluções">
+            <option value="name-asc">Nome A-Z</option>
+            <option value="pending-desc">Maior qtd. pendentes</option>
+            <option value="pending-asc">Menor qtd. pendentes</option>
+        </select>
+    </div>
 
     <div class="fh-evolucoes-table-wrap">
         <table class="fh-evolucoes-table">
@@ -24,14 +57,15 @@
                 <tr>
                     <th scope="col">Nome</th>
                     <th scope="col">Data</th>
-                    <th scope="col">Horario</th>
+                    <th scope="col">Horário</th>
                     <th scope="col">Procedimento</th>
-                    <th scope="col">Acao</th>
+                    <th scope="col">Pendências</th>
+                    <th scope="col">Ação</th>
                 </tr>
             </thead>
             <tbody id="pendingEvolutionsTableBody">
                 <tr>
-                    <td colspan="5" class="fh-evolucoes-empty">Nenhuma evolucao pendente encontrada.</td>
+                    <td colspan="6" class="fh-evolucoes-empty">Nenhuma evolução pendente encontrada.</td>
                 </tr>
             </tbody>
         </table>
