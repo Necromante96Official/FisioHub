@@ -466,8 +466,30 @@ export class PatientsController {
         };
         scheduleNext();
     }
+    getNotificationHost() {
+        const baseHost = document.getElementById("siteNotifications");
+        if (!baseHost) {
+            return null;
+        }
+        const openDialogs = Array.from(document.querySelectorAll("dialog[open]"));
+        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
+        if (!topDialog) {
+            baseHost.classList.remove("fh-site-notifications--modal");
+            return baseHost;
+        }
+        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") ?? topDialog;
+        let modalHost = surface.querySelector(".fh-site-notifications--modal");
+        if (!modalHost) {
+            modalHost = document.createElement("div");
+            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
+            modalHost.setAttribute("aria-live", "polite");
+            modalHost.setAttribute("aria-atomic", "false");
+            surface.appendChild(modalHost);
+        }
+        return modalHost;
+    }
     showSiteNotification(message) {
-        const container = document.getElementById("siteNotifications");
+        const container = this.getNotificationHost();
         if (!container)
             return;
         const toast = document.createElement("div");

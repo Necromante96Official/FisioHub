@@ -223,6 +223,20 @@
     width: min(340px, calc(100vw - 28px));
 }
 
+.fh-site-notifications--modal {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    z-index: 6;
+    width: min(340px, calc(100% - 28px));
+}
+
+.fh-backups-surface,
+.fh-conflict-surface,
+.fh-terms-surface {
+    position: relative;
+}
+
 .fh-site-toast {
     border: 1px solid color-mix(in srgb, var(--fh-primary-2) 52%, transparent);
     border-radius: 12px;

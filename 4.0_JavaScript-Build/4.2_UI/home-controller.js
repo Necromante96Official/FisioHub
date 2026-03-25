@@ -6,6 +6,7 @@ export class HomeController {
     stagingDataStorageKey = "fisiohub-staging-data-v2";
     processedDataStorageKey = "fisiohub-processed-data-v2";
     evolucoesPendingHistoryStorageKey = "fisiohub-evolucoes-pending-history-v1";
+    doneEvolutionsStorageKey = "fisiohub-evolucoes-realizadas-v1";
     referenceDateStorageKey = "fisiohub-reference-date-v1";
     patientsRecordsStorageKey = "fisiohub-patients-records-v2";
     processedMetaStorageKey = "fisiohub-processed-meta-v2";
@@ -71,9 +72,13 @@ export class HomeController {
             fileInput.value = "";
             this.showSiteNotification("Dados importados para rascunho. Clique em Processar para consolidar.");
         });
-        const clearBtn = document.getElementById("clearDataBtn");
-        clearBtn?.addEventListener("click", () => {
-            this.clearAllStoredData();
+        const clearOnlyDataBtn = document.getElementById("clearOnlyDataBtn") ?? this.ensureClearOnlyDataButton();
+        clearOnlyDataBtn?.addEventListener("click", () => {
+            this.clearOnlyPageDataPreservingPatientsList();
+        });
+        const clearDataBtn = document.getElementById("clearDataBtn");
+        clearDataBtn?.addEventListener("click", () => {
+            this.clearImportedDataOnly();
         });
         const clearAllDataBtn = document.getElementById("clearAllDataBtn");
         clearAllDataBtn?.addEventListener("click", () => {
@@ -214,12 +219,29 @@ export class HomeController {
             this.showSiteNotification("Nenhum dado em rascunho para processar.");
             return;
         }
+        let linesForProcessing = [...stagedLines];
+        const requiredFieldIssues = this.collectRequiredFieldIssues(linesForProcessing);
+        if (requiredFieldIssues.length > 0) {
+            const corrections = await this.askMissingRequiredFieldCorrections(requiredFieldIssues);
+            if (!corrections) {
+                this.showSiteNotification("Processamento cancelado. Campos obrigatórios não foram preenchidos.");
+                return;
+            }
+            linesForProcessing = this.applyRequiredFieldCorrections(linesForProcessing, requiredFieldIssues, corrections);
+            this.importedItems = linesForProcessing.map((line) => ({
+                id: this.nextItemId++,
+                raw: line,
+                dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
+            }));
+            this.saveStagingDataToStorage();
+            this.renderImportedData();
+        }
         const date = this.getCurrentDate();
-        const filtered = stagedLines.filter((line) => {
+        const filtered = linesForProcessing.filter((line) => {
             const extracted = this.extractIsoDate(line);
             return !extracted || extracted === date;
         });
-        const patientRecords = this.parsePatientsFromLines(stagedLines);
+        const patientRecords = this.parsePatientsFromLines(linesForProcessing);
         const mergedPatients = await this.mergePatientsWithConflictResolution(patientRecords);
         if (!mergedPatients) {
             this.showSiteNotification("Processamento cancelado.");
@@ -228,17 +250,17 @@ export class HomeController {
         const processedMeta = {
             processedAtIso: new Date().toISOString(),
             referenceDateIso: date,
-            totalImportedLines: stagedLines.length,
+            totalImportedLines: linesForProcessing.length,
             totalPatients: mergedPatients.length,
             totalForReferenceDate: filtered.length
         };
-        localStorage.setItem(this.processedDataStorageKey, stagedLines.join("\n"));
+        localStorage.setItem(this.processedDataStorageKey, linesForProcessing.join("\n"));
         localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(mergedPatients));
         localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(processedMeta));
         this.appendEvolucoesPendingBatch({
             processedAtIso: processedMeta.processedAtIso,
             referenceDateIso: processedMeta.referenceDateIso,
-            lines: stagedLines
+            lines: linesForProcessing
         });
         this.importedItems = [];
         this.saveStagingDataToStorage();
@@ -331,11 +353,64 @@ export class HomeController {
         this.renderImportedData();
         this.showSiteNotification("Todos os dados locais foram limpos.");
     }
+    ensureClearOnlyDataButton() {
+        const existing = document.getElementById("clearOnlyDataBtn");
+        if (existing) {
+            return existing;
+        }
+        const panelActions = document.querySelector(".fh-panel-actions");
+        if (!panelActions) {
+            return null;
+        }
+        const button = document.createElement("button");
+        button.id = "clearOnlyDataBtn";
+        button.className = "fh-btn fh-btn-ghost";
+        button.type = "button";
+        button.textContent = "Limpar Somente Dados";
+        const clearDataButton = document.getElementById("clearDataBtn");
+        if (clearDataButton?.parentElement === panelActions) {
+            panelActions.insertBefore(button, clearDataButton);
+            return button;
+        }
+        const importButton = document.getElementById("importBtn");
+        if (importButton?.parentElement === panelActions) {
+            panelActions.insertBefore(button, importButton);
+        }
+        else {
+            panelActions.appendChild(button);
+        }
+        return button;
+    }
+    clearImportedDataOnly() {
+        this.importedItems = [];
+        this.nextItemId = 1;
+        localStorage.removeItem(this.stagingDataStorageKey);
+        localStorage.removeItem(this.legacyImportedDataStorageKey);
+        this.renderImportedData();
+        this.showSiteNotification("Dados importados do painel foram limpos.");
+    }
+    clearOnlyPageDataPreservingPatientsList() {
+        const keysToRemove = [
+            this.legacyImportedDataStorageKey,
+            this.stagingDataStorageKey,
+            this.processedDataStorageKey,
+            this.processedMetaStorageKey,
+            this.evolucoesPendingHistoryStorageKey,
+            this.doneEvolutionsStorageKey,
+            this.referenceDateStorageKey
+        ];
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        this.importedItems = [];
+        this.nextItemId = 1;
+        this.setDate(this.todayIso());
+        this.renderImportedData();
+        this.showSiteNotification("Dados das páginas foram limpos. A Lista de Pacientes foi preservada.");
+    }
     clearPatientsListOnly() {
         localStorage.removeItem(this.patientsRecordsStorageKey);
         this.persistReferenceDate(this.getCurrentDate());
         this.renderImportedData();
-        this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+        this.showSiteNotification("Somente a Lista de Pacientes foi limpa. As demais páginas foram preservadas.");
     }
     appendEvolucoesPendingBatch(batch) {
         const history = this.readEvolucoesPendingHistory();
@@ -436,29 +511,30 @@ export class HomeController {
                 pushDraft();
                 return;
             }
-            const entryMatch = line.match(/^([^:]+):\s*(.+)$/);
-            if (!entryMatch) {
-                return;
-            }
-            const key = this.normalizeKey(entryMatch[1]);
-            const value = this.sanitizeProcedimentosValue(entryMatch[2].trim());
-            if (key === "horario")
-                draft.horario = value;
-            if (key === "fisioterapeuta")
-                draft.fisioterapeuta = value;
-            if (key === "paciente")
-                draft.nome = value;
-            if (key === "celular")
-                draft.celular = value;
-            if (key === "convenio")
-                draft.convenio = value;
-            if (key === "procedimentos")
-                draft.procedimentos = this.sanitizeProcedimentosValue(value);
+            const entries = this.parseFieldEntriesFromLine(line);
+            entries.forEach(([label, rawValue]) => {
+                const key = this.normalizeKey(label);
+                const value = this.sanitizeProcedimentosValue(rawValue.trim());
+                if (key === "horario")
+                    draft.horario = value;
+                if (key === "fisioterapeuta")
+                    draft.fisioterapeuta = value;
+                if (key === "paciente")
+                    draft.nome = value;
+                if (key === "celular")
+                    draft.celular = value;
+                if (key === "convenio")
+                    draft.convenio = value;
+                if (key === "status" || key === "situacao")
+                    draft.statusFinanceiro = /isento/i.test(value) ? "Isento" : "Pagante";
+                if (key === "procedimentos" || key === "procedimento")
+                    draft.procedimentos = this.sanitizeProcedimentosValue(value);
+            });
         });
         pushDraft();
         return records.map((record) => ({
             ...record,
-            statusFinanceiro: this.isIsento(record) ? "Isento" : "Pagante"
+            statusFinanceiro: record.statusFinanceiro === "Isento" || this.isIsento(record) ? "Isento" : "Pagante"
         }));
     }
     createEmptyPatientDraft() {
@@ -534,11 +610,22 @@ export class HomeController {
     }
     askConflictChoices(conflicts) {
         const dialog = document.getElementById("patientConflictDialog");
+        const title = document.getElementById("patientConflictTitle");
         const message = document.getElementById("patientConflictMessage");
         const list = document.getElementById("patientConflictList");
         const exitBtn = document.getElementById("exitPatientConflictBtn");
-        if (!dialog || !message || !list || !exitBtn) {
+        const confirmBtn = document.getElementById("confirmPatientConflictBtn");
+        const autoFillBtn = document.getElementById("autoFillRequiredBtn");
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn) {
             return Promise.resolve(null);
+        }
+        title.textContent = "Conflito de paciente detectado";
+        exitBtn.textContent = "Sair";
+        confirmBtn.hidden = true;
+        confirmBtn.disabled = true;
+        if (autoFillBtn) {
+            autoFillBtn.hidden = true;
+            autoFillBtn.disabled = true;
         }
         message.textContent = `Foram encontrados ${conflicts.length} conflito(s). Escolha qual versão manter em cada paciente.`;
         list.innerHTML = conflicts.map((conflict, position) => {
@@ -584,11 +671,10 @@ export class HomeController {
         return new Promise((resolve) => {
             const decisions = new Map();
             let resolved = false;
+            const eventsController = new AbortController();
+            const { signal } = eventsController;
             const cleanup = () => {
-                list.removeEventListener("click", onListClick);
-                exitBtn.removeEventListener("click", onExit);
-                dialog.removeEventListener("cancel", onCancel);
-                dialog.removeEventListener("close", onClose);
+                eventsController.abort();
             };
             const resolveOnce = (value) => {
                 if (resolved)
@@ -618,8 +704,15 @@ export class HomeController {
                 }
             };
             const onListClick = (event) => {
-                const target = event.target;
-                const button = target.closest("button[data-conflict-choice]");
+                const rawTarget = event.target;
+                const targetElement = rawTarget instanceof Element
+                    ? rawTarget
+                    : rawTarget instanceof Node
+                        ? rawTarget.parentElement
+                        : null;
+                if (!targetElement)
+                    return;
+                const button = targetElement.closest("button[data-conflict-choice]");
                 if (!button)
                     return;
                 const index = Number(button.dataset.conflictIndex);
@@ -648,15 +741,344 @@ export class HomeController {
             const onClose = () => {
                 resolveOnce(decisions.size === conflicts.length ? decisions : null);
             };
-            list.addEventListener("click", onListClick);
-            exitBtn.addEventListener("click", onExit, { once: true });
-            dialog.addEventListener("cancel", onCancel);
-            dialog.addEventListener("close", onClose);
+            list.addEventListener("click", onListClick, { signal });
+            exitBtn.addEventListener("click", onExit, { once: true, signal });
+            dialog.addEventListener("cancel", onCancel, { signal });
+            dialog.addEventListener("close", onClose, { signal });
             if (!dialog.open) {
                 dialog.showModal();
             }
             updateProgress();
         });
+    }
+    splitImportedLinesByAppointment(lines) {
+        const blocks = [];
+        let current = [];
+        let hasAppointmentMarker = false;
+        lines.forEach((line) => {
+            if (/^---\s*agendamento\s+\d+/i.test(line)) {
+                hasAppointmentMarker = true;
+                if (current.length > 0) {
+                    blocks.push(current);
+                }
+                current = [line];
+                return;
+            }
+            if (hasAppointmentMarker) {
+                current.push(line);
+            }
+        });
+        if (hasAppointmentMarker && current.length > 0) {
+            blocks.push(current);
+        }
+        if (!hasAppointmentMarker) {
+            const fallback = lines.map((line) => line.trim()).filter((line) => line.length > 0);
+            if (fallback.length > 0) {
+                blocks.push(fallback);
+            }
+        }
+        return blocks;
+    }
+    normalizeRequiredFieldKey(value) {
+        const normalized = this.normalizeKey(value);
+        if (normalized === "horario")
+            return "horario";
+        if (normalized === "paciente")
+            return "paciente";
+        if (normalized === "celular")
+            return "celular";
+        if (normalized === "convenio")
+            return "convenio";
+        if (normalized === "status" || normalized === "situacao")
+            return "status";
+        if (normalized === "procedimentos" || normalized === "procedimento")
+            return "procedimentos";
+        return null;
+    }
+    getRequiredFieldLabel(field) {
+        if (field === "horario")
+            return "Horário";
+        if (field === "paciente")
+            return "Paciente";
+        if (field === "celular")
+            return "Celular";
+        if (field === "convenio")
+            return "Convênio";
+        if (field === "status")
+            return "Status";
+        return "Procedimentos";
+    }
+    isMissingRequiredValue(value) {
+        const normalized = value?.trim() ?? "";
+        return normalized.length === 0;
+    }
+    parseFieldEntriesFromLine(line) {
+        const pattern = /(hor[áa]rio|paciente|celular|conv[eê]nio|status|procedimentos?|fisioterapeuta)\s*:\s*/gi;
+        const matches = Array.from(line.matchAll(pattern));
+        if (matches.length === 0) {
+            const fallback = line.match(/^([^:]+):\s*(.*)$/);
+            return fallback ? [[fallback[1], fallback[2].trim()]] : [];
+        }
+        const entries = [];
+        for (let index = 0; index < matches.length; index += 1) {
+            const current = matches[index];
+            const next = matches[index + 1];
+            const valueStart = (current.index ?? 0) + current[0].length;
+            const valueEnd = next?.index ?? line.length;
+            const rawValue = line.slice(valueStart, valueEnd).trim().replace(/[\s,;|]+$/, "");
+            entries.push([current[1], rawValue]);
+        }
+        return entries;
+    }
+    collectRequiredFieldIssues(lines) {
+        const requiredFields = ["horario", "paciente", "celular", "convenio", "status", "procedimentos"];
+        const blocks = this.splitImportedLinesByAppointment(lines);
+        return blocks
+            .map((block, blockIndex) => {
+            const values = {};
+            block.forEach((line) => {
+                const entries = this.parseFieldEntriesFromLine(line);
+                entries.forEach(([label, rawValue]) => {
+                    const key = this.normalizeRequiredFieldKey(label);
+                    if (!key || this.isMissingRequiredValue(rawValue))
+                        return;
+                    values[key] = rawValue;
+                });
+            });
+            const missingFields = requiredFields.filter((field) => this.isMissingRequiredValue(values[field]));
+            const patientName = this.isMissingRequiredValue(values.paciente)
+                ? `Registro ${blockIndex + 1}`
+                : values.paciente;
+            return {
+                blockIndex,
+                patientName,
+                missingFields,
+                currentValues: values
+            };
+        })
+            .filter((issue) => issue.missingFields.length > 0);
+    }
+    askMissingRequiredFieldCorrections(issues) {
+        const dialog = document.getElementById("patientConflictDialog");
+        const title = document.getElementById("patientConflictTitle");
+        const message = document.getElementById("patientConflictMessage");
+        const list = document.getElementById("patientConflictList");
+        const exitBtn = document.getElementById("exitPatientConflictBtn");
+        const confirmBtn = document.getElementById("confirmPatientConflictBtn");
+        const autoFillBtn = document.getElementById("autoFillRequiredBtn");
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn) {
+            return Promise.resolve(null);
+        }
+        title.textContent = "Correção obrigatória de dados";
+        message.textContent = "Foram encontrados campos obrigatórios faltando. Preencha todos para continuar o processamento.";
+        exitBtn.textContent = "Cancelar";
+        confirmBtn.hidden = false;
+        confirmBtn.textContent = "Processar com correções";
+        autoFillBtn.hidden = false;
+        autoFillBtn.disabled = false;
+        autoFillBtn.textContent = "Auto processar";
+        list.innerHTML = issues.map((issue) => {
+            const fields = issue.missingFields.map((field) => {
+                const label = this.getRequiredFieldLabel(field);
+                const value = issue.currentValues[field] ?? "";
+                return `
+                    <label class="fh-required-field">
+                      <span>${this.escapeHtml(label)}</span>
+                      <input
+                        class="fh-required-input"
+                        type="text"
+                        data-required-field="${field}"
+                        data-issue-index="${issue.blockIndex}"
+                        value="${this.escapeHtmlAttr(value)}"
+                        autocomplete="off"
+                        required>
+                    </label>
+                `;
+            }).join("");
+            return `
+                <article class="fh-conflict-item fh-required-item" data-issue-index="${issue.blockIndex}">
+                  <header class="fh-conflict-item-head">
+                    <div class="fh-conflict-item-head-top">
+                      <span class="fh-conflict-badge">Obrigatório</span>
+                      <h4 class="fh-conflict-item-name">${this.escapeHtml(issue.patientName)}</h4>
+                    </div>
+                    <p class="fh-conflict-item-index">Campos faltando: ${issue.missingFields.length}</p>
+                  </header>
+
+                  <div class="fh-required-fields-grid">
+                    ${fields}
+                  </div>
+                </article>
+            `;
+        }).join("");
+        return new Promise((resolve) => {
+            const corrections = new Map();
+            let resolved = false;
+            const eventsController = new AbortController();
+            const { signal } = eventsController;
+            const cleanup = () => {
+                eventsController.abort();
+            };
+            const resolveOnce = (value) => {
+                if (resolved)
+                    return;
+                resolved = true;
+                cleanup();
+                resolve(value);
+            };
+            const allInputs = () => {
+                return Array.from(list.querySelectorAll("input[data-required-field]"));
+            };
+            const updateConfirmState = () => {
+                const hasMissing = allInputs().some((input) => this.isMissingRequiredValue(input.value));
+                confirmBtn.disabled = hasMissing;
+            };
+            const findRecordForIssue = (issue, records) => {
+                const patientName = (issue.currentValues.paciente ?? "").trim();
+                const patientPhone = (issue.currentValues.celular ?? "").replace(/\D/g, "");
+                if (patientName.length > 0 && patientPhone.length > 0) {
+                    const normalizedName = this.normalizeKey(patientName);
+                    const withFullMatch = records.find((record) => {
+                        return this.normalizeKey(record.nome) === normalizedName
+                            && record.celular.replace(/\D/g, "") === patientPhone;
+                    });
+                    if (withFullMatch)
+                        return withFullMatch;
+                }
+                if (patientName.length > 0) {
+                    const normalizedName = this.normalizeKey(patientName);
+                    const withName = records.find((record) => this.normalizeKey(record.nome) === normalizedName);
+                    if (withName)
+                        return withName;
+                }
+                if (patientPhone.length > 0) {
+                    const withPhone = records.find((record) => record.celular.replace(/\D/g, "") === patientPhone);
+                    if (withPhone)
+                        return withPhone;
+                }
+                return null;
+            };
+            const getRecordValueByField = (record, field) => {
+                if (field === "horario")
+                    return record.horario;
+                if (field === "paciente")
+                    return record.nome;
+                if (field === "celular")
+                    return record.celular;
+                if (field === "convenio")
+                    return record.convenio;
+                if (field === "status")
+                    return record.statusFinanceiro;
+                return record.procedimentos;
+            };
+            const onInput = () => {
+                updateConfirmState();
+            };
+            const onAutoProcess = () => {
+                const records = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+                if (records.length === 0) {
+                    this.showSiteNotification("Nao ha pacientes salvos para auto completar os campos obrigatorios.");
+                    return;
+                }
+                let autoFilledCount = 0;
+                issues.forEach((issue) => {
+                    const record = findRecordForIssue(issue, records);
+                    if (!record)
+                        return;
+                    const issueInputs = Array.from(list.querySelectorAll(`input[data-issue-index="${issue.blockIndex}"]`));
+                    issueInputs.forEach((input) => {
+                        const field = input.dataset.requiredField;
+                        if (!field || !this.isMissingRequiredValue(input.value))
+                            return;
+                        const value = getRecordValueByField(record, field).trim();
+                        if (this.isMissingRequiredValue(value))
+                            return;
+                        input.value = value;
+                        autoFilledCount += 1;
+                    });
+                });
+                if (autoFilledCount === 0) {
+                    this.showSiteNotification("Nao foi possivel auto completar os campos com base na lista de pacientes.");
+                }
+                else {
+                    this.showSiteNotification(`${autoFilledCount} campo(s) obrigatorio(s) foram preenchidos automaticamente.`);
+                }
+                updateConfirmState();
+            };
+            const onConfirm = () => {
+                if (confirmBtn.disabled)
+                    return;
+                corrections.clear();
+                issues.forEach((issue) => {
+                    const issueInputs = Array.from(list.querySelectorAll(`input[data-issue-index="${issue.blockIndex}"]`));
+                    const values = {};
+                    issueInputs.forEach((input) => {
+                        const field = input.dataset.requiredField;
+                        if (!field)
+                            return;
+                        values[field] = input.value.trim();
+                    });
+                    corrections.set(issue.blockIndex, values);
+                });
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce(corrections);
+            };
+            const onExit = () => {
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce(null);
+            };
+            const onCancel = (event) => {
+                event.preventDefault();
+                if (dialog.open)
+                    dialog.close();
+                resolveOnce(null);
+            };
+            const onClose = () => {
+                resolveOnce(null);
+            };
+            list.addEventListener("input", onInput, { signal });
+            confirmBtn.addEventListener("click", onConfirm, { signal });
+            autoFillBtn.addEventListener("click", onAutoProcess, { signal });
+            exitBtn.addEventListener("click", onExit, { once: true, signal });
+            dialog.addEventListener("cancel", onCancel, { signal });
+            dialog.addEventListener("close", onClose, { signal });
+            if (!dialog.open) {
+                dialog.showModal();
+            }
+            updateConfirmState();
+        });
+    }
+    applyRequiredFieldCorrections(lines, issues, corrections) {
+        const blocks = this.splitImportedLinesByAppointment(lines);
+        issues.forEach((issue) => {
+            const block = blocks[issue.blockIndex];
+            const data = corrections.get(issue.blockIndex);
+            if (!block || !data)
+                return;
+            issue.missingFields.forEach((field) => {
+                const correctedValue = data[field]?.trim() ?? "";
+                if (this.isMissingRequiredValue(correctedValue))
+                    return;
+                const label = this.getRequiredFieldLabel(field);
+                let updated = false;
+                for (let index = 0; index < block.length; index += 1) {
+                    const entry = block[index].match(/^([^:]+):\s*(.*)$/);
+                    if (!entry)
+                        continue;
+                    if (this.normalizeRequiredFieldKey(entry[1]) === field) {
+                        block[index] = `${label}: ${correctedValue}`;
+                        updated = true;
+                        break;
+                    }
+                }
+                if (!updated) {
+                    block.push(`${label}: ${correctedValue}`);
+                }
+            });
+        });
+        return blocks.flat();
     }
     describeConflictDiff(existing, incoming) {
         const fields = [
@@ -706,6 +1128,9 @@ export class HomeController {
             .replace(/>/g, "&gt;")
             .replace(/\"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+    escapeHtmlAttr(value) {
+        return this.escapeHtml(value);
     }
     normalizeKey(value) {
         return value
@@ -903,8 +1328,30 @@ export class HomeController {
         };
         scheduleNext();
     }
+    getNotificationHost() {
+        const baseHost = document.getElementById("siteNotifications");
+        if (!baseHost) {
+            return null;
+        }
+        const openDialogs = Array.from(document.querySelectorAll("dialog[open]"));
+        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
+        if (!topDialog) {
+            baseHost.classList.remove("fh-site-notifications--modal");
+            return baseHost;
+        }
+        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") ?? topDialog;
+        let modalHost = surface.querySelector(".fh-site-notifications--modal");
+        if (!modalHost) {
+            modalHost = document.createElement("div");
+            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
+            modalHost.setAttribute("aria-live", "polite");
+            modalHost.setAttribute("aria-atomic", "false");
+            surface.appendChild(modalHost);
+        }
+        return modalHost;
+    }
     showSiteNotification(message) {
-        const container = document.getElementById("siteNotifications");
+        const container = this.getNotificationHost();
         if (!container)
             return;
         const toast = document.createElement("div");

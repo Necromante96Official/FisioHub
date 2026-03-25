@@ -843,8 +843,35 @@ export class EvolucoesController {
         scheduleNext();
     }
 
+    private getNotificationHost(): HTMLElement | null {
+        const baseHost = document.getElementById("siteNotifications") as HTMLElement | null;
+        if (!baseHost) {
+            return null;
+        }
+
+        const openDialogs = Array.from(document.querySelectorAll("dialog[open]")) as HTMLDialogElement[];
+        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
+        if (!topDialog) {
+            baseHost.classList.remove("fh-site-notifications--modal");
+            return baseHost;
+        }
+
+        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") as HTMLElement | null ?? topDialog;
+        let modalHost = surface.querySelector(".fh-site-notifications--modal") as HTMLElement | null;
+
+        if (!modalHost) {
+            modalHost = document.createElement("div");
+            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
+            modalHost.setAttribute("aria-live", "polite");
+            modalHost.setAttribute("aria-atomic", "false");
+            surface.appendChild(modalHost);
+        }
+
+        return modalHost;
+    }
+
     private showSiteNotification(message: string): void {
-        const container = document.getElementById("siteNotifications");
+        const container = this.getNotificationHost();
         if (!container) return;
 
         const toast = document.createElement("div");

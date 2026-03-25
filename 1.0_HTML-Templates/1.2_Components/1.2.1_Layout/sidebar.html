@@ -13,8 +13,10 @@
 
   <div class="fh-panel-actions">
     <button id="openBackupsBtn" class="fh-btn fh-btn-ghost" type="button">Backups</button>
-    <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar todos os dados</button>
-    <button id="clearPatientsListBtn" class="fh-btn fh-btn-ghost" type="button">Limpar lista de pacientes</button>
+    <button id="clearOnlyDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Somente Dados</button>
+    <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Todos os Dados</button>
+    <button id="clearPatientsListBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Somente a Lista de
+      Pacientes</button>
     <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
     <button id="processBtn" class="fh-btn" type="button">Processar</button>
     <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
@@ -61,6 +63,8 @@
       </div>
 
       <footer class="fh-conflict-actions">
+        <button id="confirmPatientConflictBtn" class="fh-btn" type="button" hidden>Confirmar</button>
+        <button id="autoFillRequiredBtn" class="fh-btn fh-btn-ghost" type="button" hidden>Auto processar</button>
         <button id="exitPatientConflictBtn" class="fh-btn fh-btn-ghost" type="button">Sair</button>
       </footer>
     </article>
