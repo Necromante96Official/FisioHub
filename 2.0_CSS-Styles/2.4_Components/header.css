@@ -48,7 +48,7 @@
     width: max-content;
     margin-inline: auto;
     letter-spacing: 0.01em;
-    animation: fhBrandBreathing 5.2s ease-in-out infinite;
+    animation: fhBrandBreathing 7.6s ease-in-out infinite;
     isolation: isolate;
     will-change: transform, text-shadow, filter;
 }
@@ -173,17 +173,15 @@
 
     0%,
     100% {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 14px rgba(77, 208, 200, 0.16), 0 0 22px rgba(102, 169, 255, 0.2);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.42), 0 0 12px rgba(77, 208, 200, 0.12), 0 0 18px rgba(102, 169, 255, 0.16);
         filter: saturate(1) brightness(1);
         transform: translateY(0) scale(1);
-        letter-spacing: 0.01em;
     }
 
     50% {
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.46), 0 0 18px rgba(77, 208, 200, 0.22), 0 0 28px rgba(102, 169, 255, 0.28);
-        filter: saturate(1.08) brightness(1.03);
-        transform: translateY(-1px) scale(1.022);
-        letter-spacing: 0.013em;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.46), 0 0 16px rgba(77, 208, 200, 0.18), 0 0 24px rgba(102, 169, 255, 0.22);
+        filter: saturate(1.03) brightness(1.02);
+        transform: translateY(-0.5px) scale(1.012);
     }
 }
 

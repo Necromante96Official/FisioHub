@@ -42,6 +42,8 @@ type PatientConflict = {
     incoming: PatientRecord;
 };
 
+type ConflictChoice = "existing" | "incoming";
+
 export class HomeController {
     private readonly appId = "app";
     private readonly homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
@@ -63,6 +65,15 @@ export class HomeController {
         this.bindHandlers();
         this.renderImportedData();
         this.startFloatingHomeHint();
+
+        window.addEventListener("storage", (event) => {
+            if (event.key && !event.key.startsWith("fisiohub-")) {
+                return;
+            }
+
+            this.loadStagingDataFromStorage();
+            this.renderImportedData();
+        });
     }
 
     private async loadHome(): Promise<void> {
@@ -296,6 +307,10 @@ export class HomeController {
 
         const patientRecords = this.parsePatientsFromLines(stagedLines);
         const mergedPatients = await this.mergePatientsWithConflictResolution(patientRecords);
+        if (!mergedPatients) {
+            this.showSiteNotification("Processamento cancelado.");
+            return;
+        }
 
         const processedMeta: ProcessedMeta = {
             processedAtIso: new Date().toISOString(),
@@ -412,26 +427,35 @@ export class HomeController {
     }
 
     private clearAllStoredData(): void {
-        localStorage.removeItem(this.legacyImportedDataStorageKey);
-        localStorage.removeItem(this.stagingDataStorageKey);
-        localStorage.removeItem(this.processedDataStorageKey);
-        localStorage.removeItem(this.patientsRecordsStorageKey);
-        localStorage.removeItem(this.processedMetaStorageKey);
+        this.clearAllFisioHubStorage();
 
         this.importedItems = [];
+        this.nextItemId = 1;
+        this.setDate(this.todayIso());
         this.renderImportedData();
         this.showSiteNotification("Todos os dados locais foram limpos.");
     }
 
     private clearPatientsListOnly(): void {
-        localStorage.removeItem(this.patientsRecordsStorageKey);
-        localStorage.removeItem(this.processedDataStorageKey);
-        localStorage.removeItem(this.processedMetaStorageKey);
-        localStorage.removeItem(this.legacyImportedDataStorageKey);
+        this.clearAllFisioHubStorage();
         this.importedItems = [];
-        this.saveStagingDataToStorage();
+        this.nextItemId = 1;
+        this.setDate(this.todayIso());
         this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+    }
+
+    private clearAllFisioHubStorage(): void {
+        const keysToRemove: string[] = [];
+
+        for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index);
+            if (key && key.startsWith("fisiohub-")) {
+                keysToRemove.push(key);
+            }
+        }
+
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
 
     private async pickBackupFile(): Promise<Partial<BackupPayload> | null> {
@@ -535,7 +559,7 @@ export class HomeController {
         };
     }
 
-    private async mergePatientsWithConflictResolution(incomingRecords: PatientRecord[]): Promise<PatientRecord[]> {
+    private async mergePatientsWithConflictResolution(incomingRecords: PatientRecord[]): Promise<PatientRecord[] | null> {
         const currentRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
         const merged = [...currentRecords];
         const conflicts: PatientConflict[] = [];
@@ -561,14 +585,21 @@ export class HomeController {
             });
         });
 
-        for (const conflict of conflicts) {
-            const choice = await this.askConflictChoice(conflict.existing, conflict.incoming);
-            if (choice === "incoming") {
-                merged[conflict.index] = {
-                    ...conflict.incoming,
-                    createdAtIso: conflict.existing.createdAtIso,
-                    updatedAtIso: new Date().toISOString()
-                };
+        if (conflicts.length > 0) {
+            const decisions = await this.askConflictChoices(conflicts);
+            if (!decisions) {
+                return null;
+            }
+
+            for (const conflict of conflicts) {
+                const choice = decisions.get(conflict.index) ?? "existing";
+                if (choice === "incoming") {
+                    merged[conflict.index] = {
+                        ...conflict.incoming,
+                        createdAtIso: conflict.existing.createdAtIso,
+                        updatedAtIso: new Date().toISOString()
+                    };
+                }
             }
         }
 
@@ -596,80 +627,201 @@ export class HomeController {
             && existing.procedimentos === incoming.procedimentos;
     }
 
-    private askConflictChoice(existing: PatientRecord, incoming: PatientRecord): Promise<"existing" | "incoming"> {
+    private askConflictChoices(conflicts: PatientConflict[]): Promise<Map<number, ConflictChoice> | null> {
         const dialog = document.getElementById("patientConflictDialog") as HTMLDialogElement | null;
         const message = document.getElementById("patientConflictMessage") as HTMLElement | null;
-        const existingPre = document.getElementById("patientConflictExisting") as HTMLElement | null;
-        const incomingPre = document.getElementById("patientConflictIncoming") as HTMLElement | null;
-        const keepExistingBtn = document.getElementById("keepExistingPatientBtn") as HTMLButtonElement | null;
-        const keepIncomingBtn = document.getElementById("keepIncomingPatientBtn") as HTMLButtonElement | null;
+        const list = document.getElementById("patientConflictList") as HTMLElement | null;
+        const exitBtn = document.getElementById("exitPatientConflictBtn") as HTMLButtonElement | null;
 
-        if (!dialog || !message || !existingPre || !incomingPre || !keepExistingBtn || !keepIncomingBtn) {
-            return Promise.resolve("existing");
+        if (!dialog || !message || !list || !exitBtn) {
+            return Promise.resolve(null);
         }
 
-        message.textContent = `Paciente ${incoming.nome} ja existe com dados diferentes. Escolha qual versao deseja manter.`;
-        existingPre.textContent = this.describeRecord(existing);
-        incomingPre.textContent = this.describeRecord(incoming);
+        message.textContent = `Foram encontrados ${conflicts.length} conflito(s). Escolha qual versão manter em cada paciente.`;
+        list.innerHTML = conflicts.map((conflict, position) => {
+            const diffFields = this.getConflictDiffFields(conflict.existing, conflict.incoming);
+            const currentDetails = this.describeConflictSide(conflict.existing, diffFields);
+            const incomingDetails = this.describeConflictSide(conflict.incoming, diffFields);
+            const patientName = conflict.incoming.nome || conflict.existing.nome || "Paciente sem nome";
+
+            return `
+                <article class="fh-conflict-item" data-conflict-index="${position}">
+                  <header class="fh-conflict-item-head">
+                    <div class="fh-conflict-item-head-top">
+                      <span class="fh-conflict-badge">Paciente</span>
+                      <h4 class="fh-conflict-item-name">${this.escapeHtml(patientName)}</h4>
+                    </div>
+                    <p class="fh-conflict-item-index">Conflito ${position + 1} de ${conflicts.length}</p>
+                  </header>
+
+                  <div class="fh-conflict-item-grid">
+                    <section class="fh-conflict-side fh-conflict-side-current" aria-label="Registro atual">
+                      <div class="fh-conflict-side-head">
+                        <span class="fh-conflict-badge">Atual</span>
+                        <h4>Registro atual</h4>
+                      </div>
+                      <pre class="fh-conflict-pre">${this.escapeHtml(currentDetails)}</pre>
+                    </section>
+
+                    <section class="fh-conflict-side fh-conflict-side-incoming" aria-label="Novo registro">
+                      <div class="fh-conflict-side-head">
+                        <span class="fh-conflict-badge">Novo</span>
+                        <h4>Novo registro</h4>
+                      </div>
+                      <pre class="fh-conflict-pre">${this.escapeHtml(incomingDetails)}</pre>
+                    </section>
+                  </div>
+
+                  <div class="fh-conflict-item-actions">
+                    <button class="fh-btn fh-btn-ghost" type="button" data-conflict-choice="existing" data-conflict-index="${position}">Manter Atual</button>
+                    <button class="fh-btn" type="button" data-conflict-choice="incoming" data-conflict-index="${position}">Usar Novo</button>
+                  </div>
+                </article>
+            `;
+        }).join("");
 
         return new Promise((resolve) => {
+            const decisions = new Map<number, ConflictChoice>();
             let resolved = false;
 
             const cleanup = (): void => {
-                keepExistingBtn.removeEventListener("click", onKeepExisting);
-                keepIncomingBtn.removeEventListener("click", onKeepIncoming);
+                list.removeEventListener("click", onListClick);
+                exitBtn.removeEventListener("click", onExit);
                 dialog.removeEventListener("cancel", onCancel);
                 dialog.removeEventListener("close", onClose);
             };
 
-            const resolveOnce = (choice: "existing" | "incoming"): void => {
+            const resolveOnce = (value: Map<number, ConflictChoice> | null): void => {
                 if (resolved) return;
                 resolved = true;
                 cleanup();
-                resolve(choice);
+                resolve(value);
             };
 
-            const onKeepExisting = (): void => {
-                if (dialog.open) dialog.close();
-                resolveOnce("existing");
+            const updateProgress = (): void => {
+                const doneCount = conflicts.length - Array.from(list.querySelectorAll(".fh-conflict-item:not([data-choice])")).length;
+                message.textContent = `Foram encontrados ${conflicts.length} conflito(s). Escolha qual versão manter em cada paciente. ${doneCount}/${conflicts.length} resolvido(s).`;
             };
 
-            const onKeepIncoming = (): void => {
+            const markCard = (card: HTMLElement, choice: ConflictChoice): void => {
+                card.dataset.choice = choice;
+                const buttons = Array.from(card.querySelectorAll("button[data-conflict-choice]")) as HTMLButtonElement[];
+                buttons.forEach((button) => {
+                    const buttonChoice = button.dataset.conflictChoice as ConflictChoice;
+                    button.disabled = true;
+                    button.classList.toggle("is-active", buttonChoice === choice);
+                });
+            };
+
+            const finalizeIfReady = (): void => {
+                if (decisions.size === conflicts.length) {
+                    if (dialog.open) dialog.close();
+                    resolveOnce(decisions);
+                }
+            };
+
+            const onListClick = (event: MouseEvent): void => {
+                const target = event.target as HTMLElement;
+                const button = target.closest("button[data-conflict-choice]") as HTMLButtonElement | null;
+                if (!button) return;
+
+                const index = Number(button.dataset.conflictIndex);
+                const choice = button.dataset.conflictChoice as ConflictChoice | undefined;
+                if (!Number.isFinite(index) || !choice) return;
+
+                const card = list.querySelector(`.fh-conflict-item[data-conflict-index="${index}"]`) as HTMLElement | null;
+                if (!card || decisions.has(index)) return;
+
+                decisions.set(index, choice);
+                markCard(card, choice);
+                updateProgress();
+                finalizeIfReady();
+            };
+
+            const onExit = (): void => {
                 if (dialog.open) dialog.close();
-                resolveOnce("incoming");
+                resolveOnce(null);
             };
 
             const onCancel = (event: Event): void => {
                 event.preventDefault();
                 if (dialog.open) dialog.close();
-                resolveOnce("existing");
+                resolveOnce(null);
             };
 
             const onClose = (): void => {
-                resolveOnce("existing");
+                resolveOnce(decisions.size === conflicts.length ? decisions : null);
             };
 
-            keepExistingBtn.addEventListener("click", onKeepExisting, { once: true });
-            keepIncomingBtn.addEventListener("click", onKeepIncoming, { once: true });
+            list.addEventListener("click", onListClick);
+            exitBtn.addEventListener("click", onExit, { once: true });
             dialog.addEventListener("cancel", onCancel);
             dialog.addEventListener("close", onClose);
 
             if (!dialog.open) {
                 dialog.showModal();
             }
+
+            updateProgress();
         });
     }
 
-    private describeRecord(record: PatientRecord): string {
-        return [
-            `Nome: ${record.nome}`,
-            `Status: ${record.statusFinanceiro}`,
-            `Horario: ${record.horario}`,
-            `Fisioterapeuta: ${record.fisioterapeuta}`,
-            `Celular: ${record.celular}`,
-            `Convenio: ${record.convenio}`,
-            `Procedimentos: ${record.procedimentos}`
-        ].join("\n");
+    private describeConflictDiff(existing: PatientRecord, incoming: PatientRecord): string {
+        const fields: Array<[keyof PatientRecord, string]> = [
+            ["statusFinanceiro", "Status financeiro"],
+            ["horario", "Horário"],
+            ["fisioterapeuta", "Fisioterapeuta"],
+            ["celular", "Celular"],
+            ["convenio", "Convênio"],
+            ["procedimentos", "Procedimentos"]
+        ];
+
+        const diffLines = fields
+            .filter(([key]) => existing[key] !== incoming[key])
+            .map(([key, label]) => {
+                const existingValue = this.getConflictValue(existing, key);
+                const incomingValue = this.getConflictValue(incoming, key);
+                return `${label}\nAtual: ${existingValue}\nNovo: ${incomingValue}`;
+            });
+
+        return diffLines.length > 0 ? diffLines.join("\n\n") : "Sem diferenças relevantes.";
+    }
+
+    private getConflictDiffFields(existing: PatientRecord, incoming: PatientRecord): Array<[keyof PatientRecord, string]> {
+        const fields: Array<[keyof PatientRecord, string]> = [
+            ["statusFinanceiro", "Status financeiro"],
+            ["horario", "Horário"],
+            ["fisioterapeuta", "Fisioterapeuta"],
+            ["celular", "Celular"],
+            ["convenio", "Convênio"],
+            ["procedimentos", "Procedimentos"]
+        ];
+
+        return fields.filter(([key]) => existing[key] !== incoming[key]);
+    }
+
+    private describeConflictSide(record: PatientRecord, fields: Array<[keyof PatientRecord, string]>): string {
+        if (fields.length === 0) {
+            return "Sem diferenças relevantes.";
+        }
+
+        return fields
+            .map(([key, label]) => `${label}: ${this.getConflictValue(record, key)}`)
+            .join("\n");
+    }
+
+    private getConflictValue(record: PatientRecord, key: keyof PatientRecord): string {
+        const value = record[key];
+        return typeof value === "string" ? value : "-";
+    }
+
+    private escapeHtml(value: string): string {
+        return value
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
     private normalizeKey(value: string): string {

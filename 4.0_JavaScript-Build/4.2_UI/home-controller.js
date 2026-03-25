@@ -19,6 +19,13 @@ export class HomeController {
         this.bindHandlers();
         this.renderImportedData();
         this.startFloatingHomeHint();
+        window.addEventListener("storage", (event) => {
+            if (event.key && !event.key.startsWith("fisiohub-")) {
+                return;
+            }
+            this.loadStagingDataFromStorage();
+            this.renderImportedData();
+        });
     }
     async loadHome() {
         const app = document.getElementById(this.appId);
@@ -209,6 +216,10 @@ export class HomeController {
         });
         const patientRecords = this.parsePatientsFromLines(stagedLines);
         const mergedPatients = await this.mergePatientsWithConflictResolution(patientRecords);
+        if (!mergedPatients) {
+            this.showSiteNotification("Processamento cancelado.");
+            return;
+        }
         const processedMeta = {
             processedAtIso: new Date().toISOString(),
             referenceDateIso: date,
@@ -303,24 +314,30 @@ export class HomeController {
         this.showSiteNotification("Backup importado com sucesso.");
     }
     clearAllStoredData() {
-        localStorage.removeItem(this.legacyImportedDataStorageKey);
-        localStorage.removeItem(this.stagingDataStorageKey);
-        localStorage.removeItem(this.processedDataStorageKey);
-        localStorage.removeItem(this.patientsRecordsStorageKey);
-        localStorage.removeItem(this.processedMetaStorageKey);
+        this.clearAllFisioHubStorage();
         this.importedItems = [];
+        this.nextItemId = 1;
+        this.setDate(this.todayIso());
         this.renderImportedData();
         this.showSiteNotification("Todos os dados locais foram limpos.");
     }
     clearPatientsListOnly() {
-        localStorage.removeItem(this.patientsRecordsStorageKey);
-        localStorage.removeItem(this.processedDataStorageKey);
-        localStorage.removeItem(this.processedMetaStorageKey);
-        localStorage.removeItem(this.legacyImportedDataStorageKey);
+        this.clearAllFisioHubStorage();
         this.importedItems = [];
-        this.saveStagingDataToStorage();
+        this.nextItemId = 1;
+        this.setDate(this.todayIso());
         this.renderImportedData();
         this.showSiteNotification("Lista de pacientes removida do armazenamento local.");
+    }
+    clearAllFisioHubStorage() {
+        const keysToRemove = [];
+        for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index);
+            if (key && key.startsWith("fisiohub-")) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach((key) => localStorage.removeItem(key));
     }
     async pickBackupFile() {
         const input = document.createElement("input");
@@ -436,14 +453,20 @@ export class HomeController {
                 incoming
             });
         });
-        for (const conflict of conflicts) {
-            const choice = await this.askConflictChoice(conflict.existing, conflict.incoming);
-            if (choice === "incoming") {
-                merged[conflict.index] = {
-                    ...conflict.incoming,
-                    createdAtIso: conflict.existing.createdAtIso,
-                    updatedAtIso: new Date().toISOString()
-                };
+        if (conflicts.length > 0) {
+            const decisions = await this.askConflictChoices(conflicts);
+            if (!decisions) {
+                return null;
+            }
+            for (const conflict of conflicts) {
+                const choice = decisions.get(conflict.index) ?? "existing";
+                if (choice === "incoming") {
+                    merged[conflict.index] = {
+                        ...conflict.incoming,
+                        createdAtIso: conflict.existing.createdAtIso,
+                        updatedAtIso: new Date().toISOString()
+                    };
+                }
             }
         }
         return merged;
@@ -466,72 +489,180 @@ export class HomeController {
             && existing.convenio === incoming.convenio
             && existing.procedimentos === incoming.procedimentos;
     }
-    askConflictChoice(existing, incoming) {
+    askConflictChoices(conflicts) {
         const dialog = document.getElementById("patientConflictDialog");
         const message = document.getElementById("patientConflictMessage");
-        const existingPre = document.getElementById("patientConflictExisting");
-        const incomingPre = document.getElementById("patientConflictIncoming");
-        const keepExistingBtn = document.getElementById("keepExistingPatientBtn");
-        const keepIncomingBtn = document.getElementById("keepIncomingPatientBtn");
-        if (!dialog || !message || !existingPre || !incomingPre || !keepExistingBtn || !keepIncomingBtn) {
-            return Promise.resolve("existing");
+        const list = document.getElementById("patientConflictList");
+        const exitBtn = document.getElementById("exitPatientConflictBtn");
+        if (!dialog || !message || !list || !exitBtn) {
+            return Promise.resolve(null);
         }
-        message.textContent = `Paciente ${incoming.nome} ja existe com dados diferentes. Escolha qual versao deseja manter.`;
-        existingPre.textContent = this.describeRecord(existing);
-        incomingPre.textContent = this.describeRecord(incoming);
+        message.textContent = `Foram encontrados ${conflicts.length} conflito(s). Escolha qual versão manter em cada paciente.`;
+        list.innerHTML = conflicts.map((conflict, position) => {
+            const diffFields = this.getConflictDiffFields(conflict.existing, conflict.incoming);
+            const currentDetails = this.describeConflictSide(conflict.existing, diffFields);
+            const incomingDetails = this.describeConflictSide(conflict.incoming, diffFields);
+            const patientName = conflict.incoming.nome || conflict.existing.nome || "Paciente sem nome";
+            return `
+                <article class="fh-conflict-item" data-conflict-index="${position}">
+                  <header class="fh-conflict-item-head">
+                    <div class="fh-conflict-item-head-top">
+                      <span class="fh-conflict-badge">Paciente</span>
+                      <h4 class="fh-conflict-item-name">${this.escapeHtml(patientName)}</h4>
+                    </div>
+                    <p class="fh-conflict-item-index">Conflito ${position + 1} de ${conflicts.length}</p>
+                  </header>
+
+                  <div class="fh-conflict-item-grid">
+                    <section class="fh-conflict-side fh-conflict-side-current" aria-label="Registro atual">
+                      <div class="fh-conflict-side-head">
+                        <span class="fh-conflict-badge">Atual</span>
+                        <h4>Registro atual</h4>
+                      </div>
+                      <pre class="fh-conflict-pre">${this.escapeHtml(currentDetails)}</pre>
+                    </section>
+
+                    <section class="fh-conflict-side fh-conflict-side-incoming" aria-label="Novo registro">
+                      <div class="fh-conflict-side-head">
+                        <span class="fh-conflict-badge">Novo</span>
+                        <h4>Novo registro</h4>
+                      </div>
+                      <pre class="fh-conflict-pre">${this.escapeHtml(incomingDetails)}</pre>
+                    </section>
+                  </div>
+
+                  <div class="fh-conflict-item-actions">
+                    <button class="fh-btn fh-btn-ghost" type="button" data-conflict-choice="existing" data-conflict-index="${position}">Manter Atual</button>
+                    <button class="fh-btn" type="button" data-conflict-choice="incoming" data-conflict-index="${position}">Usar Novo</button>
+                  </div>
+                </article>
+            `;
+        }).join("");
         return new Promise((resolve) => {
+            const decisions = new Map();
             let resolved = false;
             const cleanup = () => {
-                keepExistingBtn.removeEventListener("click", onKeepExisting);
-                keepIncomingBtn.removeEventListener("click", onKeepIncoming);
+                list.removeEventListener("click", onListClick);
+                exitBtn.removeEventListener("click", onExit);
                 dialog.removeEventListener("cancel", onCancel);
                 dialog.removeEventListener("close", onClose);
             };
-            const resolveOnce = (choice) => {
+            const resolveOnce = (value) => {
                 if (resolved)
                     return;
                 resolved = true;
                 cleanup();
-                resolve(choice);
+                resolve(value);
             };
-            const onKeepExisting = () => {
+            const updateProgress = () => {
+                const doneCount = conflicts.length - Array.from(list.querySelectorAll(".fh-conflict-item:not([data-choice])")).length;
+                message.textContent = `Foram encontrados ${conflicts.length} conflito(s). Escolha qual versão manter em cada paciente. ${doneCount}/${conflicts.length} resolvido(s).`;
+            };
+            const markCard = (card, choice) => {
+                card.dataset.choice = choice;
+                const buttons = Array.from(card.querySelectorAll("button[data-conflict-choice]"));
+                buttons.forEach((button) => {
+                    const buttonChoice = button.dataset.conflictChoice;
+                    button.disabled = true;
+                    button.classList.toggle("is-active", buttonChoice === choice);
+                });
+            };
+            const finalizeIfReady = () => {
+                if (decisions.size === conflicts.length) {
+                    if (dialog.open)
+                        dialog.close();
+                    resolveOnce(decisions);
+                }
+            };
+            const onListClick = (event) => {
+                const target = event.target;
+                const button = target.closest("button[data-conflict-choice]");
+                if (!button)
+                    return;
+                const index = Number(button.dataset.conflictIndex);
+                const choice = button.dataset.conflictChoice;
+                if (!Number.isFinite(index) || !choice)
+                    return;
+                const card = list.querySelector(`.fh-conflict-item[data-conflict-index="${index}"]`);
+                if (!card || decisions.has(index))
+                    return;
+                decisions.set(index, choice);
+                markCard(card, choice);
+                updateProgress();
+                finalizeIfReady();
+            };
+            const onExit = () => {
                 if (dialog.open)
                     dialog.close();
-                resolveOnce("existing");
-            };
-            const onKeepIncoming = () => {
-                if (dialog.open)
-                    dialog.close();
-                resolveOnce("incoming");
+                resolveOnce(null);
             };
             const onCancel = (event) => {
                 event.preventDefault();
                 if (dialog.open)
                     dialog.close();
-                resolveOnce("existing");
+                resolveOnce(null);
             };
             const onClose = () => {
-                resolveOnce("existing");
+                resolveOnce(decisions.size === conflicts.length ? decisions : null);
             };
-            keepExistingBtn.addEventListener("click", onKeepExisting, { once: true });
-            keepIncomingBtn.addEventListener("click", onKeepIncoming, { once: true });
+            list.addEventListener("click", onListClick);
+            exitBtn.addEventListener("click", onExit, { once: true });
             dialog.addEventListener("cancel", onCancel);
             dialog.addEventListener("close", onClose);
             if (!dialog.open) {
                 dialog.showModal();
             }
+            updateProgress();
         });
     }
-    describeRecord(record) {
-        return [
-            `Nome: ${record.nome}`,
-            `Status: ${record.statusFinanceiro}`,
-            `Horario: ${record.horario}`,
-            `Fisioterapeuta: ${record.fisioterapeuta}`,
-            `Celular: ${record.celular}`,
-            `Convenio: ${record.convenio}`,
-            `Procedimentos: ${record.procedimentos}`
-        ].join("\n");
+    describeConflictDiff(existing, incoming) {
+        const fields = [
+            ["statusFinanceiro", "Status financeiro"],
+            ["horario", "Horário"],
+            ["fisioterapeuta", "Fisioterapeuta"],
+            ["celular", "Celular"],
+            ["convenio", "Convênio"],
+            ["procedimentos", "Procedimentos"]
+        ];
+        const diffLines = fields
+            .filter(([key]) => existing[key] !== incoming[key])
+            .map(([key, label]) => {
+            const existingValue = this.getConflictValue(existing, key);
+            const incomingValue = this.getConflictValue(incoming, key);
+            return `${label}\nAtual: ${existingValue}\nNovo: ${incomingValue}`;
+        });
+        return diffLines.length > 0 ? diffLines.join("\n\n") : "Sem diferenças relevantes.";
+    }
+    getConflictDiffFields(existing, incoming) {
+        const fields = [
+            ["statusFinanceiro", "Status financeiro"],
+            ["horario", "Horário"],
+            ["fisioterapeuta", "Fisioterapeuta"],
+            ["celular", "Celular"],
+            ["convenio", "Convênio"],
+            ["procedimentos", "Procedimentos"]
+        ];
+        return fields.filter(([key]) => existing[key] !== incoming[key]);
+    }
+    describeConflictSide(record, fields) {
+        if (fields.length === 0) {
+            return "Sem diferenças relevantes.";
+        }
+        return fields
+            .map(([key, label]) => `${label}: ${this.getConflictValue(record, key)}`)
+            .join("\n");
+    }
+    getConflictValue(record, key) {
+        const value = record[key];
+        return typeof value === "string" ? value : "-";
+    }
+    escapeHtml(value) {
+        return value
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/\"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
     normalizeKey(value) {
         return value

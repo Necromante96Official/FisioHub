@@ -20,6 +20,15 @@ export class PatientsController {
         this.bindHandlers();
         this.render();
         this.startFloatingHomeHint();
+        window.addEventListener("storage", (event) => {
+            if (event.key && !event.key.startsWith("fisiohub-")) {
+                return;
+            }
+            this.patientRecords = this.parsePatientsFromStorage();
+            this.selectedRecordIndex = null;
+            this.isEditingDetails = false;
+            this.render();
+        });
         if (this.patientRecords.length === 0) {
             this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
         }

@@ -57,23 +57,11 @@
 
       <div class="fh-conflict-content">
         <p id="patientConflictMessage" class="fh-conflict-message"></p>
-
-        <div class="fh-conflict-columns">
-          <section>
-            <h4>Registro Atual</h4>
-            <pre id="patientConflictExisting" class="fh-conflict-pre"></pre>
-          </section>
-
-          <section>
-            <h4>Novo Registro</h4>
-            <pre id="patientConflictIncoming" class="fh-conflict-pre"></pre>
-          </section>
-        </div>
+        <div id="patientConflictList" class="fh-conflict-list" aria-live="polite"></div>
       </div>
 
       <footer class="fh-conflict-actions">
-        <button id="keepExistingPatientBtn" class="fh-btn fh-btn-ghost" type="button">Manter Atual</button>
-        <button id="keepIncomingPatientBtn" class="fh-btn" type="button">Usar Novo</button>
+        <button id="exitPatientConflictBtn" class="fh-btn fh-btn-ghost" type="button">Sair</button>
       </footer>
     </article>
   </dialog>
