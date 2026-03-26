@@ -64,8 +64,25 @@
 
       <footer class="fh-conflict-actions">
         <button id="confirmPatientConflictBtn" class="fh-btn" type="button" hidden>Confirmar</button>
-        <button id="autoFillRequiredBtn" class="fh-btn fh-btn-ghost" type="button" hidden>Auto processar</button>
+        <button id="autoFillRequiredBtn" class="fh-btn fh-btn-ghost" type="button" hidden>Auto completar</button>
         <button id="exitPatientConflictBtn" class="fh-btn fh-btn-ghost" type="button">Sair</button>
+      </footer>
+    </article>
+  </dialog>
+
+  <dialog id="procedurePickerDialog" class="fh-conflict-dialog" closedby="any" aria-labelledby="procedurePickerTitle">
+    <article class="fh-conflict-surface">
+      <header class="fh-conflict-header">
+        <h3 id="procedurePickerTitle">Procedimentos salvos</h3>
+      </header>
+
+      <div class="fh-conflict-content">
+        <p id="procedurePickerMessage" class="fh-conflict-message"></p>
+        <div id="procedurePickerList" class="fh-procedure-list" aria-live="polite"></div>
+      </div>
+
+      <footer class="fh-conflict-actions">
+        <button id="closeProcedurePickerBtn" class="fh-btn fh-btn-ghost" type="button">Cancelar</button>
       </footer>
     </article>
   </dialog>

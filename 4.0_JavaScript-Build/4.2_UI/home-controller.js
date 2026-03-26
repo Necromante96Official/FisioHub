@@ -698,9 +698,11 @@ export class HomeController {
             };
             const finalizeIfReady = () => {
                 if (decisions.size === conflicts.length) {
-                    if (dialog.open)
-                        dialog.close();
                     resolveOnce(decisions);
+                    window.setTimeout(() => {
+                        if (dialog.open)
+                            dialog.close();
+                    }, 0);
                 }
             };
             const onListClick = (event) => {
@@ -728,15 +730,19 @@ export class HomeController {
                 finalizeIfReady();
             };
             const onExit = () => {
-                if (dialog.open)
-                    dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const onCancel = (event) => {
                 event.preventDefault();
-                if (dialog.open)
-                    dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const onClose = () => {
                 resolveOnce(decisions.size === conflicts.length ? decisions : null);
@@ -861,7 +867,12 @@ export class HomeController {
         const exitBtn = document.getElementById("exitPatientConflictBtn");
         const confirmBtn = document.getElementById("confirmPatientConflictBtn");
         const autoFillBtn = document.getElementById("autoFillRequiredBtn");
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn) {
+        const procedureDialog = document.getElementById("procedurePickerDialog");
+        const procedureTitle = document.getElementById("procedurePickerTitle");
+        const procedureMessage = document.getElementById("procedurePickerMessage");
+        const procedureList = document.getElementById("procedurePickerList");
+        const closeProcedureBtn = document.getElementById("closeProcedurePickerBtn");
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureList || !closeProcedureBtn) {
             return Promise.resolve(null);
         }
         title.textContent = "Correção obrigatória de dados";
@@ -871,24 +882,51 @@ export class HomeController {
         confirmBtn.textContent = "Processar com correções";
         autoFillBtn.hidden = false;
         autoFillBtn.disabled = false;
-        autoFillBtn.textContent = "Auto processar";
+        autoFillBtn.textContent = "Auto completar";
+        const savedPatientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        const procedureSuggestions = this.collectProcedureSuggestions(savedPatientsRecords);
         list.innerHTML = issues.map((issue) => {
             const fields = issue.missingFields.map((field) => {
                 const label = this.getRequiredFieldLabel(field);
                 const value = issue.currentValues[field] ?? "";
+                if (field === "procedimentos") {
+                    return `
+                                                <label class="fh-required-field">
+                                                    <span>${this.escapeHtml(label)}</span>
+                                                    <div class="fh-required-field-row">
+                                                        <input
+                                                            class="fh-required-input"
+                                                            type="text"
+                                                            data-required-field="${field}"
+                                                            data-issue-index="${issue.blockIndex}"
+                                                            value="${this.escapeHtmlAttr(value)}"
+                                                            autocomplete="off"
+                                                            required>
+                                                        <button
+                                                            class="fh-btn fh-btn-ghost fh-required-search-btn"
+                                                            type="button"
+                                                            data-procedure-search="true"
+                                                            data-issue-index="${issue.blockIndex}"
+                                                            aria-label="Procurar procedimento salvo">
+                                                            Procurar
+                                                        </button>
+                                                    </div>
+                                                </label>
+                                        `;
+                }
                 return `
-                    <label class="fh-required-field">
-                      <span>${this.escapeHtml(label)}</span>
-                      <input
-                        class="fh-required-input"
-                        type="text"
-                        data-required-field="${field}"
-                        data-issue-index="${issue.blockIndex}"
-                        value="${this.escapeHtmlAttr(value)}"
-                        autocomplete="off"
-                        required>
-                    </label>
-                `;
+                                        <label class="fh-required-field">
+                                            <span>${this.escapeHtml(label)}</span>
+                                            <input
+                                                class="fh-required-input"
+                                                type="text"
+                                                data-required-field="${field}"
+                                                data-issue-index="${issue.blockIndex}"
+                                                value="${this.escapeHtmlAttr(value)}"
+                                                autocomplete="off"
+                                                required>
+                                        </label>
+                                `;
             }).join("");
             return `
                 <article class="fh-conflict-item fh-required-item" data-issue-index="${issue.blockIndex}">
@@ -958,18 +996,102 @@ export class HomeController {
                     return record.convenio;
                 return record.procedimentos;
             };
+            const openProcedurePicker = (issue, targetInput) => {
+                if (procedureSuggestions.length === 0) {
+                    this.showSiteNotification("Nao ha procedimentos salvos na lista de pacientes.");
+                    return Promise.resolve(null);
+                }
+                procedureTitle.textContent = issue.patientName ? `Procedimentos salvos — ${issue.patientName}` : "Procedimentos salvos";
+                procedureMessage.textContent = "Escolha um procedimento já salvo na lista de pacientes. A seleção é opcional.";
+                procedureList.innerHTML = procedureSuggestions.map((procedure) => {
+                    return `
+                        <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
+                          <span class="fh-procedure-choice-main">
+                            <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
+                            <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
+                          </span>
+                          <span class="fh-procedure-choice-meta">Opcional</span>
+                        </button>
+                    `;
+                }).join("");
+                return new Promise((resolve) => {
+                    const pickerController = new AbortController();
+                    const { signal: pickerSignal } = pickerController;
+                    let resolved = false;
+                    const cleanup = () => {
+                        pickerController.abort();
+                    };
+                    const resolveOnce = (value) => {
+                        if (resolved)
+                            return;
+                        resolved = true;
+                        cleanup();
+                        resolve(value);
+                    };
+                    const closePicker = () => {
+                        resolveOnce(null);
+                        window.setTimeout(() => {
+                            if (procedureDialog.open)
+                                procedureDialog.close();
+                        }, 0);
+                    };
+                    const onPickerClick = (event) => {
+                        const rawTarget = event.target;
+                        const targetElement = rawTarget instanceof Element
+                            ? rawTarget
+                            : rawTarget instanceof Node
+                                ? rawTarget.parentElement
+                                : null;
+                        if (!targetElement)
+                            return;
+                        const button = targetElement.closest("button[data-procedure-choice]");
+                        if (!button)
+                            return;
+                        const procedure = button.dataset.procedureChoice?.trim() ?? "";
+                        if (!procedure)
+                            return;
+                        targetInput.value = procedure;
+                        updateConfirmState();
+                        resolveOnce(procedure);
+                        window.setTimeout(() => {
+                            if (procedureDialog.open) {
+                                procedureDialog.close();
+                            }
+                        }, 0);
+                    };
+                    const onPickerCancel = (event) => {
+                        event.preventDefault();
+                        closePicker();
+                    };
+                    const onPickerClose = () => {
+                        resolveOnce(null);
+                    };
+                    const onPickerBackdropClick = (event) => {
+                        if (event.target === procedureDialog) {
+                            closePicker();
+                        }
+                    };
+                    procedureList.addEventListener("click", onPickerClick, { signal: pickerSignal });
+                    closeProcedureBtn.addEventListener("click", closePicker, { once: true, signal: pickerSignal });
+                    procedureDialog.addEventListener("cancel", onPickerCancel, { signal: pickerSignal });
+                    procedureDialog.addEventListener("close", onPickerClose, { signal: pickerSignal });
+                    procedureDialog.addEventListener("click", onPickerBackdropClick, { signal: pickerSignal });
+                    if (!procedureDialog.open) {
+                        procedureDialog.showModal();
+                    }
+                });
+            };
             const onInput = () => {
                 updateConfirmState();
             };
             const onAutoProcess = () => {
-                const records = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
-                if (records.length === 0) {
+                if (savedPatientsRecords.length === 0) {
                     this.showSiteNotification("Nao ha pacientes salvos para auto completar os campos obrigatorios.");
                     return;
                 }
                 let autoFilledCount = 0;
                 issues.forEach((issue) => {
-                    const record = findRecordForIssue(issue, records);
+                    const record = findRecordForIssue(issue, savedPatientsRecords);
                     if (!record)
                         return;
                     const issueInputs = Array.from(list.querySelectorAll(`input[data-issue-index="${issue.blockIndex}"]`));
@@ -992,6 +1114,30 @@ export class HomeController {
                 }
                 updateConfirmState();
             };
+            const onListClick = (event) => {
+                const rawTarget = event.target;
+                const targetElement = rawTarget instanceof Element
+                    ? rawTarget
+                    : rawTarget instanceof Node
+                        ? rawTarget.parentElement
+                        : null;
+                if (!targetElement)
+                    return;
+                const searchButton = targetElement.closest("button[data-procedure-search]");
+                if (searchButton) {
+                    const issueIndex = Number(searchButton.dataset.issueIndex);
+                    if (!Number.isFinite(issueIndex))
+                        return;
+                    const issue = issues.find((item) => item.blockIndex === issueIndex);
+                    if (!issue)
+                        return;
+                    const targetInput = list.querySelector(`input[data-issue-index="${issueIndex}"][data-required-field="procedimentos"]`);
+                    if (!targetInput)
+                        return;
+                    void openProcedurePicker(issue, targetInput);
+                    return;
+                }
+            };
             const onConfirm = () => {
                 if (confirmBtn.disabled)
                     return;
@@ -1007,24 +1153,31 @@ export class HomeController {
                     });
                     corrections.set(issue.blockIndex, values);
                 });
-                if (dialog.open)
-                    dialog.close();
                 resolveOnce(corrections);
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const onExit = () => {
-                if (dialog.open)
-                    dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const onCancel = (event) => {
                 event.preventDefault();
-                if (dialog.open)
-                    dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const onClose = () => {
                 resolveOnce(null);
             };
+            list.addEventListener("click", onListClick, { signal });
             list.addEventListener("input", onInput, { signal });
             confirmBtn.addEventListener("click", onConfirm, { signal });
             autoFillBtn.addEventListener("click", onAutoProcess, { signal });
@@ -1131,6 +1284,20 @@ export class HomeController {
     }
     sanitizeProcedimentosValue(value) {
         return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
+    }
+    collectProcedureSuggestions(records) {
+        const uniqueProcedures = new Map();
+        records.forEach((record) => {
+            const procedure = this.sanitizeProcedimentosValue(record.procedimentos).trim();
+            if (!procedure || procedure === "-") {
+                return;
+            }
+            const key = this.normalizeKey(procedure);
+            if (!uniqueProcedures.has(key)) {
+                uniqueProcedures.set(key, procedure);
+            }
+        });
+        return Array.from(uniqueProcedures.values()).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
     }
     extractIsoDate(value) {
         const isoMatch = value.match(/(\d{4})-(\d{2})-(\d{2})/);

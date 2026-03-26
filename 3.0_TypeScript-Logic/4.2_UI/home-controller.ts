@@ -876,8 +876,10 @@ export class HomeController {
 
             const finalizeIfReady = (): void => {
                 if (decisions.size === conflicts.length) {
-                    if (dialog.open) dialog.close();
                     resolveOnce(decisions);
+                    window.setTimeout(() => {
+                        if (dialog.open) dialog.close();
+                    }, 0);
                 }
             };
 
@@ -908,14 +910,18 @@ export class HomeController {
             };
 
             const onExit = (): void => {
-                if (dialog.open) dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const onCancel = (event: Event): void => {
                 event.preventDefault();
-                if (dialog.open) dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const onClose = (): void => {
@@ -1068,8 +1074,13 @@ export class HomeController {
         const exitBtn = document.getElementById("exitPatientConflictBtn") as HTMLButtonElement | null;
         const confirmBtn = document.getElementById("confirmPatientConflictBtn") as HTMLButtonElement | null;
         const autoFillBtn = document.getElementById("autoFillRequiredBtn") as HTMLButtonElement | null;
+        const procedureDialog = document.getElementById("procedurePickerDialog") as HTMLDialogElement | null;
+        const procedureTitle = document.getElementById("procedurePickerTitle") as HTMLElement | null;
+        const procedureMessage = document.getElementById("procedurePickerMessage") as HTMLElement | null;
+        const procedureList = document.getElementById("procedurePickerList") as HTMLElement | null;
+        const closeProcedureBtn = document.getElementById("closeProcedurePickerBtn") as HTMLButtonElement | null;
 
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureList || !closeProcedureBtn) {
             return Promise.resolve(null);
         }
 
@@ -1080,26 +1091,55 @@ export class HomeController {
         confirmBtn.textContent = "Processar com correções";
         autoFillBtn.hidden = false;
         autoFillBtn.disabled = false;
-        autoFillBtn.textContent = "Auto processar";
+        autoFillBtn.textContent = "Auto completar";
+
+        const savedPatientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        const procedureSuggestions = this.collectProcedureSuggestions(savedPatientsRecords);
 
         list.innerHTML = issues.map((issue) => {
             const fields = issue.missingFields.map((field) => {
                 const label = this.getRequiredFieldLabel(field);
                 const value = issue.currentValues[field] ?? "";
 
+                if (field === "procedimentos") {
+                    return `
+                                                <label class="fh-required-field">
+                                                    <span>${this.escapeHtml(label)}</span>
+                                                    <div class="fh-required-field-row">
+                                                        <input
+                                                            class="fh-required-input"
+                                                            type="text"
+                                                            data-required-field="${field}"
+                                                            data-issue-index="${issue.blockIndex}"
+                                                            value="${this.escapeHtmlAttr(value)}"
+                                                            autocomplete="off"
+                                                            required>
+                                                        <button
+                                                            class="fh-btn fh-btn-ghost fh-required-search-btn"
+                                                            type="button"
+                                                            data-procedure-search="true"
+                                                            data-issue-index="${issue.blockIndex}"
+                                                            aria-label="Procurar procedimento salvo">
+                                                            Procurar
+                                                        </button>
+                                                    </div>
+                                                </label>
+                                        `;
+                }
+
                 return `
-                    <label class="fh-required-field">
-                      <span>${this.escapeHtml(label)}</span>
-                      <input
-                        class="fh-required-input"
-                        type="text"
-                        data-required-field="${field}"
-                        data-issue-index="${issue.blockIndex}"
-                        value="${this.escapeHtmlAttr(value)}"
-                        autocomplete="off"
-                        required>
-                    </label>
-                `;
+                                        <label class="fh-required-field">
+                                            <span>${this.escapeHtml(label)}</span>
+                                            <input
+                                                class="fh-required-input"
+                                                type="text"
+                                                data-required-field="${field}"
+                                                data-issue-index="${issue.blockIndex}"
+                                                value="${this.escapeHtmlAttr(value)}"
+                                                autocomplete="off"
+                                                required>
+                                        </label>
+                                `;
             }).join("");
 
             return `
@@ -1178,13 +1218,110 @@ export class HomeController {
                 return record.procedimentos;
             };
 
+            const openProcedurePicker = (issue: RequiredFieldIssue, targetInput: HTMLInputElement): Promise<string | null> => {
+                if (procedureSuggestions.length === 0) {
+                    this.showSiteNotification("Nao ha procedimentos salvos na lista de pacientes.");
+                    return Promise.resolve(null);
+                }
+
+                procedureTitle.textContent = issue.patientName ? `Procedimentos salvos — ${issue.patientName}` : "Procedimentos salvos";
+                procedureMessage.textContent = "Escolha um procedimento já salvo na lista de pacientes. A seleção é opcional.";
+                procedureList.innerHTML = procedureSuggestions.map((procedure) => {
+                    return `
+                        <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
+                          <span class="fh-procedure-choice-main">
+                            <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
+                            <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
+                          </span>
+                          <span class="fh-procedure-choice-meta">Opcional</span>
+                        </button>
+                    `;
+                }).join("");
+
+                return new Promise((resolve) => {
+                    const pickerController = new AbortController();
+                    const { signal: pickerSignal } = pickerController;
+                    let resolved = false;
+
+                    const cleanup = (): void => {
+                        pickerController.abort();
+                    };
+
+                    const resolveOnce = (value: string | null): void => {
+                        if (resolved) return;
+                        resolved = true;
+                        cleanup();
+                        resolve(value);
+                    };
+
+                    const closePicker = (): void => {
+                        resolveOnce(null);
+                        window.setTimeout(() => {
+                            if (procedureDialog.open) procedureDialog.close();
+                        }, 0);
+                    };
+
+                    const onPickerClick = (event: MouseEvent): void => {
+                        const rawTarget = event.target;
+                        const targetElement = rawTarget instanceof Element
+                            ? rawTarget
+                            : rawTarget instanceof Node
+                                ? rawTarget.parentElement
+                                : null;
+
+                        if (!targetElement) return;
+
+                        const button = targetElement.closest("button[data-procedure-choice]") as HTMLButtonElement | null;
+                        if (!button) return;
+
+                        const procedure = button.dataset.procedureChoice?.trim() ?? "";
+                        if (!procedure) return;
+
+                        targetInput.value = procedure;
+                        updateConfirmState();
+
+                        resolveOnce(procedure);
+
+                        window.setTimeout(() => {
+                            if (procedureDialog.open) {
+                                procedureDialog.close();
+                            }
+                        }, 0);
+                    };
+
+                    const onPickerCancel = (event: Event): void => {
+                        event.preventDefault();
+                        closePicker();
+                    };
+
+                    const onPickerClose = (): void => {
+                        resolveOnce(null);
+                    };
+
+                    const onPickerBackdropClick = (event: MouseEvent): void => {
+                        if (event.target === procedureDialog) {
+                            closePicker();
+                        }
+                    };
+
+                    procedureList.addEventListener("click", onPickerClick, { signal: pickerSignal });
+                    closeProcedureBtn.addEventListener("click", closePicker, { once: true, signal: pickerSignal });
+                    procedureDialog.addEventListener("cancel", onPickerCancel, { signal: pickerSignal });
+                    procedureDialog.addEventListener("close", onPickerClose, { signal: pickerSignal });
+                    procedureDialog.addEventListener("click", onPickerBackdropClick, { signal: pickerSignal });
+
+                    if (!procedureDialog.open) {
+                        procedureDialog.showModal();
+                    }
+                });
+            };
+
             const onInput = (): void => {
                 updateConfirmState();
             };
 
             const onAutoProcess = (): void => {
-                const records = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
-                if (records.length === 0) {
+                if (savedPatientsRecords.length === 0) {
                     this.showSiteNotification("Nao ha pacientes salvos para auto completar os campos obrigatorios.");
                     return;
                 }
@@ -1192,7 +1329,7 @@ export class HomeController {
                 let autoFilledCount = 0;
 
                 issues.forEach((issue) => {
-                    const record = findRecordForIssue(issue, records);
+                    const record = findRecordForIssue(issue, savedPatientsRecords);
                     if (!record) return;
 
                     const issueInputs = Array.from(list.querySelectorAll(`input[data-issue-index="${issue.blockIndex}"]`)) as HTMLInputElement[];
@@ -1217,6 +1354,32 @@ export class HomeController {
                 updateConfirmState();
             };
 
+            const onListClick = (event: MouseEvent): void => {
+                const rawTarget = event.target;
+                const targetElement = rawTarget instanceof Element
+                    ? rawTarget
+                    : rawTarget instanceof Node
+                        ? rawTarget.parentElement
+                        : null;
+
+                if (!targetElement) return;
+
+                const searchButton = targetElement.closest("button[data-procedure-search]") as HTMLButtonElement | null;
+                if (searchButton) {
+                    const issueIndex = Number(searchButton.dataset.issueIndex);
+                    if (!Number.isFinite(issueIndex)) return;
+
+                    const issue = issues.find((item) => item.blockIndex === issueIndex);
+                    if (!issue) return;
+
+                    const targetInput = list.querySelector(`input[data-issue-index="${issueIndex}"][data-required-field="procedimentos"]`) as HTMLInputElement | null;
+                    if (!targetInput) return;
+
+                    void openProcedurePicker(issue, targetInput);
+                    return;
+                }
+            };
+
             const onConfirm = (): void => {
                 if (confirmBtn.disabled) return;
 
@@ -1235,25 +1398,32 @@ export class HomeController {
                     corrections.set(issue.blockIndex, values);
                 });
 
-                if (dialog.open) dialog.close();
                 resolveOnce(corrections);
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const onExit = (): void => {
-                if (dialog.open) dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const onCancel = (event: Event): void => {
                 event.preventDefault();
-                if (dialog.open) dialog.close();
                 resolveOnce(null);
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const onClose = (): void => {
                 resolveOnce(null);
             };
 
+            list.addEventListener("click", onListClick, { signal });
             list.addEventListener("input", onInput, { signal });
             confirmBtn.addEventListener("click", onConfirm, { signal });
             autoFillBtn.addEventListener("click", onAutoProcess, { signal });
@@ -1384,6 +1554,24 @@ export class HomeController {
 
     private sanitizeProcedimentosValue(value: string): string {
         return value.replace(/\s*observa[cç][oõ]es\s*:[\s\S]*$/i, "").trim();
+    }
+
+    private collectProcedureSuggestions(records: PatientRecord[]): string[] {
+        const uniqueProcedures = new Map<string, string>();
+
+        records.forEach((record) => {
+            const procedure = this.sanitizeProcedimentosValue(record.procedimentos).trim();
+            if (!procedure || procedure === "-") {
+                return;
+            }
+
+            const key = this.normalizeKey(procedure);
+            if (!uniqueProcedures.has(key)) {
+                uniqueProcedures.set(key, procedure);
+            }
+        });
+
+        return Array.from(uniqueProcedures.values()).sort((a, b) => a.localeCompare(b, "pt-BR", { sensitivity: "base" }));
     }
 
     private extractIsoDate(value: string): string | null {
