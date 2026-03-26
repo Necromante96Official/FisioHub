@@ -1,0 +1,61 @@
+{
+  "name": "Zenfisio Presence Notifier",
+  "description": "Monitora mudancas de status na agenda da Zenfisio e envia mensagem no Google Chat com maior precisao.",
+  "version": "0.3.3",
+  "manifest_version": 3,
+  "author": "Necromante96Official",
+  "permissions": ["tabs", "storage", "scripting"],
+  "host_permissions": [
+    "https://app.zenfisio.com/*",
+    "https://mail.google.com/*",
+    "https://chat.google.com/*"
+  ],
+  "background": {
+    "service_worker": "dist/2.0_background/index.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Zenfisio Presence Notifier",
+    "default_popup": "src/4.0_ui/popup.html"
+  },
+  "commands": {
+    "toggle-extension": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Z",
+        "mac": "Command+Shift+Z"
+      },
+      "description": "Ativar ou desativar o monitoramento da Zenfisio"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://app.zenfisio.com/calendar*"],
+      "js": ["dist/3.0_content/3.1_zenfisio/loader.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://mail.google.com/*",
+        "https://chat.google.com/*"
+      ],
+      "js": ["dist/3.0_content/3.2_googleChat/loader.js"],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "dist/1.0_shared/*.js",
+        "dist/3.0_content/3.1_zenfisio/*.js",
+        "dist/3.0_content/3.2_googleChat/*.js"
+      ],
+      "matches": [
+        "https://app.zenfisio.com/*",
+        "https://mail.google.com/*",
+        "https://chat.google.com/*"
+      ]
+    }
+  ]
+}

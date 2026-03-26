@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zenfisio Notifier 0.3.3</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="panel">
+      <header class="panel-head">
+        <h1>Zenfisio Notifier</h1>
+        <p class="version">Release 0.3.3</p>
+      </header>
+
+      <section class="controls">
+        <button id="toggleBtn" class="btn primary" type="button">Carregando estado...</button>
+        <button id="clearBtn" class="btn danger" type="button">Limpar historico</button>
+      </section>
+
+      <section>
+        <h2>Historico de envios</h2>
+        <div id="list" class="list">Carregando...</div>
+      </section>
+    </main>
+
+    <script type="module" src="../../dist/4.0_ui/popup.js"></script>
+  </body>
+</html>

@@ -671,6 +671,7 @@ export class HomeController {
         return new Promise((resolve) => {
             const decisions = new Map();
             let resolved = false;
+            let pendingResult;
             const eventsController = new AbortController();
             const { signal } = eventsController;
             const cleanup = () => {
@@ -682,6 +683,12 @@ export class HomeController {
                 resolved = true;
                 cleanup();
                 resolve(value);
+            };
+            const closeDialogAsync = () => {
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const updateProgress = () => {
                 const doneCount = conflicts.length - Array.from(list.querySelectorAll(".fh-conflict-item:not([data-choice])")).length;
@@ -698,11 +705,8 @@ export class HomeController {
             };
             const finalizeIfReady = () => {
                 if (decisions.size === conflicts.length) {
-                    resolveOnce(decisions);
-                    window.setTimeout(() => {
-                        if (dialog.open)
-                            dialog.close();
-                    }, 0);
+                    pendingResult = decisions;
+                    closeDialogAsync();
                 }
             };
             const onListClick = (event) => {
@@ -730,22 +734,16 @@ export class HomeController {
                 finalizeIfReady();
             };
             const onExit = () => {
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open)
-                        dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
             const onCancel = (event) => {
                 event.preventDefault();
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open)
-                        dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
             const onClose = () => {
-                resolveOnce(decisions.size === conflicts.length ? decisions : null);
+                resolveOnce(pendingResult ?? null);
             };
             list.addEventListener("click", onListClick, { signal });
             exitBtn.addEventListener("click", onExit, { once: true, signal });
@@ -870,9 +868,11 @@ export class HomeController {
         const procedureDialog = document.getElementById("procedurePickerDialog");
         const procedureTitle = document.getElementById("procedurePickerTitle");
         const procedureMessage = document.getElementById("procedurePickerMessage");
+        const procedureSearch = document.getElementById("procedurePickerSearch");
+        const procedureCount = document.getElementById("procedurePickerCount");
         const procedureList = document.getElementById("procedurePickerList");
         const closeProcedureBtn = document.getElementById("closeProcedurePickerBtn");
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureList || !closeProcedureBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureSearch || !procedureCount || !procedureList || !closeProcedureBtn) {
             return Promise.resolve(null);
         }
         title.textContent = "Correção obrigatória de dados";
@@ -947,6 +947,7 @@ export class HomeController {
         return new Promise((resolve) => {
             const corrections = new Map();
             let resolved = false;
+            let pendingResult;
             const eventsController = new AbortController();
             const { signal } = eventsController;
             const cleanup = () => {
@@ -958,6 +959,12 @@ export class HomeController {
                 resolved = true;
                 cleanup();
                 resolve(value);
+            };
+            const closeDialogAsync = () => {
+                window.setTimeout(() => {
+                    if (dialog.open)
+                        dialog.close();
+                }, 0);
             };
             const allInputs = () => {
                 return Array.from(list.querySelectorAll("input[data-required-field]"));
@@ -1003,17 +1010,6 @@ export class HomeController {
                 }
                 procedureTitle.textContent = issue.patientName ? `Procedimentos salvos — ${issue.patientName}` : "Procedimentos salvos";
                 procedureMessage.textContent = "Escolha um procedimento já salvo na lista de pacientes. A seleção é opcional.";
-                procedureList.innerHTML = procedureSuggestions.map((procedure) => {
-                    return `
-                        <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
-                          <span class="fh-procedure-choice-main">
-                            <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
-                            <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
-                          </span>
-                          <span class="fh-procedure-choice-meta">Opcional</span>
-                        </button>
-                    `;
-                }).join("");
                 return new Promise((resolve) => {
                     const pickerController = new AbortController();
                     const { signal: pickerSignal } = pickerController;
@@ -1027,6 +1023,33 @@ export class HomeController {
                         resolved = true;
                         cleanup();
                         resolve(value);
+                    };
+                    const formatProcedureCount = (count) => {
+                        return count === 1 ? "1 procedimento encontrado" : `${count} procedimentos encontrados`;
+                    };
+                    const renderProcedureList = () => {
+                        const search = this.normalizeKey(procedureSearch.value);
+                        const visibleProcedures = search.length === 0
+                            ? procedureSuggestions
+                            : procedureSuggestions.filter((procedure) => this.normalizeKey(procedure).includes(search));
+                        procedureCount.textContent = search.length === 0
+                            ? `${procedureSuggestions.length} procedimento(s) salvo(s)`
+                            : formatProcedureCount(visibleProcedures.length);
+                        if (visibleProcedures.length === 0) {
+                            procedureList.innerHTML = '<p class="fh-procedure-empty">Nenhum procedimento encontrado para essa busca.</p>';
+                            return;
+                        }
+                        procedureList.innerHTML = visibleProcedures.map((procedure) => {
+                            return `
+                                <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
+                                  <span class="fh-procedure-choice-main">
+                                    <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
+                                    <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
+                                  </span>
+                                  <span class="fh-procedure-choice-meta">Opcional</span>
+                                </button>
+                            `;
+                        }).join("");
                     };
                     const closePicker = () => {
                         resolveOnce(null);
@@ -1059,6 +1082,9 @@ export class HomeController {
                             }
                         }, 0);
                     };
+                    const onPickerSearch = () => {
+                        renderProcedureList();
+                    };
                     const onPickerCancel = (event) => {
                         event.preventDefault();
                         closePicker();
@@ -1072,13 +1098,20 @@ export class HomeController {
                         }
                     };
                     procedureList.addEventListener("click", onPickerClick, { signal: pickerSignal });
+                    procedureSearch.addEventListener("input", onPickerSearch, { signal: pickerSignal });
                     closeProcedureBtn.addEventListener("click", closePicker, { once: true, signal: pickerSignal });
                     procedureDialog.addEventListener("cancel", onPickerCancel, { signal: pickerSignal });
                     procedureDialog.addEventListener("close", onPickerClose, { signal: pickerSignal });
                     procedureDialog.addEventListener("click", onPickerBackdropClick, { signal: pickerSignal });
+                    procedureSearch.value = "";
+                    renderProcedureList();
                     if (!procedureDialog.open) {
                         procedureDialog.showModal();
                     }
+                    window.setTimeout(() => {
+                        procedureSearch.focus();
+                        procedureSearch.select();
+                    }, 0);
                 });
             };
             const onInput = () => {
@@ -1153,29 +1186,20 @@ export class HomeController {
                     });
                     corrections.set(issue.blockIndex, values);
                 });
-                resolveOnce(corrections);
-                window.setTimeout(() => {
-                    if (dialog.open)
-                        dialog.close();
-                }, 0);
+                pendingResult = corrections;
+                closeDialogAsync();
             };
             const onExit = () => {
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open)
-                        dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
             const onCancel = (event) => {
                 event.preventDefault();
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open)
-                        dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
             const onClose = () => {
-                resolveOnce(null);
+                resolveOnce(pendingResult ?? null);
             };
             list.addEventListener("click", onListClick, { signal });
             list.addEventListener("input", onInput, { signal });

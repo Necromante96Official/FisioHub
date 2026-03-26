@@ -845,6 +845,7 @@ export class HomeController {
         return new Promise((resolve) => {
             const decisions = new Map<number, ConflictChoice>();
             let resolved = false;
+            let pendingResult: Map<number, ConflictChoice> | null | undefined;
             const eventsController = new AbortController();
             const { signal } = eventsController;
 
@@ -857,6 +858,12 @@ export class HomeController {
                 resolved = true;
                 cleanup();
                 resolve(value);
+            };
+
+            const closeDialogAsync = (): void => {
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const updateProgress = (): void => {
@@ -876,10 +883,8 @@ export class HomeController {
 
             const finalizeIfReady = (): void => {
                 if (decisions.size === conflicts.length) {
-                    resolveOnce(decisions);
-                    window.setTimeout(() => {
-                        if (dialog.open) dialog.close();
-                    }, 0);
+                    pendingResult = decisions;
+                    closeDialogAsync();
                 }
             };
 
@@ -910,22 +915,18 @@ export class HomeController {
             };
 
             const onExit = (): void => {
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open) dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
 
             const onCancel = (event: Event): void => {
                 event.preventDefault();
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open) dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
 
             const onClose = (): void => {
-                resolveOnce(decisions.size === conflicts.length ? decisions : null);
+                resolveOnce(pendingResult ?? null);
             };
 
             list.addEventListener("click", onListClick, { signal });
@@ -1077,10 +1078,12 @@ export class HomeController {
         const procedureDialog = document.getElementById("procedurePickerDialog") as HTMLDialogElement | null;
         const procedureTitle = document.getElementById("procedurePickerTitle") as HTMLElement | null;
         const procedureMessage = document.getElementById("procedurePickerMessage") as HTMLElement | null;
+        const procedureSearch = document.getElementById("procedurePickerSearch") as HTMLInputElement | null;
+        const procedureCount = document.getElementById("procedurePickerCount") as HTMLElement | null;
         const procedureList = document.getElementById("procedurePickerList") as HTMLElement | null;
         const closeProcedureBtn = document.getElementById("closeProcedurePickerBtn") as HTMLButtonElement | null;
 
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureList || !closeProcedureBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureSearch || !procedureCount || !procedureList || !closeProcedureBtn) {
             return Promise.resolve(null);
         }
 
@@ -1162,6 +1165,7 @@ export class HomeController {
         return new Promise((resolve) => {
             const corrections = new Map<number, Partial<Record<RequiredFieldKey, string>>>();
             let resolved = false;
+            let pendingResult: Map<number, Partial<Record<RequiredFieldKey, string>>> | null | undefined;
             const eventsController = new AbortController();
             const { signal } = eventsController;
 
@@ -1174,6 +1178,12 @@ export class HomeController {
                 resolved = true;
                 cleanup();
                 resolve(value);
+            };
+
+            const closeDialogAsync = (): void => {
+                window.setTimeout(() => {
+                    if (dialog.open) dialog.close();
+                }, 0);
             };
 
             const allInputs = (): HTMLInputElement[] => {
@@ -1226,17 +1236,6 @@ export class HomeController {
 
                 procedureTitle.textContent = issue.patientName ? `Procedimentos salvos — ${issue.patientName}` : "Procedimentos salvos";
                 procedureMessage.textContent = "Escolha um procedimento já salvo na lista de pacientes. A seleção é opcional.";
-                procedureList.innerHTML = procedureSuggestions.map((procedure) => {
-                    return `
-                        <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
-                          <span class="fh-procedure-choice-main">
-                            <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
-                            <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
-                          </span>
-                          <span class="fh-procedure-choice-meta">Opcional</span>
-                        </button>
-                    `;
-                }).join("");
 
                 return new Promise((resolve) => {
                     const pickerController = new AbortController();
@@ -1252,6 +1251,38 @@ export class HomeController {
                         resolved = true;
                         cleanup();
                         resolve(value);
+                    };
+
+                    const formatProcedureCount = (count: number): string => {
+                        return count === 1 ? "1 procedimento encontrado" : `${count} procedimentos encontrados`;
+                    };
+
+                    const renderProcedureList = (): void => {
+                        const search = this.normalizeKey(procedureSearch.value);
+                        const visibleProcedures = search.length === 0
+                            ? procedureSuggestions
+                            : procedureSuggestions.filter((procedure) => this.normalizeKey(procedure).includes(search));
+
+                        procedureCount.textContent = search.length === 0
+                            ? `${procedureSuggestions.length} procedimento(s) salvo(s)`
+                            : formatProcedureCount(visibleProcedures.length);
+
+                        if (visibleProcedures.length === 0) {
+                            procedureList.innerHTML = '<p class="fh-procedure-empty">Nenhum procedimento encontrado para essa busca.</p>';
+                            return;
+                        }
+
+                        procedureList.innerHTML = visibleProcedures.map((procedure) => {
+                            return `
+                                <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
+                                  <span class="fh-procedure-choice-main">
+                                    <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
+                                    <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
+                                  </span>
+                                  <span class="fh-procedure-choice-meta">Opcional</span>
+                                </button>
+                            `;
+                        }).join("");
                     };
 
                     const closePicker = (): void => {
@@ -1289,6 +1320,10 @@ export class HomeController {
                         }, 0);
                     };
 
+                    const onPickerSearch = (): void => {
+                        renderProcedureList();
+                    };
+
                     const onPickerCancel = (event: Event): void => {
                         event.preventDefault();
                         closePicker();
@@ -1305,14 +1340,23 @@ export class HomeController {
                     };
 
                     procedureList.addEventListener("click", onPickerClick, { signal: pickerSignal });
+                    procedureSearch.addEventListener("input", onPickerSearch, { signal: pickerSignal });
                     closeProcedureBtn.addEventListener("click", closePicker, { once: true, signal: pickerSignal });
                     procedureDialog.addEventListener("cancel", onPickerCancel, { signal: pickerSignal });
                     procedureDialog.addEventListener("close", onPickerClose, { signal: pickerSignal });
                     procedureDialog.addEventListener("click", onPickerBackdropClick, { signal: pickerSignal });
 
+                    procedureSearch.value = "";
+                    renderProcedureList();
+
                     if (!procedureDialog.open) {
                         procedureDialog.showModal();
                     }
+
+                    window.setTimeout(() => {
+                        procedureSearch.focus();
+                        procedureSearch.select();
+                    }, 0);
                 });
             };
 
@@ -1398,29 +1442,23 @@ export class HomeController {
                     corrections.set(issue.blockIndex, values);
                 });
 
-                resolveOnce(corrections);
-                window.setTimeout(() => {
-                    if (dialog.open) dialog.close();
-                }, 0);
+                pendingResult = corrections;
+                closeDialogAsync();
             };
 
             const onExit = (): void => {
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open) dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
 
             const onCancel = (event: Event): void => {
                 event.preventDefault();
-                resolveOnce(null);
-                window.setTimeout(() => {
-                    if (dialog.open) dialog.close();
-                }, 0);
+                pendingResult = null;
+                closeDialogAsync();
             };
 
             const onClose = (): void => {
-                resolveOnce(null);
+                resolveOnce(pendingResult ?? null);
             };
 
             list.addEventListener("click", onListClick, { signal });

@@ -1,0 +1,111 @@
+:root {
+  --bg: #f6f7fb;
+  --card: #ffffff;
+  --text: #1e2330;
+  --muted: #61697d;
+  --line: #e5e7ee;
+  --primary: #1767d3;
+  --danger: #b62828;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", Arial, sans-serif;
+  width: 390px;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.panel-head h1 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.version {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--primary);
+}
+
+.btn.danger {
+  background: var(--danger);
+}
+
+h2 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.list {
+  margin-top: 8px;
+  border-top: 1px solid var(--line);
+  max-height: 340px;
+  overflow: auto;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 8px 0;
+}
+
+.item strong {
+  display: block;
+  font-size: 12px;
+}
+
+.item .meta {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.mini {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 11px;
+  background: #fff;
+  cursor: pointer;
+}
