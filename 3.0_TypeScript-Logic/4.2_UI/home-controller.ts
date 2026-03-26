@@ -50,13 +50,15 @@ type PatientConflict = {
 
 type ConflictChoice = "existing" | "incoming";
 
-type RequiredFieldKey = "horario" | "paciente" | "celular" | "convenio" | "status" | "procedimentos";
+type RequiredFieldKey = "convenio" | "procedimentos";
 
 type RequiredFieldIssue = {
     blockIndex: number;
     patientName: string;
     missingFields: RequiredFieldKey[];
     currentValues: Partial<Record<RequiredFieldKey, string>>;
+    lookupName: string;
+    lookupPhone: string;
 };
 
 export class HomeController {
@@ -972,22 +974,14 @@ export class HomeController {
     private normalizeRequiredFieldKey(value: string): RequiredFieldKey | null {
         const normalized = this.normalizeKey(value);
 
-        if (normalized === "horario") return "horario";
-        if (normalized === "paciente") return "paciente";
-        if (normalized === "celular") return "celular";
         if (normalized === "convenio") return "convenio";
-        if (normalized === "status" || normalized === "situacao") return "status";
         if (normalized === "procedimentos" || normalized === "procedimento") return "procedimentos";
 
         return null;
     }
 
     private getRequiredFieldLabel(field: RequiredFieldKey): string {
-        if (field === "horario") return "Horário";
-        if (field === "paciente") return "Paciente";
-        if (field === "celular") return "Celular";
         if (field === "convenio") return "Convênio";
-        if (field === "status") return "Status";
         return "Procedimentos";
     }
 
@@ -1020,17 +1014,29 @@ export class HomeController {
     }
 
     private collectRequiredFieldIssues(lines: string[]): RequiredFieldIssue[] {
-        const requiredFields: RequiredFieldKey[] = ["horario", "paciente", "celular", "convenio", "status", "procedimentos"];
+        const requiredFields: RequiredFieldKey[] = ["convenio", "procedimentos"];
         const blocks = this.splitImportedLinesByAppointment(lines);
 
         return blocks
             .map((block, blockIndex) => {
                 const values: Partial<Record<RequiredFieldKey, string>> = {};
+                let lookupName = "";
+                let lookupPhone = "";
 
                 block.forEach((line) => {
                     const entries = this.parseFieldEntriesFromLine(line);
                     entries.forEach(([label, rawValue]) => {
+                        const normalizedLabel = this.normalizeKey(label);
                         const key = this.normalizeRequiredFieldKey(label);
+
+                        if (normalizedLabel === "paciente" && !this.isMissingRequiredValue(rawValue)) {
+                            lookupName = rawValue;
+                        }
+
+                        if (normalizedLabel === "celular" && !this.isMissingRequiredValue(rawValue)) {
+                            lookupPhone = rawValue;
+                        }
+
                         if (!key || this.isMissingRequiredValue(rawValue)) return;
 
                         values[key] = rawValue;
@@ -1038,15 +1044,17 @@ export class HomeController {
                 });
 
                 const missingFields = requiredFields.filter((field) => this.isMissingRequiredValue(values[field]));
-                const patientName = this.isMissingRequiredValue(values.paciente)
+                const patientName = this.isMissingRequiredValue(lookupName)
                     ? `Registro ${blockIndex + 1}`
-                    : values.paciente as string;
+                    : lookupName;
 
                 return {
                     blockIndex,
                     patientName,
                     missingFields,
-                    currentValues: values
+                    currentValues: values,
+                    lookupName,
+                    lookupPhone
                 };
             })
             .filter((issue) => issue.missingFields.length > 0);
@@ -1138,8 +1146,8 @@ export class HomeController {
             };
 
             const findRecordForIssue = (issue: RequiredFieldIssue, records: PatientRecord[]): PatientRecord | null => {
-                const patientName = (issue.currentValues.paciente ?? "").trim();
-                const patientPhone = (issue.currentValues.celular ?? "").replace(/\D/g, "");
+                const patientName = issue.lookupName.trim();
+                const patientPhone = issue.lookupPhone.replace(/\D/g, "");
 
                 if (patientName.length > 0 && patientPhone.length > 0) {
                     const normalizedName = this.normalizeKey(patientName);
@@ -1166,11 +1174,7 @@ export class HomeController {
             };
 
             const getRecordValueByField = (record: PatientRecord, field: RequiredFieldKey): string => {
-                if (field === "horario") return record.horario;
-                if (field === "paciente") return record.nome;
-                if (field === "celular") return record.celular;
                 if (field === "convenio") return record.convenio;
-                if (field === "status") return record.statusFinanceiro;
                 return record.procedimentos;
             };
 
