@@ -35,7 +35,7 @@ const renderHistory = (items: HistoryEntry[]): void => {
     row.className = "item";
 
     const info = document.createElement("div");
-    const statusLabel = item.statusKind === "confirmed" ? "Chegou" : "Desmarcacao";
+    const statusLabel = item.statusKind === "confirmed" ? "✅ Chegou" : "❌ DESMARCAÇÃO";
     info.innerHTML = `<strong>${item.patientName}</strong><div class="meta">${item.dateKey} - ${statusLabel}</div>`;
 
     const actions = document.createElement("div");

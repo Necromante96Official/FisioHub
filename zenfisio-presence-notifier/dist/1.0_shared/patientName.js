@@ -101,9 +101,25 @@ export const extractPatientNameFromText = (text) => {
     if (!text) {
         return null;
     }
-    const byLabel = text.match(/paciente\s*[:\-]\s*([^\n\r]+)/i);
-    if (byLabel?.[1]) {
-        const candidate = sanitizePatientName(byLabel[1]);
+    const patterns = [
+        /paciente\s*[:\-]?\s*([^\n\r|]+)/i,
+        /nome\s*[:\-]?\s*([^\n\r|]+)/i,
+        /patient\s*[:\-]?\s*([^\n\r|]+)/i
+    ];
+    for (const pattern of patterns) {
+        const match = text.match(pattern);
+        if (match?.[1]) {
+            const candidate = sanitizePatientName(match[1]);
+            if (isLikelyValidPatientName(candidate)) {
+                return candidate;
+            }
+        }
+    }
+    const looseLine = text.split(/\n+/).find(line => /paciente|nome|patient/i.test(line));
+    if (looseLine) {
+        const pieces = looseLine.split(/[:\-]/);
+        const tail = pieces.length > 1 ? pieces.slice(1).join("-") : looseLine.replace(/^(paciente|nome|patient)\s*/i, "");
+        const candidate = sanitizePatientName(tail);
         if (isLikelyValidPatientName(candidate)) {
             return candidate;
         }

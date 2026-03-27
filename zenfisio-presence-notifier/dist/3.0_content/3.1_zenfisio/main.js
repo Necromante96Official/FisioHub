@@ -2,6 +2,7 @@ import { STORAGE_KEYS } from "../../1.0_shared/constants.js";
 import { initExtensionState, onStateChange, toggleExtensionState } from "./extensionState.js";
 import { clearHistoryFromBackground } from "./messaging.js";
 import { showToast } from "./notifications.js";
+import { initNetworkMonitor } from "./networkMonitor.js";
 import { initStatusMonitor } from "./statusMonitor.js";
 const DEFAULT_POSITION = {
     left: 20,
@@ -640,6 +641,7 @@ const registerKeyboardShortcut = () => {
 };
 const bootstrap = async () => {
     await initExtensionState();
+    initNetworkMonitor();
     await createFloatingStateCard();
     registerKeyboardShortcut();
     initStatusMonitor();

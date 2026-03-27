@@ -45,6 +45,6 @@ export const CHAT_URL_PATTERNS = [
 ] as const;
 
 export const STATUS_MESSAGE_PREFIX: Record<StatusKind, string> = {
-  confirmed: "Chegou",
-  cancelled: "Desmarcação"
+  confirmed: "✅ Chegou",
+  cancelled: "❌ DESMARCAÇÃO"
 };

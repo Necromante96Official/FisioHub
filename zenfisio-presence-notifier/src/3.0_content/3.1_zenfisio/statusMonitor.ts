@@ -8,6 +8,7 @@ import { isExtensionEnabled } from "./extensionState.js";
 import { requestStatusConfirmation } from "./confirmationPrompt.js";
 import { sendStatusEvent } from "./messaging.js";
 import { showToast } from "./notifications.js";
+import { getCachedNetworkPatientName } from "./networkPatientCache.js";
 import { resolvePatientNameFromStatusSelect } from "./patientResolver.js";
 
 const confirmedSet = new Set<string>([
@@ -22,6 +23,7 @@ const cancelledSet = new Set<string>([
 ]);
 
 const previousValueBySelect = new WeakMap<HTMLSelectElement, string>();
+const patientNameBySelect = new WeakMap<HTMLSelectElement, string>();
 
 const getSelectedLabel = (select: HTMLSelectElement): string => {
   const option = select.options[select.selectedIndex];
@@ -66,6 +68,64 @@ const resolvePatientNameFromContext = (target: HTMLElement): string | null => {
   return null;
 };
 
+const resolvePatientNameNow = (
+  select: HTMLSelectElement | null,
+  target: HTMLElement
+): string | null => {
+  const cachedPatientName = select ? patientNameBySelect.get(select) : null;
+  const fromNetwork = getCachedNetworkPatientName();
+  const fromSelect = select ? resolvePatientNameFromStatusSelect(select) : null;
+  const fromContext = resolvePatientNameFromContext(target);
+  const patientName = cachedPatientName || fromNetwork || fromSelect || fromContext;
+
+  if (patientName && select) {
+    patientNameBySelect.set(select, patientName);
+  }
+
+  return patientName;
+};
+
+const resolvePatientNameWithObserver = async (
+  select: HTMLSelectElement | null,
+  target: HTMLElement
+): Promise<string | null> => {
+  const immediate = resolvePatientNameNow(select, target);
+  if (immediate) {
+    return immediate;
+  }
+
+  const root = document.body || document.documentElement;
+  if (!root) {
+    return null;
+  }
+
+  return new Promise(resolve => {
+    const timeoutId = window.setTimeout(() => {
+      cleanup();
+      resolve(resolvePatientNameNow(select, target));
+    }, 2500);
+
+    const observer = new MutationObserver(() => {
+      const patientName = resolvePatientNameNow(select, target);
+      if (patientName) {
+        cleanup();
+        resolve(patientName);
+      }
+    });
+
+    const cleanup = (): void => {
+      observer.disconnect();
+      window.clearTimeout(timeoutId);
+    };
+
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  });
+};
+
 const isStatusSelect = (select: HTMLSelectElement): boolean => {
   const normalizedOptions = Array.from(select.options).map(option => option.textContent || "");
   const knownCount = normalizedOptions.filter(value => isKnownZenfisioStatusLabel(value)).length;
@@ -94,6 +154,11 @@ const rememberCurrentSelectValue = (event: Event): void => {
   }
 
   previousValueBySelect.set(select, normalizeText(getSelectedLabel(select)));
+
+  const patientName = resolvePatientNameFromStatusSelect(select) || resolvePatientNameFromContext(select);
+  if (patientName) {
+    patientNameBySelect.set(select, patientName);
+  }
 };
 
 const handleSelectChange = async (event: Event): Promise<void> => {
@@ -132,7 +197,7 @@ const handleSelectChange = async (event: Event): Promise<void> => {
     return;
   }
 
-  const patientName = resolvePatientNameFromStatusSelect(target) || resolvePatientNameFromContext(target);
+  const patientName = await resolvePatientNameWithObserver(target, target);
   if (!patientName) {
     showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
     return;
@@ -216,7 +281,8 @@ const handleClickTrigger = async (event: MouseEvent): Promise<void> => {
     return;
   }
 
-  const patientName = resolvePatientNameFromContext(target);
+  const select = target.closest("select");
+  const patientName = await resolvePatientNameWithObserver(select instanceof HTMLSelectElement ? select : null, target);
   if (!patientName) {
     showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
     return;

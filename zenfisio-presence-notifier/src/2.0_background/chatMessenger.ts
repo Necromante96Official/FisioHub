@@ -49,6 +49,9 @@ const ensureChatTab = async (): Promise<chrome.tabs.Tab> => {
     try {
       const existing = await getTab(chatTabId);
       if (isKnownChatUrl(existing.url)) {
+        if (existing.status !== "complete" && typeof existing.id === "number") {
+          await waitForTabComplete(existing.id);
+        }
         return existing;
       }
     } catch {
@@ -60,6 +63,9 @@ const ensureChatTab = async (): Promise<chrome.tabs.Tab> => {
   const openedTabs = await queryTabs({ url: Array.from(CHAT_URL_PATTERNS) });
   const reusable = openedTabs.find(tab => typeof tab.id === "number");
   if (reusable?.id) {
+    if (reusable.status !== "complete") {
+      await waitForTabComplete(reusable.id);
+    }
     await persistChatTabId(reusable.id);
     return reusable;
   }

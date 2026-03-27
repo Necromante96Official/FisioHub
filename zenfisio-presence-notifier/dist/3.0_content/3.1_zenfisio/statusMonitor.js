@@ -7,6 +7,7 @@ import { isExtensionEnabled } from "./extensionState.js";
 import { requestStatusConfirmation } from "./confirmationPrompt.js";
 import { sendStatusEvent } from "./messaging.js";
 import { showToast } from "./notifications.js";
+import { getCachedNetworkPatientName } from "./networkPatientCache.js";
 import { resolvePatientNameFromStatusSelect } from "./patientResolver.js";
 const confirmedSet = new Set([
     normalizeText(STATUS_LABELS.CONFIRMED),
@@ -18,6 +19,7 @@ const cancelledSet = new Set([
     "nao atendido sem cobranca"
 ]);
 const previousValueBySelect = new WeakMap();
+const patientNameBySelect = new WeakMap();
 const getSelectedLabel = (select) => {
     const option = select.options[select.selectedIndex];
     return (option?.textContent || "").trim();
@@ -54,6 +56,49 @@ const resolvePatientNameFromContext = (target) => {
     }
     return null;
 };
+const resolvePatientNameNow = (select, target) => {
+    const cachedPatientName = select ? patientNameBySelect.get(select) : null;
+    const fromNetwork = getCachedNetworkPatientName();
+    const fromSelect = select ? resolvePatientNameFromStatusSelect(select) : null;
+    const fromContext = resolvePatientNameFromContext(target);
+    const patientName = cachedPatientName || fromNetwork || fromSelect || fromContext;
+    if (patientName && select) {
+        patientNameBySelect.set(select, patientName);
+    }
+    return patientName;
+};
+const resolvePatientNameWithObserver = async (select, target) => {
+    const immediate = resolvePatientNameNow(select, target);
+    if (immediate) {
+        return immediate;
+    }
+    const root = document.body || document.documentElement;
+    if (!root) {
+        return null;
+    }
+    return new Promise(resolve => {
+        const timeoutId = window.setTimeout(() => {
+            cleanup();
+            resolve(resolvePatientNameNow(select, target));
+        }, 2500);
+        const observer = new MutationObserver(() => {
+            const patientName = resolvePatientNameNow(select, target);
+            if (patientName) {
+                cleanup();
+                resolve(patientName);
+            }
+        });
+        const cleanup = () => {
+            observer.disconnect();
+            window.clearTimeout(timeoutId);
+        };
+        observer.observe(root, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+    });
+};
 const isStatusSelect = (select) => {
     const normalizedOptions = Array.from(select.options).map(option => option.textContent || "");
     const knownCount = normalizedOptions.filter(value => isKnownZenfisioStatusLabel(value)).length;
@@ -75,6 +120,10 @@ const rememberCurrentSelectValue = (event) => {
         return;
     }
     previousValueBySelect.set(select, normalizeText(getSelectedLabel(select)));
+    const patientName = resolvePatientNameFromStatusSelect(select) || resolvePatientNameFromContext(select);
+    if (patientName) {
+        patientNameBySelect.set(select, patientName);
+    }
 };
 const handleSelectChange = async (event) => {
     if (!event.isTrusted) {
@@ -104,7 +153,7 @@ const handleSelectChange = async (event) => {
         showToast("Extensao desativada. Ative no card ou com Ctrl+Shift+Z.", "warn");
         return;
     }
-    const patientName = resolvePatientNameFromStatusSelect(target) || resolvePatientNameFromContext(target);
+    const patientName = await resolvePatientNameWithObserver(target, target);
     if (!patientName) {
         showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
         return;
@@ -173,7 +222,8 @@ const handleClickTrigger = async (event) => {
     if (!statusKind) {
         return;
     }
-    const patientName = resolvePatientNameFromContext(target);
+    const select = target.closest("select");
+    const patientName = await resolvePatientNameWithObserver(select instanceof HTMLSelectElement ? select : null, target);
     if (!patientName) {
         showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
         return;

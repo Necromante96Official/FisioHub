@@ -102,7 +102,24 @@ const readFromScopeText = (scope: HTMLElement): string | null => {
     return null;
   }
 
-  return toCandidate(text);
+  const directCandidate = toCandidate(text);
+  if (directCandidate) {
+    return directCandidate;
+  }
+
+  const segments = text
+    .split(/[\n\r|•·]+/)
+    .map(segment => segment.trim())
+    .filter(Boolean);
+
+  for (const segment of segments) {
+    const candidate = toCandidate(segment);
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  return null;
 };
 
 const readFromDocumentFallback = (): string | null => {
@@ -124,6 +141,18 @@ const readFromDocumentFallback = (): string | null => {
   const pageText = (root.innerText || root.textContent || "").slice(0, 5000);
   if (!pageText) {
     return null;
+  }
+
+  const pageSegments = pageText
+    .split(/[\n\r|•·]+/)
+    .map(segment => segment.trim())
+    .filter(Boolean);
+
+  for (const segment of pageSegments) {
+    const candidate = toCandidate(segment);
+    if (candidate) {
+      return candidate;
+    }
   }
 
   const fromLabel = extractPatientNameFromText(pageText);
