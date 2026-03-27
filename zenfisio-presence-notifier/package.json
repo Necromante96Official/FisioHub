@@ -1,6 +1,6 @@
 {
-  "name": "zenfisio-presence-notifier-v0.3.5",
-  "version": "0.3.6",
+  "name": "zenfisio-presence-notifier",
+  "version": "0.3.5",
   "private": true,
   "type": "module",
   "scripts": {

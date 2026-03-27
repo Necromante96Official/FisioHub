@@ -2,10 +2,28 @@ import { extractPatientNameFromText, isLikelyValidPatientName, sanitizePatientNa
 const FIELD_SELECTORS = [
     "[data-field='paciente']",
     "[data-field='patient']",
+    "[data-field='nome']",
+    "[data-field='name']",
+    ".patient-name",
+    ".paciente-nome",
+    ".nome-paciente",
+    ".paciente",
     "[class*='paciente']",
     "[class*='patient']",
+    "[class*='nome']",
+    "[class*='name']",
     "[id*='paciente']",
     "[id*='patient']",
+    "[id*='nome']",
+    "[id*='name']",
+    "[data-testid*='patient']",
+    "[data-testid*='paciente']",
+    "[data-testid*='nome']",
+    "[data-testid*='name']",
+    "[aria-label*='patient']",
+    "[aria-label*='paciente']",
+    "[aria-label*='nome']",
+    "[aria-label*='name']",
     "a[href*='paciente']",
     "a[href*='patient']"
 ];
@@ -23,16 +41,70 @@ const CONTAINER_SELECTORS = [
     ".appointment",
     ".calendar-event"
 ];
-const toCandidate = (value) => {
+const OVERLAY_SELECTORS = [
+    ".popover",
+    "[role='dialog']",
+    ".modal",
+    ".fc-popover",
+    ".ui-dialog",
+    ".dropdown-menu"
+];
+const toCandidate = (value, mode = "generic") => {
     const fromLabel = extractPatientNameFromText(value);
     if (fromLabel && isLikelyValidPatientName(fromLabel)) {
         return fromLabel;
     }
-    const sanitized = sanitizePatientName(value);
-    if (isLikelyValidPatientName(sanitized)) {
-        return sanitized;
+    if (mode === "field") {
+        const sanitized = sanitizePatientName(value);
+        if (isLikelyValidPatientName(sanitized)) {
+            return sanitized;
+        }
     }
     return null;
+};
+const isVisibleElement = (element) => {
+    const style = window.getComputedStyle(element);
+    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+        return false;
+    }
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.height > 0;
+};
+const hasPatientLabel = (text) => /\b(paciente|patient)\b/i.test(text);
+const readFromPatientAnchors = (scope) => {
+    const anchors = Array.from(scope.querySelectorAll("a"));
+    for (const anchor of anchors) {
+        const rawText = (anchor.textContent || "").trim();
+        if (!rawText) {
+            continue;
+        }
+        const candidate = sanitizePatientName(rawText);
+        if (!isLikelyValidPatientName(candidate)) {
+            continue;
+        }
+        const parentText = (anchor.parentElement?.textContent || "").trim();
+        const grandParentText = (anchor.parentElement?.parentElement?.textContent || "").trim();
+        if (hasPatientLabel(parentText) || hasPatientLabel(grandParentText)) {
+            return candidate;
+        }
+    }
+    return null;
+};
+const readFromTextSample = (sample) => {
+    if (!sample) {
+        return null;
+    }
+    const lines = sample
+        .split(/[\n\r|•·]+/)
+        .map(segment => segment.trim())
+        .filter(Boolean);
+    for (const line of lines) {
+        const candidate = toCandidate(line, "generic");
+        if (candidate) {
+            return candidate;
+        }
+    }
+    return toCandidate(sample, "generic");
 };
 const readFromLabelledNode = (scope, keyword) => {
     const walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT, {
@@ -47,7 +119,7 @@ const readFromLabelledNode = (scope, keyword) => {
         if (!text) {
             continue;
         }
-        const candidate = toCandidate(text);
+        const candidate = toCandidate(text, "generic");
         if (candidate) {
             return candidate;
         }
@@ -55,6 +127,10 @@ const readFromLabelledNode = (scope, keyword) => {
     return null;
 };
 const readFromElements = (scope) => {
+    const fromAnchor = readFromPatientAnchors(scope);
+    if (fromAnchor) {
+        return fromAnchor;
+    }
     for (const selector of FIELD_SELECTORS) {
         const elements = Array.from(scope.querySelectorAll(selector));
         for (const element of elements) {
@@ -62,7 +138,7 @@ const readFromElements = (scope) => {
             if (!text) {
                 continue;
             }
-            const candidate = toCandidate(text);
+            const candidate = toCandidate(text, "field");
             if (candidate) {
                 return candidate;
             }
@@ -71,7 +147,7 @@ const readFromElements = (scope) => {
     return null;
 };
 const readFromScopeByKeywords = (scope) => {
-    const keywords = ["paciente", "patient", "nome"];
+    const keywords = ["paciente", "patient"];
     for (const keyword of keywords) {
         const found = readFromLabelledNode(scope, keyword);
         if (found) {
@@ -85,21 +161,30 @@ const readFromScopeText = (scope) => {
     if (!text) {
         return null;
     }
-    const directCandidate = toCandidate(text);
-    if (directCandidate) {
-        return directCandidate;
+    return extractPatientNameFromText(text);
+};
+const resolvePatientNameInScope = (scope) => {
+    const fromElements = readFromElements(scope);
+    if (fromElements) {
+        return fromElements;
     }
-    const segments = text
-        .split(/[\n\r|•·]+/)
-        .map(segment => segment.trim())
-        .filter(Boolean);
-    for (const segment of segments) {
-        const candidate = toCandidate(segment);
-        if (candidate) {
-            return candidate;
+    if (scope instanceof HTMLElement) {
+        const fromText = readFromScopeText(scope);
+        if (fromText) {
+            return fromText;
         }
     }
+    const fromLabelled = readFromScopeByKeywords(scope);
+    if (fromLabelled) {
+        return fromLabelled;
+    }
     return null;
+};
+export const resolvePatientNameFromScope = (scope) => {
+    if (!scope) {
+        return null;
+    }
+    return resolvePatientNameInScope(scope);
 };
 const readFromDocumentFallback = () => {
     const root = document.body || document.documentElement;
@@ -115,65 +200,75 @@ const readFromDocumentFallback = () => {
         return fromLabelled;
     }
     const pageText = (root.innerText || root.textContent || "").slice(0, 5000);
-    if (!pageText) {
-        return null;
-    }
-    const pageSegments = pageText
-        .split(/[\n\r|•·]+/)
-        .map(segment => segment.trim())
-        .filter(Boolean);
-    for (const segment of pageSegments) {
-        const candidate = toCandidate(segment);
-        if (candidate) {
-            return candidate;
+    if (pageText) {
+        const pageCandidate = extractPatientNameFromText(pageText);
+        if (isLikelyValidPatientName(pageCandidate)) {
+            return pageCandidate;
         }
-    }
-    const fromLabel = extractPatientNameFromText(pageText);
-    if (isLikelyValidPatientName(fromLabel)) {
-        return fromLabel;
-    }
-    const sanitized = sanitizePatientName(pageText);
-    if (isLikelyValidPatientName(sanitized)) {
-        return sanitized;
     }
     return null;
 };
 const collectCandidateScopes = (select) => {
     const scopes = [];
     const seen = new Set();
-    for (const selector of CONTAINER_SELECTORS) {
-        const found = select.closest(selector);
-        if (found && !seen.has(found)) {
-            scopes.push(found);
-            seen.add(found);
+    const addScope = (value) => {
+        if (!(value instanceof HTMLElement)) {
+            return;
         }
+        if (seen.has(value)) {
+            return;
+        }
+        scopes.push(value);
+        seen.add(value);
+    };
+    for (const selector of CONTAINER_SELECTORS) {
+        addScope(select.closest(selector));
     }
     let current = select.parentElement;
     let depth = 0;
-    while (current && depth < 4) {
-        if (!seen.has(current)) {
-            scopes.push(current);
-            seen.add(current);
-        }
+    while (current && depth < 12) {
+        addScope(current);
+        addScope(current.previousElementSibling);
+        addScope(current.nextElementSibling);
         current = current.parentElement;
         depth += 1;
     }
+    const selectRect = select.getBoundingClientRect();
+    const selectCenterX = selectRect.left + selectRect.width / 2;
+    const selectCenterY = selectRect.top + selectRect.height / 2;
+    const rankedOverlays = [];
+    for (const selector of OVERLAY_SELECTORS) {
+        const overlays = Array.from(document.querySelectorAll(selector));
+        for (const overlay of overlays) {
+            if (!(overlay instanceof HTMLElement)) {
+                continue;
+            }
+            if (!isVisibleElement(overlay)) {
+                continue;
+            }
+            const text = (overlay.innerText || overlay.textContent || "").trim();
+            if (!hasPatientLabel(text)) {
+                continue;
+            }
+            const rect = overlay.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const distance = Math.hypot(centerX - selectCenterX, centerY - selectCenterY);
+            rankedOverlays.push({ element: overlay, distance });
+        }
+    }
+    rankedOverlays
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, 3)
+        .forEach(item => addScope(item.element));
     return scopes;
 };
 export const resolvePatientNameFromStatusSelect = (select) => {
     const scopes = collectCandidateScopes(select);
     for (const scope of scopes) {
-        const fromElements = readFromElements(scope);
-        if (fromElements) {
-            return fromElements;
-        }
-        const fromText = readFromScopeText(scope);
-        if (fromText) {
-            return fromText;
-        }
-        const fromKeywordLabel = readFromScopeByKeywords(scope);
-        if (fromKeywordLabel) {
-            return fromKeywordLabel;
+        const resolved = resolvePatientNameInScope(scope);
+        if (resolved) {
+            return resolved;
         }
     }
     const fromDocument = readFromDocumentFallback();

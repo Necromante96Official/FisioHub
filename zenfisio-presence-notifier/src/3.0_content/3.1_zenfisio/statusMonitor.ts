@@ -9,7 +9,7 @@ import { requestStatusConfirmation } from "./confirmationPrompt.js";
 import { sendStatusEvent } from "./messaging.js";
 import { showToast } from "./notifications.js";
 import { getCachedNetworkPatientName } from "./networkPatientCache.js";
-import { resolvePatientNameFromStatusSelect } from "./patientResolver.js";
+import { resolvePatientNameFromScope, resolvePatientNameFromStatusSelect } from "./patientResolver.js";
 
 const confirmedSet = new Set<string>([
   normalizeText(STATUS_LABELS.CONFIRMED),
@@ -24,6 +24,7 @@ const cancelledSet = new Set<string>([
 
 const previousValueBySelect = new WeakMap<HTMLSelectElement, string>();
 const patientNameBySelect = new WeakMap<HTMLSelectElement, string>();
+const patientScopeBySelect = new WeakMap<HTMLSelectElement, HTMLElement>();
 
 const getSelectedLabel = (select: HTMLSelectElement): string => {
   const option = select.options[select.selectedIndex];
@@ -40,32 +41,32 @@ const resolveStatusKind = (normalizedLabel: string): StatusKind | null => {
   return null;
 };
 
-const resolvePatientNameFromContext = (target: HTMLElement): string | null => {
-  const candidateScopes = [
-    target.closest(".popover, [role='dialog'], .modal, [role='menu'], [role='option'], tr, li, article, section, .agendamento, .appointment, .calendar-event"),
-    target,
-    target.parentElement,
-    document.body
-  ].filter((value): value is HTMLElement => value instanceof HTMLElement);
+const getPatientScope = (target: HTMLElement): HTMLElement | null => {
+  return (target.closest(".popover, [role='dialog'], .modal") as HTMLElement | null) || document.body;
+};
 
-  for (const scope of candidateScopes) {
-    const text = (scope.innerText || scope.textContent || "").trim();
-    if (!text) {
-      continue;
-    }
+const nextAnimationFrame = (): Promise<void> => {
+  return new Promise(resolve => window.requestAnimationFrame(() => resolve()));
+};
 
-    const extracted = extractPatientNameFromText(text);
-    if (isLikelyValidPatientName(extracted)) {
-      return extracted;
-    }
-
-    const sanitized = sanitizePatientName(text);
-    if (isLikelyValidPatientName(sanitized)) {
-      return sanitized;
-    }
+const resolvePatientNameAfterPaint = async (
+  scope: ParentNode | null,
+  retries: number
+): Promise<string | null> => {
+  if (!scope) {
+    return null;
   }
 
-  return null;
+  for (let index = 0; index < retries; index += 1) {
+    const patientName = resolvePatientNameFromScope(scope);
+    if (patientName) {
+      return patientName;
+    }
+
+    await nextAnimationFrame();
+  }
+
+  return resolvePatientNameFromScope(scope);
 };
 
 const resolvePatientNameNow = (
@@ -73,10 +74,11 @@ const resolvePatientNameNow = (
   target: HTMLElement
 ): string | null => {
   const cachedPatientName = select ? patientNameBySelect.get(select) : null;
-  const fromNetwork = getCachedNetworkPatientName();
+  const patientScope = select ? patientScopeBySelect.get(select) || getPatientScope(select) : getPatientScope(target);
+  const fromScope = patientScope ? resolvePatientNameFromScope(patientScope) : null;
   const fromSelect = select ? resolvePatientNameFromStatusSelect(select) : null;
-  const fromContext = resolvePatientNameFromContext(target);
-  const patientName = cachedPatientName || fromNetwork || fromSelect || fromContext;
+  const fromNetwork = getCachedNetworkPatientName();
+  const patientName = cachedPatientName || fromScope || fromSelect || fromNetwork;
 
   if (patientName && select) {
     patientNameBySelect.set(select, patientName);
@@ -85,45 +87,19 @@ const resolvePatientNameNow = (
   return patientName;
 };
 
-const resolvePatientNameWithObserver = async (
-  select: HTMLSelectElement | null,
-  target: HTMLElement
-): Promise<string | null> => {
-  const immediate = resolvePatientNameNow(select, target);
-  if (immediate) {
-    return immediate;
-  }
-
-  const root = document.body || document.documentElement;
-  if (!root) {
+const requestManualPatientName = (): string | null => {
+  const typedName = window.prompt("Nao foi possivel identificar automaticamente. Digite o nome completo do paciente para enviar ao chat:");
+  if (typedName === null) {
     return null;
   }
 
-  return new Promise(resolve => {
-    const timeoutId = window.setTimeout(() => {
-      cleanup();
-      resolve(resolvePatientNameNow(select, target));
-    }, 2500);
+  const sanitized = sanitizePatientName(typedName);
+  if (isLikelyValidPatientName(sanitized)) {
+    return sanitized;
+  }
 
-    const observer = new MutationObserver(() => {
-      const patientName = resolvePatientNameNow(select, target);
-      if (patientName) {
-        cleanup();
-        resolve(patientName);
-      }
-    });
-
-    const cleanup = (): void => {
-      observer.disconnect();
-      window.clearTimeout(timeoutId);
-    };
-
-    observer.observe(root, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-  });
+  showToast("Nome informado invalido. Envio cancelado.", "warn");
+  return null;
 };
 
 const isStatusSelect = (select: HTMLSelectElement): boolean => {
@@ -154,8 +130,12 @@ const rememberCurrentSelectValue = (event: Event): void => {
   }
 
   previousValueBySelect.set(select, normalizeText(getSelectedLabel(select)));
+  const scope = getPatientScope(select);
+  if (scope) {
+    patientScopeBySelect.set(select, scope);
+  }
 
-  const patientName = resolvePatientNameFromStatusSelect(select) || resolvePatientNameFromContext(select);
+  const patientName = (scope ? resolvePatientNameFromScope(scope) : null) || resolvePatientNameFromStatusSelect(select);
   if (patientName) {
     patientNameBySelect.set(select, patientName);
   }
@@ -197,24 +177,34 @@ const handleSelectChange = async (event: Event): Promise<void> => {
     return;
   }
 
-  const patientName = await resolvePatientNameWithObserver(target, target);
-  if (!patientName) {
-    showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
-    return;
-  }
-
-  const previewMessage = formatOutgoingMessage(statusKind, patientName);
+  const patientScope = getPatientScope(target);
+  const initialPatientName = await resolvePatientNameAfterPaint(patientScope, 3);
+  const patientNameResolution = resolvePatientNameAfterPaint(patientScope, 8);
+  const previewMessage = initialPatientName
+    ? formatOutgoingMessage(statusKind, initialPatientName)
+    : "Aguardando identificacao do paciente...";
 
   const confirmed = await requestStatusConfirmation({
-    patientName,
+    patientName: initialPatientName,
     statusKind,
     statusLabel: getSelectedLabel(target),
-    previewMessage
+    previewMessage,
+    patientNameResolver: patientNameResolution
   });
 
   if (!confirmed) {
     showToast("Envio cancelado antes de chegar ao chat.", "warn");
     return;
+  }
+
+  let patientName = await patientNameResolution;
+  if (!patientName) {
+    const manualPatientName = requestManualPatientName();
+    if (!manualPatientName) {
+      showToast("Nao foi possivel identificar o paciente para envio.", "warn");
+      return;
+    }
+    patientName = manualPatientName;
   }
 
   try {
@@ -282,23 +272,33 @@ const handleClickTrigger = async (event: MouseEvent): Promise<void> => {
   }
 
   const select = target.closest("select");
-  const patientName = await resolvePatientNameWithObserver(select instanceof HTMLSelectElement ? select : null, target);
-  if (!patientName) {
-    showToast("Paciente nao identificado. Envio bloqueado para evitar falso positivo.", "warn");
-    return;
-  }
-
-  const previewMessage = formatOutgoingMessage(statusKind, patientName);
+  const patientScope = select instanceof HTMLSelectElement ? getPatientScope(select) : getPatientScope(target);
+  const initialPatientName = await resolvePatientNameAfterPaint(patientScope, 3);
+  const patientNameResolution = resolvePatientNameAfterPaint(patientScope, 8);
+  const previewMessage = initialPatientName
+    ? formatOutgoingMessage(statusKind, initialPatientName)
+    : "Aguardando identificacao do paciente...";
   const confirmed = await requestStatusConfirmation({
-    patientName,
+    patientName: initialPatientName,
     statusKind,
     statusLabel: text,
-    previewMessage
+    previewMessage,
+    patientNameResolver: patientNameResolution
   });
 
   if (!confirmed) {
     showToast("Envio cancelado antes de chegar ao chat.", "warn");
     return;
+  }
+
+  let patientName = await patientNameResolution;
+  if (!patientName) {
+    const manualPatientName = requestManualPatientName();
+    if (!manualPatientName) {
+      showToast("Nao foi possivel identificar o paciente para envio.", "warn");
+      return;
+    }
+    patientName = manualPatientName;
   }
 
   try {

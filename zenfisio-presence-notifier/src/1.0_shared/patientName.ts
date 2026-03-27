@@ -11,7 +11,18 @@ const INVALID_FULL_PHRASES = new Set([
   "agendamentos",
   "presenca confirmada",
   "nao atendido",
-  "nao atendido sem cobranca"
+  "nao atendido sem cobranca",
+  "aguardando identificacao",
+  "identificando paciente",
+  "paciente identificado",
+  "status selecionado",
+  "mensagem que sera enviada",
+  "confirmar envio desta presenca ao chat",
+  "confirmar envio desta desmarcacao ao chat",
+  "confirmar presenca e enviar",
+  "confirmar desmarcacao e enviar",
+  "cancelar com esc",
+  "pressione enter para confirmar esc para cancelar"
 ]);
 
 const INVALID_SINGLE_WORDS = new Set([
@@ -100,9 +111,6 @@ export const isLikelyValidPatientName = (name: string | null): name is string =>
   }
 
   const words = normalized.split(" ").filter(Boolean);
-  if (words.length > 6) {
-    return false;
-  }
 
   if (words.length >= 2) {
     for (const word of words) {
@@ -127,7 +135,6 @@ export const extractPatientNameFromText = (text: string): string | null => {
 
   const patterns = [
     /paciente\s*[:\-]?\s*([^\n\r|]+)/i,
-    /nome\s*[:\-]?\s*([^\n\r|]+)/i,
     /patient\s*[:\-]?\s*([^\n\r|]+)/i
   ];
 
@@ -141,10 +148,26 @@ export const extractPatientNameFromText = (text: string): string | null => {
     }
   }
 
-  const looseLine = text.split(/\n+/).find(line => /paciente|nome|patient/i.test(line));
+  const jsonPatterns = [
+    /"(?:patientName|patient_name|patient|paciente|nomePaciente|nome_paciente)"\s*:\s*"([^"]+)"/gi,
+    /'(?:patientName|patient_name|patient|paciente|nomePaciente|nome_paciente)'\s*:\s*'([^']+)'/gi
+  ];
+
+  for (const pattern of jsonPatterns) {
+    let match: RegExpExecArray | null = pattern.exec(text);
+    while (match) {
+      const candidate = sanitizePatientName(match[1]);
+      if (isLikelyValidPatientName(candidate)) {
+        return candidate;
+      }
+      match = pattern.exec(text);
+    }
+  }
+
+  const looseLine = text.split(/\n+/).find(line => /paciente|patient/i.test(line));
   if (looseLine) {
     const pieces = looseLine.split(/[:\-]/);
-    const tail = pieces.length > 1 ? pieces.slice(1).join("-") : looseLine.replace(/^(paciente|nome|patient)\s*/i, "");
+    const tail = pieces.length > 1 ? pieces.slice(1).join("-") : looseLine.replace(/^(paciente|patient)\s*/i, "");
     const candidate = sanitizePatientName(tail);
     if (isLikelyValidPatientName(candidate)) {
       return candidate;

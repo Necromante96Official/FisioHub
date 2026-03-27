@@ -194,7 +194,7 @@ export const requestStatusConfirmation = async (request) => {
         patientLine.textContent = "Paciente identificado";
         const patientValue = document.createElement("div");
         patientValue.className = "zenfisio-confirm-value";
-        patientValue.textContent = request.patientName;
+        patientValue.textContent = request.patientName || "Identificando paciente...";
         const statusLine = document.createElement("div");
         statusLine.className = "zenfisio-confirm-line";
         statusLine.textContent = "Status selecionado";
@@ -207,6 +207,23 @@ export const requestStatusConfirmation = async (request) => {
         const previewValue = document.createElement("pre");
         previewValue.className = "zenfisio-confirm-preview";
         previewValue.textContent = request.previewMessage;
+        let isOpen = true;
+        const updatePatientPreview = (resolvedName) => {
+            if (!isOpen || !resolvedName) {
+                return;
+            }
+            patientValue.textContent = resolvedName;
+            previewValue.textContent = request.statusKind === "confirmed"
+                ? `*✅ Chegou:* *${resolvedName}*`
+                : `*❌ DESMARCAÇÃO:* *${resolvedName}*`;
+        };
+        if (request.patientNameResolver) {
+            void request.patientNameResolver.then(resolvedName => {
+                if (typeof resolvedName === "string" && resolvedName.trim()) {
+                    updatePatientPreview(resolvedName.trim());
+                }
+            });
+        }
         focusBox.appendChild(patientLine);
         focusBox.appendChild(patientValue);
         focusBox.appendChild(statusLine);
@@ -252,6 +269,7 @@ export const requestStatusConfirmation = async (request) => {
             focusables[nextIndex].focus({ preventScroll: true });
         };
         const cleanup = (result) => {
+            isOpen = false;
             window.removeEventListener("keydown", onKeyDown, true);
             window.removeEventListener("keydown", trapFocus, true);
             backdrop.removeEventListener("click", onBackdropClick);
