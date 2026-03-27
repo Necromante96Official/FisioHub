@@ -15,6 +15,8 @@ const CONTAINER_SELECTORS = [
   ".popover",
   "[role='dialog']",
   ".modal",
+  "[role='menu']",
+  "[role='option']",
   "tr",
   "li",
   "article",
@@ -33,6 +35,30 @@ const toCandidate = (value: string): string | null => {
   const sanitized = sanitizePatientName(value);
   if (isLikelyValidPatientName(sanitized)) {
     return sanitized;
+  }
+
+  return null;
+};
+
+const readFromLabelledNode = (scope: ParentNode, keyword: string): string | null => {
+  const walker = document.createTreeWalker(scope, NodeFilter.SHOW_ELEMENT, {
+    acceptNode: node => {
+      const text = node.textContent || "";
+      return text.toLowerCase().includes(keyword) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+    }
+  });
+
+  while (walker.nextNode()) {
+    const currentNode = walker.currentNode;
+    const text = (currentNode.textContent || (currentNode instanceof HTMLElement ? currentNode.innerText : "") || "").trim();
+    if (!text) {
+      continue;
+    }
+
+    const candidate = toCandidate(text);
+    if (candidate) {
+      return candidate;
+    }
   }
 
   return null;
@@ -57,6 +83,19 @@ const readFromElements = (scope: ParentNode): string | null => {
   return null;
 };
 
+const readFromScopeByKeywords = (scope: ParentNode): string | null => {
+  const keywords = ["paciente", "patient", "nome"];
+
+  for (const keyword of keywords) {
+    const found = readFromLabelledNode(scope, keyword);
+    if (found) {
+      return found;
+    }
+  }
+
+  return null;
+};
+
 const readFromScopeText = (scope: HTMLElement): string | null => {
   const text = (scope.innerText || scope.textContent || "").slice(0, 2500);
   if (!text) {
@@ -64,6 +103,40 @@ const readFromScopeText = (scope: HTMLElement): string | null => {
   }
 
   return toCandidate(text);
+};
+
+const readFromDocumentFallback = (): string | null => {
+  const root = document.body || document.documentElement;
+  if (!root) {
+    return null;
+  }
+
+  const fromElements = readFromElements(root);
+  if (fromElements) {
+    return fromElements;
+  }
+
+  const fromLabelled = readFromScopeByKeywords(root);
+  if (fromLabelled) {
+    return fromLabelled;
+  }
+
+  const pageText = (root.innerText || root.textContent || "").slice(0, 5000);
+  if (!pageText) {
+    return null;
+  }
+
+  const fromLabel = extractPatientNameFromText(pageText);
+  if (isLikelyValidPatientName(fromLabel)) {
+    return fromLabel;
+  }
+
+  const sanitized = sanitizePatientName(pageText);
+  if (isLikelyValidPatientName(sanitized)) {
+    return sanitized;
+  }
+
+  return null;
 };
 
 const collectCandidateScopes = (select: HTMLSelectElement): HTMLElement[] => {
@@ -105,6 +178,16 @@ export const resolvePatientNameFromStatusSelect = (select: HTMLSelectElement): s
     if (fromText) {
       return fromText;
     }
+
+    const fromKeywordLabel = readFromScopeByKeywords(scope);
+    if (fromKeywordLabel) {
+      return fromKeywordLabel;
+    }
+  }
+
+  const fromDocument = readFromDocumentFallback();
+  if (fromDocument) {
+    return fromDocument;
   }
 
   return null;

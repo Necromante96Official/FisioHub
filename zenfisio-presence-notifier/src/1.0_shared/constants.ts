@@ -20,7 +20,8 @@ export const STORAGE_KEYS = {
   EXTENSION_ENABLED: "zenfisio/extension-enabled",
   CHAT_TAB_ID: "zenfisio/chat-tab-id",
   SENT_HISTORY: "zenfisio/sent-history",
-  CARD_POSITION: "zenfisio/card-position"
+  CARD_POSITION: "zenfisio/card-position",
+  CARD_MINIMIZED: "zenfisio/card-minimized"
 } as const;
 
 export const STATUS_LABELS = {
@@ -45,5 +46,5 @@ export const CHAT_URL_PATTERNS = [
 
 export const STATUS_MESSAGE_PREFIX: Record<StatusKind, string> = {
   confirmed: "Chegou",
-  cancelled: "Desmarcacao"
+  cancelled: "Desmarcação"
 };

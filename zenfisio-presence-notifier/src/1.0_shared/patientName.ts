@@ -64,6 +64,8 @@ export const sanitizePatientName = (rawName: string): string | null => {
   text = stripUnsafeTrailing(text);
   text = text.replace(/\s+/g, " ").trim();
 
+  text = text.replace(/[\s.'-]+$/g, "").trim();
+
   if (!text) {
     return null;
   }
@@ -93,29 +95,29 @@ export const isLikelyValidPatientName = (name: string | null): name is string =>
     return false;
   }
 
-  if (!/^[A-Za-z\s.'-]+$/.test(name)) {
+  if (!/^[A-Za-zÀ-ÿ\s.'-]+$/.test(name)) {
     return false;
   }
 
   const words = normalized.split(" ").filter(Boolean);
-  if (words.length < 2) {
-    return false;
-  }
-
   if (words.length > 6) {
     return false;
   }
 
-  for (const word of words) {
-    if (word.length < 2) {
-      return false;
+  if (words.length >= 2) {
+    for (const word of words) {
+      if (word.length < 2) {
+        return false;
+      }
+      if (INVALID_SINGLE_WORDS.has(word)) {
+        return false;
+      }
     }
-    if (INVALID_SINGLE_WORDS.has(word)) {
-      return false;
-    }
+
+    return true;
   }
 
-  return true;
+  return words[0].length >= 3 && !INVALID_SINGLE_WORDS.has(words[0]);
 };
 
 export const extractPatientNameFromText = (text: string): string | null => {

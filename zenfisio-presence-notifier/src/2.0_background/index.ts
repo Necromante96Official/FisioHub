@@ -1,4 +1,5 @@
-import { COMMANDS, MESSAGE_TYPES, STATUS_MESSAGE_PREFIX } from "../1.0_shared/constants.js";
+import { COMMANDS, MESSAGE_TYPES } from "../1.0_shared/constants.js";
+import { formatOutgoingMessage } from "../1.0_shared/messageFormat.js";
 import { isLikelyValidPatientName, sanitizePatientName } from "../1.0_shared/patientName.js";
 import type { StatusKind } from "../1.0_shared/types.js";
 import { deliverMessageToChat, onChatReady, onTabRemoved } from "./chatMessenger.js";
@@ -44,11 +45,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-const buildOutgoingMessage = (statusKind: StatusKind, patientName: string): string => {
-  const prefix = STATUS_MESSAGE_PREFIX[statusKind];
-  return `${prefix}: ${patientName}`;
-};
-
 const dispatchKey = (patientKey: string, statusKind: StatusKind): string => `${statusKind}:${patientKey}`;
 
 const handleStatusEvent = (
@@ -93,7 +89,7 @@ const handleStatusEvent = (
     inFlightDispatches.add(lockKey);
 
     try {
-      const outgoingMessage = buildOutgoingMessage(statusKind, sanitizedName);
+      const outgoingMessage = formatOutgoingMessage(statusKind, sanitizedName);
       await deliverMessageToChat(outgoingMessage);
       await markDispatched(sanitizedName, gate.patientKey, statusKind);
       sendResponse({ ok: true });

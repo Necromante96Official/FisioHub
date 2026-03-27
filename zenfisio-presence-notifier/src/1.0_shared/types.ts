@@ -3,7 +3,7 @@ export type StatusKind = "confirmed" | "cancelled";
 export type StatusEventPayload = {
   patientName: string;
   statusKind: StatusKind;
-  source: "select-change";
+  source: "select-change" | "click-trigger";
 };
 
 export type HistoryEntry = {

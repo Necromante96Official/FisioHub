@@ -15,36 +15,36 @@ const promisify = <TResult>(
 };
 
 export const queryTabs = (queryInfo: chrome.tabs.QueryInfo): Promise<chrome.tabs.Tab[]> => {
-  return promisify<chrome.tabs.Tab[]>(chrome.tabs.query, queryInfo);
+  return promisify<chrome.tabs.Tab[]>(chrome.tabs.query.bind(chrome.tabs), queryInfo);
 };
 
 export const createTab = (createProperties: chrome.tabs.CreateProperties): Promise<chrome.tabs.Tab> => {
-  return promisify<chrome.tabs.Tab>(chrome.tabs.create, createProperties);
+  return promisify<chrome.tabs.Tab>(chrome.tabs.create.bind(chrome.tabs), createProperties);
 };
 
 export const getTab = (tabId: number): Promise<chrome.tabs.Tab> => {
-  return promisify<chrome.tabs.Tab>(chrome.tabs.get, tabId);
+  return promisify<chrome.tabs.Tab>(chrome.tabs.get.bind(chrome.tabs), tabId);
 };
 
 export const sendMessageToTab = <TResponse = unknown>(tabId: number, message: unknown): Promise<TResponse> => {
-  return promisify<TResponse>(chrome.tabs.sendMessage, tabId, message);
+  return promisify<TResponse>(chrome.tabs.sendMessage.bind(chrome.tabs), tabId, message);
 };
 
 export const storageGet = <TData extends Record<string, unknown>>(keys: string[]): Promise<TData> => {
-  return promisify<TData>(chrome.storage.local.get, keys);
+  return promisify<TData>(chrome.storage.local.get.bind(chrome.storage.local), keys);
 };
 
 export const storageSet = (value: Record<string, unknown>): Promise<void> => {
-  return promisify<void>(chrome.storage.local.set, value);
+  return promisify<void>(chrome.storage.local.set.bind(chrome.storage.local), value);
 };
 
 export const storageRemove = (keys: string[]): Promise<void> => {
-  return promisify<void>(chrome.storage.local.remove, keys);
+  return promisify<void>(chrome.storage.local.remove.bind(chrome.storage.local), keys);
 };
 
 export const setBadge = async (enabled: boolean): Promise<void> => {
-  await promisify<void>(chrome.action.setBadgeText, { text: enabled ? "ON" : "OFF" });
-  await promisify<void>(chrome.action.setBadgeBackgroundColor, { color: enabled ? "#2E7D32" : "#C62828" });
+  await promisify<void>(chrome.action.setBadgeText.bind(chrome.action), { text: enabled ? "ON" : "OFF" });
+  await promisify<void>(chrome.action.setBadgeBackgroundColor.bind(chrome.action), { color: enabled ? "#2E7D32" : "#C62828" });
 };
 
 export const waitForTabComplete = (tabId: number, timeoutMs = 15000): Promise<void> => {

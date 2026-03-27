@@ -8,7 +8,7 @@ export const normalizeText = (value: string): string => {
 };
 
 export const stripUnsafeTrailing = (value: string): string => {
-  return value.replace(/[^A-Za-z\s.'-]+$/g, "").trim();
+  return value.replace(/[^A-Za-zÀ-ÿ\s.'-]+$/g, "").trim();
 };
 
 export const toDateKey = (date: Date = new Date()): string => {

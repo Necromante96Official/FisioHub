@@ -1,7 +1,7 @@
 {
   "name": "Zenfisio Presence Notifier",
   "description": "Monitora mudancas de status na agenda da Zenfisio e envia mensagem no Google Chat com maior precisao.",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "manifest_version": 3,
   "author": "Necromante96Official",
   "permissions": ["tabs", "storage", "scripting"],
