@@ -110,7 +110,7 @@
 
 .fh-panel-actions {
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start;
     gap: var(--fh-s-2);
     flex-wrap: wrap;
     margin-top: auto;
@@ -118,13 +118,20 @@
     padding-bottom: var(--fh-s-1);
 }
 
-#openBackupsBtn,
-#clearAllDataBtn {
-    margin-right: 0;
+.fh-panel-actions-left,
+.fh-panel-actions-right {
+    display: flex;
+    gap: var(--fh-s-2);
+    flex-wrap: wrap;
+    align-items: center;
 }
 
-#clearPatientsListBtn {
+.fh-panel-actions-left {
     margin-right: auto;
+}
+
+.fh-panel-actions-right {
+    justify-content: flex-end;
 }
 
 .fh-backups-dialog {
@@ -456,97 +463,6 @@
     outline-offset: 1px;
 }
 
-.fh-procedure-searchbar {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 2px;
-}
-
-.fh-procedure-search {
-    width: 100%;
-    min-height: 38px;
-    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 10px;
-    padding: 9px 11px;
-    background: color-mix(in srgb, var(--fh-surface-2) 24%, transparent);
-    color: var(--fh-text);
-    font-size: 0.84rem;
-    line-height: 1.3;
-}
-
-.fh-procedure-search:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--fh-primary-2) 58%, transparent);
-    outline-offset: 1px;
-}
-
-.fh-procedure-count {
-    margin: 0;
-    font-size: 0.72rem;
-    line-height: 1.3;
-    color: var(--fh-muted);
-}
-
-.fh-procedure-list {
-    display: grid;
-    gap: 8px;
-    max-height: min(42vh, 520px);
-    overflow: auto;
-    padding-right: 2px;
-}
-
-.fh-procedure-choice {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    gap: 8px 10px;
-    width: 100%;
-    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 12px;
-    padding: 10px 12px;
-    background: color-mix(in srgb, var(--fh-surface-2) 28%, transparent);
-    color: var(--fh-text);
-    text-align: left;
-    cursor: pointer;
-    transition: transform 0.14s ease, border-color 0.14s ease, background 0.14s ease;
-}
-
-.fh-procedure-choice:hover,
-.fh-procedure-choice:focus-visible {
-    border-color: color-mix(in srgb, var(--fh-primary-2) 62%, transparent);
-    background: color-mix(in srgb, var(--fh-surface-2) 38%, transparent);
-    transform: translateY(-1px);
-}
-
-.fh-procedure-choice-main {
-    display: grid;
-    gap: 1px;
-    min-width: 0;
-}
-
-.fh-procedure-choice-name {
-    font-size: 0.84rem;
-    font-weight: 700;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
-}
-
-.fh-procedure-choice-meta {
-    font-size: 0.66rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, var(--fh-primary-2) 70%, #ffffff);
-}
-
-.fh-procedure-empty {
-    margin: 0;
-    padding: 12px 14px;
-    border: 1px dashed color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 12px;
-    color: var(--fh-muted);
-    background: color-mix(in srgb, var(--fh-surface-2) 18%, transparent);
-    font-size: 0.84rem;
-}
-
 @media (max-width: 760px) {
     .fh-panel-wrap {
         max-width: 100%;
@@ -561,9 +477,7 @@
         justify-content: center;
     }
 
-    #openBackupsBtn,
-    #clearAllDataBtn,
-    #clearPatientsListBtn {
+    .fh-panel-actions-left {
         margin-right: 0;
     }
 

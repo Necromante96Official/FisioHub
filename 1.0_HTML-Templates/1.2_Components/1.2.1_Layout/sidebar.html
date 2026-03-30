@@ -12,44 +12,17 @@
   </article>
 
   <div class="fh-panel-actions">
-    <button id="openBackupsBtn" class="fh-btn fh-btn-ghost" type="button">Backups</button>
-    <button id="clearOnlyDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Somente Dados</button>
-    <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Todos os Dados</button>
-    <button id="clearPatientsListBtn" class="fh-btn fh-btn-ghost" type="button">Limpar Somente a Lista de
-      Pacientes</button>
-    <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
-    <button id="processBtn" class="fh-btn" type="button">Processar</button>
-    <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
+    <div class="fh-panel-actions-left">
+      <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button" data-hover-description="Remove todos os dados, mantendo a Lista de Pacientes.">Limpar Dados</button>
+    </div>
+
+    <div class="fh-panel-actions-right">
+      <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
+      <button id="processBtn" class="fh-btn" type="button">Processar</button>
+      <button id="clearDataBtn" class="fh-btn fh-btn-danger" type="button">Limpar</button>
+    </div>
     <input id="importFileInput" type="file" accept=".txt,.json" hidden>
   </div>
-
-  <dialog id="backupsDialog" class="fh-backups-dialog" closedby="any" aria-labelledby="backupsDialogTitle">
-    <article class="fh-backups-surface">
-      <header class="fh-backups-header">
-        <h3 id="backupsDialogTitle">Backups</h3>
-        <button id="closeBackupsDialogBtn" class="fh-btn fh-btn-ghost" type="button"
-          aria-label="Fechar backups">Fechar</button>
-      </header>
-
-      <div class="fh-backups-content">
-        <section class="fh-backups-column" aria-label="Exportar backups">
-          <h4>Exportar</h4>
-          <button id="exportAllDataBtn" class="fh-btn" type="button">Exportar todos os dados</button>
-          <button id="exportPatientsOnlyBtn" class="fh-btn" type="button">Exportar lista de pacientes</button>
-          <button id="exportAllWithoutPatientsBtn" class="fh-btn" type="button">Exportar todos os dados sem lista de
-            Pacientes</button>
-        </section>
-
-        <section class="fh-backups-column" aria-label="Importar backups">
-          <h4>Importar</h4>
-          <button id="importAllDataBtn" class="fh-btn" type="button">Importar todos os dados</button>
-          <button id="importPatientsOnlyBtn" class="fh-btn" type="button">Importar lista de pacientes</button>
-          <button id="importAllWithoutPatientsBtn" class="fh-btn" type="button">Importar todos os dados sem lista de
-            Pacientes</button>
-        </section>
-      </div>
-    </article>
-  </dialog>
 
   <dialog id="patientConflictDialog" class="fh-conflict-dialog" aria-labelledby="patientConflictTitle">
     <article class="fh-conflict-surface">
@@ -70,24 +43,4 @@
     </article>
   </dialog>
 
-  <dialog id="procedurePickerDialog" class="fh-conflict-dialog" closedby="any" aria-labelledby="procedurePickerTitle">
-    <article class="fh-conflict-surface">
-      <header class="fh-conflict-header">
-        <h3 id="procedurePickerTitle">Procedimentos salvos</h3>
-      </header>
-
-      <div class="fh-conflict-content">
-        <p id="procedurePickerMessage" class="fh-conflict-message"></p>
-        <div class="fh-procedure-searchbar" role="search">
-          <input id="procedurePickerSearch" type="search" class="fh-procedure-search" placeholder="Buscar procedimento salvo..." aria-label="Buscar procedimento salvo" autocomplete="off">
-          <p id="procedurePickerCount" class="fh-procedure-count" aria-live="polite"></p>
-        </div>
-        <div id="procedurePickerList" class="fh-procedure-list" aria-live="polite"></div>
-      </div>
-
-      <footer class="fh-conflict-actions">
-        <button id="closeProcedurePickerBtn" class="fh-btn fh-btn-ghost" type="button">Cancelar</button>
-      </footer>
-    </article>
-  </dialog>
 </section>

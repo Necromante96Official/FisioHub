@@ -1,10 +1,12 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
+import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
+import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
 export class PatientsController {
     appId = "app";
     pageTemplate = "1.0_HTML-Templates/1.1_Pages/pacientes.html";
-    processedDataStorageKey = "fisiohub-processed-data-v2";
-    patientsRecordsStorageKey = "fisiohub-patients-records-v2";
-    legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
+    patientsRecordsStorageKey = FISIOHUB_STORAGE_KEYS.PATIENTS_RECORDS;
+    legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     theme = new ThemeManager();
     patientRecords = [];
     activeSearch = "";
@@ -18,8 +20,9 @@ export class PatientsController {
         await this.resolveIncludes();
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
+        sharedBindHoverToasts({ scope: document });
         this.render();
-        this.startFloatingHomeHint();
+        sharedStartFloatingHomeHint();
         window.addEventListener("storage", (event) => {
             if (event.key && !event.key.startsWith("fisiohub-")) {
                 return;
@@ -119,33 +122,6 @@ export class PatientsController {
         dialog.addEventListener("close", () => {
             this.setDetailsEditMode(false);
             this.selectedRecordIndex = null;
-        });
-        const termsButton = document.getElementById("termsBtn");
-        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
-        const termsDialog = this.getTermsDialog();
-        termsButton?.addEventListener("click", () => {
-            if (!termsDialog.open) {
-                termsDialog.classList.remove("is-opening");
-                termsDialog.classList.remove("is-closing");
-                termsDialog.removeAttribute("data-closing");
-                termsDialog.showModal();
-                window.requestAnimationFrame(() => {
-                    window.requestAnimationFrame(() => {
-                        termsDialog.classList.add("is-opening");
-                    });
-                });
-                const onOpenAnimationEnd = () => {
-                    termsDialog.classList.remove("is-opening");
-                    termsDialog.removeEventListener("animationend", onOpenAnimationEnd);
-                };
-                termsDialog.addEventListener("animationend", onOpenAnimationEnd);
-            }
-        });
-        closeTermsButton?.addEventListener("click", () => {
-            this.requestTermsClose(termsDialog);
-        });
-        termsDialog?.addEventListener("cancel", (event) => {
-            this.requestTermsClose(termsDialog, event);
         });
     }
     render() {
@@ -391,44 +367,6 @@ export class PatientsController {
     getDetailsDialog() {
         return document.getElementById("patientDetailsDialog");
     }
-    getTermsDialog() {
-        return document.getElementById("termsDialog");
-    }
-    requestTermsClose(dialog, event) {
-        event?.preventDefault();
-        if (!dialog.open || dialog.dataset.closing === "true") {
-            return;
-        }
-        dialog.dataset.closing = "true";
-        dialog.classList.remove("is-opening");
-        dialog.classList.add("is-closing");
-        const surface = dialog.querySelector(".fh-terms-surface");
-        const finalizeClose = () => {
-            dialog.classList.remove("is-closing");
-            dialog.removeAttribute("data-closing");
-            if (dialog.open) {
-                dialog.close();
-            }
-        };
-        const fallback = window.setTimeout(() => {
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-            finalizeClose();
-        }, 560);
-        const onAnimationEnd = () => {
-            window.clearTimeout(fallback);
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-            finalizeClose();
-        };
-        if (surface) {
-            surface.addEventListener("animationend", onAnimationEnd, { once: true });
-            return;
-        }
-        finalizeClose();
-    }
     getFilteredRecords() {
         const filtered = this.patientRecords.filter((record) => {
             const statusKind = record.statusFinanceiro.toLowerCase();
@@ -444,67 +382,10 @@ export class PatientsController {
         return filtered;
     }
     startFloatingHomeHint() {
-        const toast = document.querySelector(".fh-floating-home-toast");
-        if (!toast || toast.dataset.started === "true") {
-            return;
-        }
-        toast.dataset.started = "true";
-        const intervalMs = 15000;
-        const pulse = () => {
-            toast.classList.remove("is-visible");
-            void toast.offsetWidth;
-            toast.classList.add("is-visible");
-        };
-        let nextTick = performance.now() + intervalMs;
-        const scheduleNext = () => {
-            const delay = Math.max(0, nextTick - performance.now());
-            window.setTimeout(() => {
-                pulse();
-                nextTick += intervalMs;
-                scheduleNext();
-            }, delay);
-        };
-        scheduleNext();
-    }
-    getNotificationHost() {
-        const baseHost = document.getElementById("siteNotifications");
-        if (!baseHost) {
-            return null;
-        }
-        const openDialogs = Array.from(document.querySelectorAll("dialog[open]"));
-        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
-        if (!topDialog) {
-            baseHost.classList.remove("fh-site-notifications--modal");
-            return baseHost;
-        }
-        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") ?? topDialog;
-        let modalHost = surface.querySelector(".fh-site-notifications--modal");
-        if (!modalHost) {
-            modalHost = document.createElement("div");
-            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
-            modalHost.setAttribute("aria-live", "polite");
-            modalHost.setAttribute("aria-atomic", "false");
-            surface.appendChild(modalHost);
-        }
-        return modalHost;
+        sharedStartFloatingHomeHint();
     }
     showSiteNotification(message) {
-        const container = this.getNotificationHost();
-        if (!container)
-            return;
-        const toast = document.createElement("div");
-        toast.className = "fh-site-toast";
-        toast.textContent = message;
-        container.appendChild(toast);
-        const beginClose = () => {
-            toast.classList.add("is-leaving");
-            const remove = () => {
-                toast.removeEventListener("animationend", remove);
-                toast.remove();
-            };
-            toast.addEventListener("animationend", remove);
-        };
-        window.setTimeout(beginClose, 2600);
+        sharedShowSiteNotification(message);
     }
     setText(id, text) {
         const element = document.getElementById(id);

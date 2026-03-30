@@ -1,23 +1,13 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
-
-type PatientRecord = {
-    nome: string;
-    statusFinanceiro: "Pagante" | "Isento";
-    horario: string;
-    fisioterapeuta: string;
-    celular: string;
-    convenio: string;
-    procedimentos: string;
-    createdAtIso: string;
-    updatedAtIso: string;
-};
+import { FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
+import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
     private readonly appId = "app";
     private readonly pageTemplate = "1.0_HTML-Templates/1.1_Pages/pacientes.html";
-    private readonly processedDataStorageKey = "fisiohub-processed-data-v2";
-    private readonly patientsRecordsStorageKey = "fisiohub-patients-records-v2";
-    private readonly legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
+    private readonly processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
+    private readonly patientsRecordsStorageKey = FISIOHUB_STORAGE_KEYS.PATIENTS_RECORDS;
+    private readonly legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     private readonly theme = new ThemeManager();
     private patientRecords: PatientRecord[] = [];
     private activeSearch = "";
@@ -32,8 +22,9 @@ export class PatientsController {
         await this.resolveIncludes();
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
+        sharedBindHoverToasts({ scope: document });
         this.render();
-        this.startFloatingHomeHint();
+        sharedStartFloatingHomeHint();
 
         window.addEventListener("storage", (event) => {
             if (event.key && !event.key.startsWith("fisiohub-")) {
@@ -152,39 +143,6 @@ export class PatientsController {
             this.selectedRecordIndex = null;
         });
 
-        const termsButton = document.getElementById("termsBtn");
-        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
-        const termsDialog = this.getTermsDialog();
-
-        termsButton?.addEventListener("click", () => {
-            if (!termsDialog.open) {
-                termsDialog.classList.remove("is-opening");
-                termsDialog.classList.remove("is-closing");
-                termsDialog.removeAttribute("data-closing");
-                termsDialog.showModal();
-
-                window.requestAnimationFrame(() => {
-                    window.requestAnimationFrame(() => {
-                        termsDialog.classList.add("is-opening");
-                    });
-                });
-
-                const onOpenAnimationEnd = (): void => {
-                    termsDialog.classList.remove("is-opening");
-                    termsDialog.removeEventListener("animationend", onOpenAnimationEnd);
-                };
-
-                termsDialog.addEventListener("animationend", onOpenAnimationEnd);
-            }
-        });
-
-        closeTermsButton?.addEventListener("click", () => {
-            this.requestTermsClose(termsDialog);
-        });
-
-        termsDialog?.addEventListener("cancel", (event) => {
-            this.requestTermsClose(termsDialog, event);
-        });
     }
 
     private render(): void {
@@ -466,56 +424,6 @@ export class PatientsController {
         return document.getElementById("patientDetailsDialog") as HTMLDialogElement;
     }
 
-    private getTermsDialog(): HTMLDialogElement {
-        return document.getElementById("termsDialog") as HTMLDialogElement;
-    }
-
-    private requestTermsClose(dialog: HTMLDialogElement, event?: Event): void {
-        event?.preventDefault();
-
-        if (!dialog.open || dialog.dataset.closing === "true") {
-            return;
-        }
-
-        dialog.dataset.closing = "true";
-        dialog.classList.remove("is-opening");
-        dialog.classList.add("is-closing");
-        const surface = dialog.querySelector(".fh-terms-surface") as HTMLElement | null;
-
-        const finalizeClose = (): void => {
-            dialog.classList.remove("is-closing");
-            dialog.removeAttribute("data-closing");
-
-            if (dialog.open) {
-                dialog.close();
-            }
-        };
-
-        const fallback = window.setTimeout(() => {
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-            finalizeClose();
-        }, 560);
-
-        const onAnimationEnd = (): void => {
-            window.clearTimeout(fallback);
-
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-
-            finalizeClose();
-        };
-
-        if (surface) {
-            surface.addEventListener("animationend", onAnimationEnd, { once: true });
-            return;
-        }
-
-        finalizeClose();
-    }
-
     private getFilteredRecords(): PatientRecord[] {
         const filtered = this.patientRecords.filter((record) => {
             const statusKind = record.statusFinanceiro.toLowerCase() as "pagante" | "isento";
@@ -536,81 +444,11 @@ export class PatientsController {
     }
 
     private startFloatingHomeHint(): void {
-        const toast = document.querySelector(".fh-floating-home-toast") as HTMLElement | null;
-        if (!toast || toast.dataset.started === "true") {
-            return;
-        }
-
-        toast.dataset.started = "true";
-        const intervalMs = 15000;
-
-        const pulse = (): void => {
-            toast.classList.remove("is-visible");
-            void toast.offsetWidth;
-            toast.classList.add("is-visible");
-        };
-
-        let nextTick = performance.now() + intervalMs;
-
-        const scheduleNext = (): void => {
-            const delay = Math.max(0, nextTick - performance.now());
-            window.setTimeout(() => {
-                pulse();
-                nextTick += intervalMs;
-                scheduleNext();
-            }, delay);
-        };
-
-        scheduleNext();
-    }
-
-    private getNotificationHost(): HTMLElement | null {
-        const baseHost = document.getElementById("siteNotifications") as HTMLElement | null;
-        if (!baseHost) {
-            return null;
-        }
-
-        const openDialogs = Array.from(document.querySelectorAll("dialog[open]")) as HTMLDialogElement[];
-        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
-        if (!topDialog) {
-            baseHost.classList.remove("fh-site-notifications--modal");
-            return baseHost;
-        }
-
-        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") as HTMLElement | null ?? topDialog;
-        let modalHost = surface.querySelector(".fh-site-notifications--modal") as HTMLElement | null;
-
-        if (!modalHost) {
-            modalHost = document.createElement("div");
-            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
-            modalHost.setAttribute("aria-live", "polite");
-            modalHost.setAttribute("aria-atomic", "false");
-            surface.appendChild(modalHost);
-        }
-
-        return modalHost;
+        sharedStartFloatingHomeHint();
     }
 
     private showSiteNotification(message: string): void {
-        const container = this.getNotificationHost();
-        if (!container) return;
-
-        const toast = document.createElement("div");
-        toast.className = "fh-site-toast";
-        toast.textContent = message;
-        container.appendChild(toast);
-
-        const beginClose = (): void => {
-            toast.classList.add("is-leaving");
-            const remove = (): void => {
-                toast.removeEventListener("animationend", remove);
-                toast.remove();
-            };
-
-            toast.addEventListener("animationend", remove);
-        };
-
-        window.setTimeout(beginClose, 2600);
+        sharedShowSiteNotification(message);
     }
 
     private setText(id: string, text: string): void {

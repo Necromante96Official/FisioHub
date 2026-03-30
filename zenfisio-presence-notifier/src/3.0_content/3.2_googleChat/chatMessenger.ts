@@ -2,38 +2,76 @@ const INPUT_SELECTORS = [
   "div[contenteditable='true'][role='textbox']",
   "div[contenteditable='true'][aria-label*='Mensagem']",
   "div[contenteditable='true'][aria-label*='message']",
-  "div[role='combobox'][contenteditable='true']"
+  "div[contenteditable='true'][data-placeholder*='Mensagem']",
+  "div[contenteditable='true'][data-placeholder*='message']",
+  "div[contenteditable='true'][data-emoji-root='true']",
+  "div[contenteditable='true'][data-tab='true']",
+  "div[role='combobox'][contenteditable='true']",
+  "div.editable[contenteditable='true']",
+  "div[contenteditable='true'][aria-label*='Chat']",
+  "div[contenteditable='true'][aria-label*='Bate-papo']",
+  "[aria-label='Mensagem'][contenteditable='true']",
+  "[aria-label*='Enviar mensagem'][contenteditable='true']"
 ] as const;
 
 const SEND_BUTTON_SELECTORS = [
   "button[aria-label='Enviar mensagem']",
   "button[aria-label='Send message']",
+  "button[data-tooltip='Send message']",
+  "button[data-tooltip='Enviar mensagem']",
+  "button[aria-label*='Enviar'][data-tooltip*='Mensagem']",
+  "button[aria-label*='Send'][data-tooltip*='Message']",
   "div[role='button'][aria-label*='Enviar']",
-  "div[role='button'][aria-label*='Send']"
+  "div[role='button'][data-tooltip*='Enviar']",
+  "div[role='button'][aria-label*='Send']",
+  "div[role='button'][data-tooltip*='Send']",
+  "span[data-tooltip*='Enviar'] button",
+  "span[data-tooltip*='Send'] button"
 ] as const;
 
 const WAIT_TIMEOUT_MS = 45000;
 
-const findVisibleEditable = (): HTMLElement | null => {
-  for (const selector of INPUT_SELECTORS) {
-    const list = Array.from(document.querySelectorAll<HTMLElement>(selector));
-    for (const element of list) {
-      if (!element.isContentEditable) {
-        continue;
-      }
-      const rect = element.getBoundingClientRect();
-      if (rect.width === 0 || rect.height === 0) {
-        continue;
-      }
-      const style = window.getComputedStyle(element);
-      if (style.display === "none" || style.visibility === "hidden") {
-        continue;
-      }
+const isEligibleInput = (element: HTMLElement): boolean => {
+  if (!element.isContentEditable) {
+    return false;
+  }
+
+  const style = window.getComputedStyle(element);
+  if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+    return false;
+  }
+
+  const rect = element.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {
+    return false;
+  }
+
+  return !element.hasAttribute("aria-hidden");
+};
+
+const findVisibleMatch = (collection: Iterable<HTMLElement>): HTMLElement | null => {
+  for (const element of collection) {
+    if (isEligibleInput(element)) {
       return element;
     }
   }
 
   return null;
+};
+
+const findFirstMatch = (): HTMLElement | null => {
+  for (const selector of INPUT_SELECTORS) {
+    const candidate = findVisibleMatch(document.querySelectorAll<HTMLElement>(selector));
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  return findVisibleMatch(document.querySelectorAll<HTMLElement>("[contenteditable='true']"));
+};
+
+const findVisibleEditable = (): HTMLElement | null => {
+  return findFirstMatch();
 };
 
 const waitForEditableInput = (): Promise<HTMLElement> => {
@@ -71,7 +109,11 @@ const waitForEditableInput = (): Promise<HTMLElement> => {
 };
 
 const findSendButton = (input: HTMLElement): HTMLElement | null => {
-  const roots: ParentNode[] = [input.parentElement || document, document];
+  const roots: ParentNode[] = [
+    input.closest("footer") || input.parentElement || document,
+    input.parentElement || document,
+    document
+  ];
 
   for (const root of roots) {
     for (const selector of SEND_BUTTON_SELECTORS) {
@@ -135,7 +177,7 @@ export const deliverChatMessage = async (messageText: string): Promise<void> => 
   const input = await waitForEditableInput();
   setInputText(input, messageText);
 
-  await new Promise(resolve => window.setTimeout(resolve, 120));
+  await new Promise(resolve => window.setTimeout(resolve, 150));
 
   const sendButton = findSendButton(input);
   if (sendButton) {

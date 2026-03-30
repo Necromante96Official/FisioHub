@@ -4,7 +4,7 @@
     z-index: 16;
     width: 100%;
     display: grid;
-    gap: var(--fh-s-2);
+    gap: 10px;
 }
 
 .fh-header {
@@ -26,11 +26,6 @@
     min-height: 72px;
     padding-block: clamp(8px, 1.2vw, 12px);
     justify-content: center;
-}
-
-.fh-header-bottom {
-    justify-content: center;
-    padding-block: clamp(8px, 1.2vw, 14px);
 }
 
 .fh-brand-block {
@@ -87,6 +82,15 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     font-weight: 600;
+}
+
+.fh-header-bottom {
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
 .fh-date-nav {

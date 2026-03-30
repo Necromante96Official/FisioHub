@@ -1,15 +1,16 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
+import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
+import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
-    legacyImportedDataStorageKey = "fisiohub-imported-data-lines-v1";
-    stagingDataStorageKey = "fisiohub-staging-data-v2";
-    processedDataStorageKey = "fisiohub-processed-data-v2";
-    evolucoesPendingHistoryStorageKey = "fisiohub-evolucoes-pending-history-v1";
-    doneEvolutionsStorageKey = "fisiohub-evolucoes-realizadas-v1";
-    referenceDateStorageKey = "fisiohub-reference-date-v1";
-    patientsRecordsStorageKey = "fisiohub-patients-records-v2";
-    processedMetaStorageKey = "fisiohub-processed-meta-v2";
+    legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
+    stagingDataStorageKey = FISIOHUB_STORAGE_KEYS.STAGING_DATA;
+    processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
+    evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
+    doneEvolutionsStorageKey = FISIOHUB_STORAGE_KEYS.DONE_EVOLUTIONS;
+    patientsRecordsStorageKey = FISIOHUB_STORAGE_KEYS.PATIENTS_RECORDS;
+    processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     theme = new ThemeManager();
     importedItems = [];
     nextItemId = 1;
@@ -20,8 +21,9 @@ export class HomeController {
         this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
         this.bindHandlers();
+        sharedBindHoverToasts({ scope: document });
         this.renderImportedData();
-        this.startFloatingHomeHint();
+        sharedStartFloatingHomeHint();
         window.addEventListener("storage", (event) => {
             if (event.key && !event.key.startsWith("fisiohub-")) {
                 return;
@@ -74,19 +76,15 @@ export class HomeController {
         });
         const clearOnlyDataBtn = document.getElementById("clearOnlyDataBtn") ?? this.ensureClearOnlyDataButton();
         clearOnlyDataBtn?.addEventListener("click", () => {
-            this.clearOnlyPageDataPreservingPatientsList();
+            this.clearAllStoredData();
         });
         const clearDataBtn = document.getElementById("clearDataBtn");
         clearDataBtn?.addEventListener("click", () => {
-            this.clearImportedDataOnly();
+            this.clearOnlyPageDataPreservingPatientsList();
         });
         const clearAllDataBtn = document.getElementById("clearAllDataBtn");
         clearAllDataBtn?.addEventListener("click", () => {
-            this.clearAllStoredData();
-        });
-        const clearPatientsListBtn = document.getElementById("clearPatientsListBtn");
-        clearPatientsListBtn?.addEventListener("click", () => {
-            this.clearPatientsListOnly();
+            this.clearImportedDataOnly();
         });
         const importedDataEditor = document.getElementById("importedDataEditor");
         importedDataEditor?.addEventListener("input", () => {
@@ -101,117 +99,63 @@ export class HomeController {
             this.persistReferenceDate(dateInput.value || this.todayIso());
             this.renderImportedData();
         });
-        document.getElementById("todayBtn")?.addEventListener("click", () => {
+        const todayBtn = document.getElementById("todayBtn");
+        todayBtn?.addEventListener("click", () => {
             this.setDate(this.todayIso());
             this.renderImportedData();
         });
-        document.getElementById("prevDayBtn")?.addEventListener("click", () => this.moveDateByDays(-1));
-        document.getElementById("nextDayBtn")?.addEventListener("click", () => this.moveDateByDays(1));
-        document.getElementById("prevMonthBtn")?.addEventListener("click", () => this.moveMonthStart(-1));
-        document.getElementById("nextMonthBtn")?.addEventListener("click", () => this.moveMonthStart(1));
-        const termsButton = document.getElementById("termsBtn");
-        const closeTermsButton = document.getElementById("closeTermsDialogBtn");
-        const termsDialog = this.getTermsDialog();
-        termsButton?.addEventListener("click", () => {
-            if (!termsDialog.open) {
-                termsDialog.classList.remove("is-opening");
-                termsDialog.classList.remove("is-closing");
-                termsDialog.removeAttribute("data-closing");
-                termsDialog.showModal();
-                window.requestAnimationFrame(() => {
-                    window.requestAnimationFrame(() => {
-                        termsDialog.classList.add("is-opening");
-                    });
-                });
-                const onOpenAnimationEnd = () => {
-                    termsDialog.classList.remove("is-opening");
-                    termsDialog.removeEventListener("animationend", onOpenAnimationEnd);
-                };
-                termsDialog.addEventListener("animationend", onOpenAnimationEnd);
-            }
-        });
-        closeTermsButton?.addEventListener("click", () => {
-            this.requestTermsClose(termsDialog);
-        });
-        termsDialog?.addEventListener("cancel", (event) => {
-            this.requestTermsClose(termsDialog, event);
-        });
-        const openBackupsBtn = document.getElementById("openBackupsBtn");
-        const backupsDialog = this.getBackupsDialog();
-        const closeBackupsBtn = document.getElementById("closeBackupsDialogBtn");
-        openBackupsBtn?.addEventListener("click", () => {
-            if (!backupsDialog.open) {
-                backupsDialog.showModal();
-            }
-        });
-        closeBackupsBtn?.addEventListener("click", () => {
-            if (backupsDialog.open)
-                backupsDialog.close();
-        });
-        backupsDialog?.addEventListener("click", (event) => {
-            if (event.target === backupsDialog) {
-                backupsDialog.close();
-            }
-        });
-        document.getElementById("exportAllDataBtn")?.addEventListener("click", () => {
-            this.exportBackup("all");
-        });
-        document.getElementById("exportPatientsOnlyBtn")?.addEventListener("click", () => {
-            this.exportBackup("patients-only");
-        });
-        document.getElementById("exportAllWithoutPatientsBtn")?.addEventListener("click", () => {
-            this.exportBackup("all-without-patients");
-        });
-        document.getElementById("importAllDataBtn")?.addEventListener("click", async () => {
-            await this.importBackup("all");
-        });
-        document.getElementById("importPatientsOnlyBtn")?.addEventListener("click", async () => {
-            await this.importBackup("patients-only");
-        });
-        document.getElementById("importAllWithoutPatientsBtn")?.addEventListener("click", async () => {
-            await this.importBackup("all-without-patients");
-        });
+        const prevDayBtn = document.getElementById("prevDayBtn");
+        prevDayBtn?.addEventListener("click", () => this.moveDateByDays(-1));
+        const nextDayBtn = document.getElementById("nextDayBtn");
+        nextDayBtn?.addEventListener("click", () => this.moveDateByDays(1));
+        const prevMonthBtn = document.getElementById("prevMonthBtn");
+        prevMonthBtn?.addEventListener("click", () => this.moveMonthStart(-1));
+        const nextMonthBtn = document.getElementById("nextMonthBtn");
+        nextMonthBtn?.addEventListener("click", () => this.moveMonthStart(1));
     }
-    getTermsDialog() {
-        return document.getElementById("termsDialog");
+    getDateInput() {
+        return document.getElementById("refDate");
     }
-    getBackupsDialog() {
-        return document.getElementById("backupsDialog");
+    getCurrentDate() {
+        const dateInput = this.getDateInput();
+        return dateInput?.value || this.getStoredReferenceDate() || this.todayIso();
     }
-    requestTermsClose(dialog, event) {
-        event?.preventDefault();
-        if (!dialog.open || dialog.dataset.closing === "true") {
+    setDate(value) {
+        const dateInput = this.getDateInput();
+        if (!dateInput)
+            return;
+        dateInput.value = value;
+        this.persistReferenceDate(value);
+    }
+    getStoredReferenceDate() {
+        const stored = localStorage.getItem(FISIOHUB_STORAGE_KEYS.REFERENCE_DATE);
+        if (!stored)
+            return null;
+        const date = new Date(`${stored}T00:00:00`);
+        if (Number.isNaN(date.getTime())) {
+            return null;
+        }
+        return stored;
+    }
+    persistReferenceDate(value) {
+        const parsed = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(parsed.getTime())) {
             return;
         }
-        dialog.dataset.closing = "true";
-        dialog.classList.remove("is-opening");
-        dialog.classList.add("is-closing");
-        const surface = dialog.querySelector(".fh-terms-surface");
-        const finalizeClose = () => {
-            dialog.classList.remove("is-closing");
-            dialog.removeAttribute("data-closing");
-            if (dialog.open) {
-                dialog.close();
-            }
-        };
-        const fallback = window.setTimeout(() => {
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-            finalizeClose();
-        }, 560);
-        const onAnimationEnd = () => {
-            window.clearTimeout(fallback);
-            if (surface) {
-                surface.removeEventListener("animationend", onAnimationEnd);
-            }
-            finalizeClose();
-        };
-        if (surface) {
-            surface.addEventListener("animationend", onAnimationEnd, { once: true });
-            return;
-        }
-        finalizeClose();
+        const normalized = this.toIso(parsed);
+        localStorage.setItem(FISIOHUB_STORAGE_KEYS.REFERENCE_DATE, normalized);
+    }
+    moveDateByDays(days) {
+        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
+        current.setDate(current.getDate() + days);
+        this.setDate(this.toIso(current));
+        this.renderImportedData();
+    }
+    moveMonthStart(monthShift) {
+        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
+        current.setMonth(current.getMonth() + monthShift, 1);
+        this.setDate(this.toIso(current));
+        this.renderImportedData();
     }
     async processAndPersistData() {
         const stagedLines = this.importedItems.map((item) => item.raw.trim()).filter((line) => line.length > 0);
@@ -231,7 +175,7 @@ export class HomeController {
             this.importedItems = linesForProcessing.map((line) => ({
                 id: this.nextItemId++,
                 raw: line,
-                dateIso: this.extractIsoDate(line) ?? this.getCurrentDate()
+                dateIso: this.extractIsoDate(line) ?? this.todayIso()
             }));
             this.saveStagingDataToStorage();
             this.renderImportedData();
@@ -366,7 +310,17 @@ export class HomeController {
         button.id = "clearOnlyDataBtn";
         button.className = "fh-btn fh-btn-ghost";
         button.type = "button";
-        button.textContent = "Limpar Somente Dados";
+        button.textContent = "Limpar Tudo";
+        const panelActionsLeft = document.querySelector(".fh-panel-actions-left");
+        const clearAllDataButton = document.getElementById("clearAllDataBtn");
+        if (clearAllDataButton && panelActionsLeft && clearAllDataButton.parentElement === panelActionsLeft) {
+            panelActionsLeft.insertBefore(button, clearAllDataButton.nextSibling);
+            return button;
+        }
+        if (panelActionsLeft) {
+            panelActionsLeft.appendChild(button);
+            return button;
+        }
         const clearDataButton = document.getElementById("clearDataBtn");
         if (clearDataButton?.parentElement === panelActions) {
             panelActions.insertBefore(button, clearDataButton);
@@ -397,7 +351,7 @@ export class HomeController {
             this.processedMetaStorageKey,
             this.evolucoesPendingHistoryStorageKey,
             this.doneEvolutionsStorageKey,
-            this.referenceDateStorageKey
+            FISIOHUB_STORAGE_KEYS.REFERENCE_DATE
         ];
         keysToRemove.forEach((key) => localStorage.removeItem(key));
         this.importedItems = [];
@@ -405,12 +359,6 @@ export class HomeController {
         this.setDate(this.todayIso());
         this.renderImportedData();
         this.showSiteNotification("Dados das páginas foram limpos. A Lista de Pacientes foi preservada.");
-    }
-    clearPatientsListOnly() {
-        localStorage.removeItem(this.patientsRecordsStorageKey);
-        this.persistReferenceDate(this.getCurrentDate());
-        this.renderImportedData();
-        this.showSiteNotification("Somente a Lista de Pacientes foi limpa. As demais páginas foram preservadas.");
     }
     appendEvolucoesPendingBatch(batch) {
         const history = this.readEvolucoesPendingHistory();
@@ -865,14 +813,7 @@ export class HomeController {
         const exitBtn = document.getElementById("exitPatientConflictBtn");
         const confirmBtn = document.getElementById("confirmPatientConflictBtn");
         const autoFillBtn = document.getElementById("autoFillRequiredBtn");
-        const procedureDialog = document.getElementById("procedurePickerDialog");
-        const procedureTitle = document.getElementById("procedurePickerTitle");
-        const procedureMessage = document.getElementById("procedurePickerMessage");
-        const procedureSearch = document.getElementById("procedurePickerSearch");
-        const procedureCount = document.getElementById("procedurePickerCount");
-        const procedureList = document.getElementById("procedurePickerList");
-        const closeProcedureBtn = document.getElementById("closeProcedurePickerBtn");
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureDialog || !procedureTitle || !procedureMessage || !procedureSearch || !procedureCount || !procedureList || !closeProcedureBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn) {
             return Promise.resolve(null);
         }
         title.textContent = "Correção obrigatória de dados";
@@ -884,7 +825,6 @@ export class HomeController {
         autoFillBtn.disabled = false;
         autoFillBtn.textContent = "Auto completar";
         const savedPatientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
-        const procedureSuggestions = this.collectProcedureSuggestions(savedPatientsRecords);
         list.innerHTML = issues.map((issue) => {
             const fields = issue.missingFields.map((field) => {
                 const label = this.getRequiredFieldLabel(field);
@@ -893,24 +833,14 @@ export class HomeController {
                     return `
                                                 <label class="fh-required-field">
                                                     <span>${this.escapeHtml(label)}</span>
-                                                    <div class="fh-required-field-row">
-                                                        <input
-                                                            class="fh-required-input"
-                                                            type="text"
-                                                            data-required-field="${field}"
-                                                            data-issue-index="${issue.blockIndex}"
-                                                            value="${this.escapeHtmlAttr(value)}"
-                                                            autocomplete="off"
-                                                            required>
-                                                        <button
-                                                            class="fh-btn fh-btn-ghost fh-required-search-btn"
-                                                            type="button"
-                                                            data-procedure-search="true"
-                                                            data-issue-index="${issue.blockIndex}"
-                                                            aria-label="Procurar procedimento salvo">
-                                                            Procurar
-                                                        </button>
-                                                    </div>
+                                                    <input
+                                                        class="fh-required-input"
+                                                        type="text"
+                                                        data-required-field="${field}"
+                                                        data-issue-index="${issue.blockIndex}"
+                                                        value="${this.escapeHtmlAttr(value)}"
+                                                        autocomplete="off"
+                                                        required>
                                                 </label>
                                         `;
                 }
@@ -1003,117 +933,6 @@ export class HomeController {
                     return record.convenio;
                 return record.procedimentos;
             };
-            const openProcedurePicker = (issue, targetInput) => {
-                if (procedureSuggestions.length === 0) {
-                    this.showSiteNotification("Nao ha procedimentos salvos na lista de pacientes.");
-                    return Promise.resolve(null);
-                }
-                procedureTitle.textContent = issue.patientName ? `Procedimentos salvos — ${issue.patientName}` : "Procedimentos salvos";
-                procedureMessage.textContent = "Escolha um procedimento já salvo na lista de pacientes. A seleção é opcional.";
-                return new Promise((resolve) => {
-                    const pickerController = new AbortController();
-                    const { signal: pickerSignal } = pickerController;
-                    let resolved = false;
-                    const cleanup = () => {
-                        pickerController.abort();
-                    };
-                    const resolveOnce = (value) => {
-                        if (resolved)
-                            return;
-                        resolved = true;
-                        cleanup();
-                        resolve(value);
-                    };
-                    const formatProcedureCount = (count) => {
-                        return count === 1 ? "1 procedimento encontrado" : `${count} procedimentos encontrados`;
-                    };
-                    const renderProcedureList = () => {
-                        const search = this.normalizeKey(procedureSearch.value);
-                        const visibleProcedures = search.length === 0
-                            ? procedureSuggestions
-                            : procedureSuggestions.filter((procedure) => this.normalizeKey(procedure).includes(search));
-                        procedureCount.textContent = search.length === 0
-                            ? `${procedureSuggestions.length} procedimento(s) salvo(s)`
-                            : formatProcedureCount(visibleProcedures.length);
-                        if (visibleProcedures.length === 0) {
-                            procedureList.innerHTML = '<p class="fh-procedure-empty">Nenhum procedimento encontrado para essa busca.</p>';
-                            return;
-                        }
-                        procedureList.innerHTML = visibleProcedures.map((procedure) => {
-                            return `
-                                <button class="fh-procedure-choice" type="button" data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
-                                  <span class="fh-procedure-choice-main">
-                                    <span class="fh-procedure-choice-name">${this.escapeHtml(procedure)}</span>
-                                    <span class="fh-procedure-choice-meta">Selecionar procedimento</span>
-                                  </span>
-                                  <span class="fh-procedure-choice-meta">Opcional</span>
-                                </button>
-                            `;
-                        }).join("");
-                    };
-                    const closePicker = () => {
-                        resolveOnce(null);
-                        window.setTimeout(() => {
-                            if (procedureDialog.open)
-                                procedureDialog.close();
-                        }, 0);
-                    };
-                    const onPickerClick = (event) => {
-                        const rawTarget = event.target;
-                        const targetElement = rawTarget instanceof Element
-                            ? rawTarget
-                            : rawTarget instanceof Node
-                                ? rawTarget.parentElement
-                                : null;
-                        if (!targetElement)
-                            return;
-                        const button = targetElement.closest("button[data-procedure-choice]");
-                        if (!button)
-                            return;
-                        const procedure = button.dataset.procedureChoice?.trim() ?? "";
-                        if (!procedure)
-                            return;
-                        targetInput.value = procedure;
-                        updateConfirmState();
-                        resolveOnce(procedure);
-                        window.setTimeout(() => {
-                            if (procedureDialog.open) {
-                                procedureDialog.close();
-                            }
-                        }, 0);
-                    };
-                    const onPickerSearch = () => {
-                        renderProcedureList();
-                    };
-                    const onPickerCancel = (event) => {
-                        event.preventDefault();
-                        closePicker();
-                    };
-                    const onPickerClose = () => {
-                        resolveOnce(null);
-                    };
-                    const onPickerBackdropClick = (event) => {
-                        if (event.target === procedureDialog) {
-                            closePicker();
-                        }
-                    };
-                    procedureList.addEventListener("click", onPickerClick, { signal: pickerSignal });
-                    procedureSearch.addEventListener("input", onPickerSearch, { signal: pickerSignal });
-                    closeProcedureBtn.addEventListener("click", closePicker, { once: true, signal: pickerSignal });
-                    procedureDialog.addEventListener("cancel", onPickerCancel, { signal: pickerSignal });
-                    procedureDialog.addEventListener("close", onPickerClose, { signal: pickerSignal });
-                    procedureDialog.addEventListener("click", onPickerBackdropClick, { signal: pickerSignal });
-                    procedureSearch.value = "";
-                    renderProcedureList();
-                    if (!procedureDialog.open) {
-                        procedureDialog.showModal();
-                    }
-                    window.setTimeout(() => {
-                        procedureSearch.focus();
-                        procedureSearch.select();
-                    }, 0);
-                });
-            };
             const onInput = () => {
                 updateConfirmState();
             };
@@ -1156,20 +975,6 @@ export class HomeController {
                         : null;
                 if (!targetElement)
                     return;
-                const searchButton = targetElement.closest("button[data-procedure-search]");
-                if (searchButton) {
-                    const issueIndex = Number(searchButton.dataset.issueIndex);
-                    if (!Number.isFinite(issueIndex))
-                        return;
-                    const issue = issues.find((item) => item.blockIndex === issueIndex);
-                    if (!issue)
-                        return;
-                    const targetInput = list.querySelector(`input[data-issue-index="${issueIndex}"][data-required-field="procedimentos"]`);
-                    if (!targetInput)
-                        return;
-                    void openProcedurePicker(issue, targetInput);
-                    return;
-                }
             };
             const onConfirm = () => {
                 if (confirmBtn.disabled)
@@ -1334,50 +1139,6 @@ export class HomeController {
         }
         return null;
     }
-    getCurrentDate() {
-        const dateInput = this.getDateInput();
-        return dateInput?.value || this.getStoredReferenceDate() || this.todayIso();
-    }
-    getDateInput() {
-        return document.getElementById("refDate");
-    }
-    setDate(value) {
-        const dateInput = this.getDateInput();
-        if (!dateInput)
-            return;
-        dateInput.value = value;
-        this.persistReferenceDate(value);
-    }
-    getStoredReferenceDate() {
-        const stored = localStorage.getItem(this.referenceDateStorageKey);
-        if (!stored)
-            return null;
-        const date = new Date(`${stored}T00:00:00`);
-        if (Number.isNaN(date.getTime())) {
-            return null;
-        }
-        return stored;
-    }
-    persistReferenceDate(value) {
-        const parsed = new Date(`${value}T00:00:00`);
-        if (Number.isNaN(parsed.getTime())) {
-            return;
-        }
-        const normalized = this.toIso(parsed);
-        localStorage.setItem(this.referenceDateStorageKey, normalized);
-    }
-    moveDateByDays(days) {
-        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
-        current.setDate(current.getDate() + days);
-        this.setDate(this.toIso(current));
-        this.renderImportedData();
-    }
-    moveMonthStart(monthShift) {
-        const current = new Date(`${this.getCurrentDate()}T00:00:00`);
-        current.setMonth(current.getMonth() + monthShift, 1);
-        this.setDate(this.toIso(current));
-        this.renderImportedData();
-    }
     toIso(date) {
         const yyyy = date.getFullYear();
         const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -1484,67 +1245,10 @@ export class HomeController {
         }).filter((record) => record.nome.trim().length > 0);
     }
     startFloatingHomeHint() {
-        const toast = document.querySelector(".fh-floating-home-toast");
-        if (!toast || toast.dataset.started === "true") {
-            return;
-        }
-        toast.dataset.started = "true";
-        const intervalMs = 15000;
-        const pulse = () => {
-            toast.classList.remove("is-visible");
-            void toast.offsetWidth;
-            toast.classList.add("is-visible");
-        };
-        let nextTick = performance.now() + intervalMs;
-        const scheduleNext = () => {
-            const delay = Math.max(0, nextTick - performance.now());
-            window.setTimeout(() => {
-                pulse();
-                nextTick += intervalMs;
-                scheduleNext();
-            }, delay);
-        };
-        scheduleNext();
-    }
-    getNotificationHost() {
-        const baseHost = document.getElementById("siteNotifications");
-        if (!baseHost) {
-            return null;
-        }
-        const openDialogs = Array.from(document.querySelectorAll("dialog[open]"));
-        const topDialog = openDialogs.length > 0 ? openDialogs[openDialogs.length - 1] : null;
-        if (!topDialog) {
-            baseHost.classList.remove("fh-site-notifications--modal");
-            return baseHost;
-        }
-        const surface = topDialog.querySelector(".fh-conflict-surface, .fh-backups-surface, .fh-terms-surface") ?? topDialog;
-        let modalHost = surface.querySelector(".fh-site-notifications--modal");
-        if (!modalHost) {
-            modalHost = document.createElement("div");
-            modalHost.className = "fh-site-notifications fh-site-notifications--modal";
-            modalHost.setAttribute("aria-live", "polite");
-            modalHost.setAttribute("aria-atomic", "false");
-            surface.appendChild(modalHost);
-        }
-        return modalHost;
+        sharedStartFloatingHomeHint();
     }
     showSiteNotification(message) {
-        const container = this.getNotificationHost();
-        if (!container)
-            return;
-        const toast = document.createElement("div");
-        toast.className = "fh-site-toast";
-        toast.textContent = message;
-        container.appendChild(toast);
-        const beginClose = () => {
-            toast.classList.add("is-leaving");
-            const remove = () => {
-                toast.removeEventListener("animationend", remove);
-                toast.remove();
-            };
-            toast.addEventListener("animationend", remove);
-        };
-        window.setTimeout(beginClose, 2600);
+        sharedShowSiteNotification(message);
     }
 }
 //# sourceMappingURL=home-controller.js.map
