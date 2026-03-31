@@ -14,8 +14,8 @@
 }
 
 .fh-panel {
-    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
-    border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 96%, transparent), color-mix(in srgb, var(--fh-surface-2) 98%, transparent));
+    border: 1px solid color-mix(in srgb, var(--fh-border) 86%, transparent);
     border-radius: var(--fh-r-3);
     box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.03);
     padding: clamp(12px, 1.8vw, 20px);
@@ -54,9 +54,9 @@
 .fh-panel-body {
     width: 100%;
     padding: 12px;
-    border: 1px solid color-mix(in srgb, var(--fh-border) 78%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 80%, transparent);
     border-radius: var(--fh-r-2);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
     min-height: 0;
     flex: 1 1 auto;
@@ -115,7 +115,8 @@
     flex-wrap: wrap;
     margin-top: auto;
     padding-top: var(--fh-s-2);
-    padding-bottom: var(--fh-s-1);
+    padding-bottom: var(--fh-s-2);
+    align-items: flex-start;
 }
 
 .fh-panel-actions-left,
@@ -124,14 +125,21 @@
     gap: var(--fh-s-2);
     flex-wrap: wrap;
     align-items: center;
+    min-width: 0;
 }
 
 .fh-panel-actions-left {
     margin-right: auto;
+    flex: 1 1 240px;
 }
 
 .fh-panel-actions-right {
     justify-content: flex-end;
+    flex: 2 1 360px;
+}
+
+.fh-panel-actions .fh-btn {
+    min-width: 0;
 }
 
 .fh-backups-dialog {
@@ -665,11 +673,30 @@
     }
 
     .fh-panel-actions {
-        justify-content: center;
+        justify-content: stretch;
+        align-items: stretch;
     }
 
     .fh-panel-actions-left {
         margin-right: 0;
+        flex: 1 1 auto;
+    }
+
+    .fh-panel-actions-left,
+    .fh-panel-actions-right {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .fh-panel-actions .fh-btn {
+        flex: 1 1 180px;
+        white-space: normal;
+        line-height: 1.2;
+        min-height: 38px;
+    }
+
+    .fh-panel-actions-right .fh-btn:last-child {
+        flex-basis: 100%;
     }
 
     .fh-backups-content {

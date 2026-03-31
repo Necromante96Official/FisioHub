@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
+import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type PendingEvolutionRecord = {
     nome: string;
@@ -44,7 +44,7 @@ export class EvolucoesController {
 
     private allPendingRecords: PendingEvolutionRecord[] = [];
     private visiblePendingRecords: PendingEvolutionRecord[] = [];
-    private expandedDetails = new Set<string>();
+    private selectedPatientKey: string | null = null;
     private activeSearch = "";
     private activeDateMode: DateMode = "all";
     private activeSpecificDate = this.todayIso();
@@ -58,6 +58,12 @@ export class EvolucoesController {
         this.theme.init();
         await this.loadPage();
         await this.resolveIncludes();
+        await syncFooterMetadata();
+        bindTermsDialog({
+            dialogId: "termsDialog",
+            triggerButtonId: "footerTermsBtn",
+            closeButtonId: "closeTermsDialogBtn"
+        });
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.render();
@@ -113,14 +119,7 @@ export class EvolucoesController {
             if (detailsButton) {
                 const patientKey = detailsButton.dataset.patientDetails;
                 if (!patientKey) return;
-
-                if (this.expandedDetails.has(patientKey)) {
-                    this.expandedDetails.delete(patientKey);
-                } else {
-                    this.expandedDetails.add(patientKey);
-                }
-
-                this.render();
+                this.openDetails(patientKey);
                 return;
             }
 
@@ -188,6 +187,36 @@ export class EvolucoesController {
             }
         });
 
+        const dialog = this.getDetailsDialog();
+        const closeButton = document.getElementById("closeEvolucoesDetailsBtn");
+
+        closeButton?.addEventListener("click", () => {
+            if (dialog.open) {
+                dialog.close();
+            }
+        });
+
+        dialog.addEventListener("click", (event) => {
+            if (event.target === dialog) {
+                dialog.close();
+            }
+        });
+
+        dialog.addEventListener("close", () => {
+            this.selectedPatientKey = null;
+        });
+
+        dialog.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement;
+            const doneButton = target.closest("button[data-signature]") as HTMLButtonElement | null;
+            if (!doneButton) return;
+
+            const signature = doneButton.dataset.signature;
+            if (!signature) return;
+
+            this.markAsDone(signature);
+        });
+
     }
 
     private render(): void {
@@ -212,17 +241,17 @@ export class EvolucoesController {
         if (this.visiblePendingRecords.length === 0) {
             const row = document.createElement("tr");
             const cell = document.createElement("td");
-            cell.colSpan = 6;
+            cell.colSpan = 5;
             cell.className = "fh-evolucoes-empty";
             cell.textContent = "Nenhuma evolucao pendente encontrada para os filtros atuais.";
             row.appendChild(cell);
             tableBody.appendChild(row);
+            this.renderSelectedModal();
             return;
         }
 
         visibleGroups.forEach((group) => {
             const firstRecord = group.records[0];
-            const isExpanded = this.expandedDetails.has(group.nomeNormalizado);
 
             const row = document.createElement("tr");
 
@@ -234,8 +263,7 @@ export class EvolucoesController {
             detailsButton.type = "button";
             detailsButton.className = "fh-evolucao-details-btn";
             detailsButton.dataset.patientDetails = group.nomeNormalizado;
-            detailsButton.setAttribute("aria-expanded", isExpanded ? "true" : "false");
-            detailsButton.textContent = isExpanded ? "Ocultar detalhes" : "Ver mais...";
+            detailsButton.textContent = "Ver mais...";
             detailsCell.appendChild(detailsButton);
 
             const timeCell = document.createElement("td");
@@ -247,101 +275,16 @@ export class EvolucoesController {
             const pendingCell = document.createElement("td");
             pendingCell.textContent = String(countsByPatient.get(group.nomeNormalizado) ?? group.records.length);
 
-            const actionCell = document.createElement("td");
-            const doneButton = document.createElement("button");
-            doneButton.type = "button";
-            doneButton.className = "fh-evolucao-done-btn";
-            doneButton.dataset.signature = firstRecord.assinatura;
-            doneButton.textContent = "Evoluído";
-            actionCell.appendChild(doneButton);
-
             row.appendChild(nameCell);
             row.appendChild(detailsCell);
             row.appendChild(timeCell);
             row.appendChild(procedureCell);
             row.appendChild(pendingCell);
-            row.appendChild(actionCell);
 
             tableBody.appendChild(row);
-
-            if (!isExpanded) {
-                return;
-            }
-
-            const detailRow = document.createElement("tr");
-            detailRow.className = "fh-evolucoes-detail-row";
-
-            const detailCell = document.createElement("td");
-            detailCell.colSpan = 6;
-
-            const detailPanel = document.createElement("div");
-            detailPanel.className = "fh-evolucoes-detail-panel";
-
-            const detailHeader = document.createElement("div");
-            detailHeader.className = "fh-evolucoes-detail-header";
-
-            const titleWrapper = document.createElement("div");
-            const title = document.createElement("h3");
-            title.textContent = `Pendências de ${group.nome}`;
-            const subtitle = document.createElement("p");
-            subtitle.textContent = "Todas as datas, horários e procedimentos pendentes deste paciente.";
-            titleWrapper.appendChild(title);
-            titleWrapper.appendChild(subtitle);
-
-            const count = document.createElement("p");
-            count.textContent = `${group.records.length} item(ns) pendente(s)`;
-
-            detailHeader.appendChild(titleWrapper);
-            detailHeader.appendChild(count);
-
-            const detailList = document.createElement("div");
-            detailList.className = "fh-evolucoes-detail-list";
-
-            group.records.forEach((pendingRecord) => {
-                const detailItem = document.createElement("div");
-                detailItem.className = "fh-evolucoes-detail-item";
-
-                const meta = document.createElement("div");
-                meta.className = "fh-evolucoes-detail-meta";
-
-                const datePair = document.createElement("span");
-                const dateLabel = document.createElement("span");
-                dateLabel.textContent = "Data: ";
-                const dateValue = document.createElement("strong");
-                dateValue.textContent = pendingRecord.dataLabel;
-                datePair.appendChild(dateLabel);
-                datePair.appendChild(dateValue);
-
-                const timePair = document.createElement("span");
-                const timeLabel = document.createElement("span");
-                timeLabel.textContent = "Horário: ";
-                const timeValue = document.createElement("strong");
-                timeValue.textContent = pendingRecord.horario;
-                timePair.appendChild(timeLabel);
-                timePair.appendChild(timeValue);
-
-                const procedurePair = document.createElement("span");
-                const procedureLabel = document.createElement("span");
-                procedureLabel.textContent = "Procedimento: ";
-                const procedureValue = document.createElement("strong");
-                procedureValue.textContent = pendingRecord.procedimento;
-                procedurePair.appendChild(procedureLabel);
-                procedurePair.appendChild(procedureValue);
-
-                meta.appendChild(datePair);
-                meta.appendChild(timePair);
-                meta.appendChild(procedurePair);
-
-                detailItem.appendChild(meta);
-                detailList.appendChild(detailItem);
-            });
-
-            detailPanel.appendChild(detailHeader);
-            detailPanel.appendChild(detailList);
-            detailCell.appendChild(detailPanel);
-            detailRow.appendChild(detailCell);
-            tableBody.appendChild(detailRow);
         });
+
+        this.renderSelectedModal();
     }
 
     private groupRecordsByPatient(records: PendingEvolutionRecord[]): PendingEvolutionGroup[] {
@@ -464,6 +407,82 @@ export class EvolucoesController {
             counts.set(record.nomeNormalizado, (counts.get(record.nomeNormalizado) ?? 0) + 1);
         });
         return counts;
+    }
+
+    private renderSelectedModal(): void {
+        const dialog = this.getDetailsDialog();
+        const list = document.getElementById("evolucoesDetailsList") as HTMLDivElement | null;
+        const title = document.getElementById("evolucoesDetailsTitle");
+        const subtitle = document.getElementById("evolucoesDetailsSubtitle");
+        const count = document.getElementById("evolucoesDetailsCount");
+        const emptyState = document.getElementById("evolucoesDetailsEmpty");
+
+        const selectedGroup = this.selectedPatientKey
+            ? this.groupRecordsByPatient(this.allPendingRecords).find((group) => group.nomeNormalizado === this.selectedPatientKey) ?? null
+            : null;
+
+        if (!selectedGroup) {
+            if (dialog.open) {
+                dialog.close();
+            }
+
+            if (list) list.innerHTML = "";
+            if (title) title.textContent = "-";
+            if (subtitle) subtitle.textContent = "-";
+            if (count) count.textContent = "0 item(ns) pendente(s)";
+            if (emptyState) emptyState.hidden = false;
+            return;
+        }
+
+        if (title) title.textContent = selectedGroup.nome;
+        if (subtitle) subtitle.textContent = "Todas as pendências deste paciente aparecem abaixo, uma por data.";
+        if (count) count.textContent = `${selectedGroup.records.length} item(ns) pendente(s)`;
+
+        if (!list) return;
+
+        const orderedRecords = this.sortRecordsByDateDesc(selectedGroup.records);
+
+        if (orderedRecords.length === 0) {
+            list.innerHTML = "";
+            if (emptyState) emptyState.hidden = false;
+        } else {
+            if (emptyState) emptyState.hidden = true;
+            list.innerHTML = orderedRecords.map((record) => `
+                <article class="fh-evolucoes-dialog-item">
+                    <div class="fh-evolucoes-dialog-item-main">
+                        <strong>${this.escapeHtml(record.dataLabel)}</strong>
+                        <span>${this.escapeHtml(record.horario)}</span>
+                    </div>
+                    <p>${this.escapeHtml(record.procedimento)}</p>
+                    <div class="fh-evolucoes-dialog-item-actions">
+                        <button type="button" class="fh-btn fh-evolucao-done-btn" data-signature="${this.escapeHtmlAttr(record.assinatura)}">Evoluído</button>
+                    </div>
+                </article>
+            `).join("");
+        }
+
+        if (!dialog.open) {
+            dialog.showModal();
+        }
+    }
+
+    private openDetails(patientKey: string): void {
+        this.selectedPatientKey = patientKey;
+        this.renderSelectedModal();
+    }
+
+    private getDetailsDialog(): HTMLDialogElement {
+        return document.getElementById("evolucoesDetailsDialog") as HTMLDialogElement;
+    }
+
+    private sortRecordsByDateDesc(records: PendingEvolutionRecord[]): PendingEvolutionRecord[] {
+        return [...records].sort((a, b) => {
+            if (a.dataIso !== b.dataIso) {
+                return b.dataIso.localeCompare(a.dataIso);
+            }
+
+            return b.horario.localeCompare(a.horario);
+        });
     }
 
     private matchesDateMode(recordDateIso: string): boolean {

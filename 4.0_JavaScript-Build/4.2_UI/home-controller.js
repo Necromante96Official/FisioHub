@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
+import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
@@ -18,6 +18,12 @@ export class HomeController {
         this.theme.init();
         await this.loadHome();
         await this.resolveIncludes();
+        await syncFooterMetadata();
+        bindTermsDialog({
+            dialogId: "termsDialog",
+            triggerButtonId: "footerTermsBtn",
+            closeButtonId: "closeTermsDialogBtn"
+        });
         this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
         this.bindHandlers();
@@ -112,6 +118,50 @@ export class HomeController {
         prevMonthBtn?.addEventListener("click", () => this.moveMonthStart(-1));
         const nextMonthBtn = document.getElementById("nextMonthBtn");
         nextMonthBtn?.addEventListener("click", () => this.moveMonthStart(1));
+        const backupsDialog = document.getElementById("backupsDialog");
+        const backupsOpenBtn = document.getElementById("backupsBtn");
+        const backupsCloseBtn = document.getElementById("closeBackupsDialogBtn");
+        backupsOpenBtn?.addEventListener("click", () => {
+            if (!backupsDialog?.open) {
+                backupsDialog?.showModal();
+            }
+        });
+        backupsCloseBtn?.addEventListener("click", () => {
+            backupsDialog?.close();
+        });
+        backupsDialog?.addEventListener("click", (event) => {
+            if (event.target === backupsDialog) {
+                backupsDialog.close();
+            }
+        });
+        backupsDialog?.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            backupsDialog.close();
+        });
+        document.getElementById("exportAllBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            this.exportBackup("all");
+        });
+        document.getElementById("exportPatientsOnlyBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            this.exportBackup("patients-only");
+        });
+        document.getElementById("exportAllWithoutPatientsBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            this.exportBackup("all-without-patients");
+        });
+        document.getElementById("importAllBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            void this.importBackup("all");
+        });
+        document.getElementById("importPatientsOnlyBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            void this.importBackup("patients-only");
+        });
+        document.getElementById("importAllWithoutPatientsBackupBtn")?.addEventListener("click", () => {
+            backupsDialog?.close();
+            void this.importBackup("all-without-patients");
+        });
     }
     getDateInput() {
         return document.getElementById("refDate");

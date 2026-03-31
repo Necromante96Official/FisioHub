@@ -13,6 +13,7 @@
 
   <div class="fh-panel-actions">
     <div class="fh-panel-actions-left">
+      <button id="backupsBtn" class="fh-btn fh-btn-success" type="button" data-hover-description="Abre as opções de backup e restauração.">Backups</button>
       <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button" data-hover-description="Limpa todos os dados das páginas, mantendo a Lista de Pacientes intacta.">Limpar Dados</button>
     </div>
 
@@ -23,6 +24,31 @@
     </div>
     <input id="importFileInput" type="file" accept=".txt,.json" hidden>
   </div>
+
+  <dialog id="backupsDialog" class="fh-backups-dialog" aria-labelledby="backupsTitle">
+    <article class="fh-backups-surface">
+      <header class="fh-backups-header">
+        <h3 id="backupsTitle">Backups</h3>
+        <button id="closeBackupsDialogBtn" class="fh-btn fh-btn-ghost" type="button">Fechar</button>
+      </header>
+
+      <div class="fh-backups-content">
+        <div class="fh-backups-column">
+          <h4>Exportar</h4>
+          <button id="exportAllBackupBtn" class="fh-btn fh-btn-success" type="button">Backup completo</button>
+          <button id="exportPatientsOnlyBackupBtn" class="fh-btn" type="button">Somente pacientes</button>
+          <button id="exportAllWithoutPatientsBackupBtn" class="fh-btn fh-btn-ghost" type="button">Sem pacientes</button>
+        </div>
+
+        <div class="fh-backups-column">
+          <h4>Importar</h4>
+          <button id="importAllBackupBtn" class="fh-btn fh-btn-success" type="button">Importar completo</button>
+          <button id="importPatientsOnlyBackupBtn" class="fh-btn" type="button">Importar pacientes</button>
+          <button id="importAllWithoutPatientsBackupBtn" class="fh-btn fh-btn-ghost" type="button">Importar sem pacientes</button>
+        </div>
+      </div>
+    </article>
+  </dialog>
 
   <dialog id="patientConflictDialog" class="fh-conflict-dialog" aria-labelledby="patientConflictTitle">
     <article class="fh-conflict-surface">

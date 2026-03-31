@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint } from "../4.0_Shared/ui-feedback.js";
+import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
     private readonly appId = "app";
@@ -20,6 +20,12 @@ export class PatientsController {
         this.theme.init();
         await this.loadPage();
         await this.resolveIncludes();
+        await syncFooterMetadata();
+        bindTermsDialog({
+            dialogId: "termsDialog",
+            triggerButtonId: "footerTermsBtn",
+            closeButtonId: "closeTermsDialogBtn"
+        });
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });

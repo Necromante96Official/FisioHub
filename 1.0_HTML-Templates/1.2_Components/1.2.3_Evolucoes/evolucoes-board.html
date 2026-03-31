@@ -1,5 +1,6 @@
 <section class="fh-evolucoes-board" aria-label="Evoluções pendentes">
     <header class="fh-evolucoes-headline">
+        <p class="fh-evolucoes-kicker">Pendências processadas</p>
         <h2>Evoluções pendentes</h2>
         <p class="fh-subtitle">Pendências de evolução com base no processamento mais recente.</p>
     </header>
@@ -7,12 +8,12 @@
     <div class="fh-evolucoes-cards" role="list" aria-label="Indicadores de evoluções pendentes">
         <article class="fh-evolucao-card" role="listitem">
             <p>Pacientes Pendentes</p>
-            <strong id="pendingPatientsCount">0</strong>
+            <strong id="pendingPatientsCount" class="fh-evolucao-patients-number">0</strong>
         </article>
 
         <article class="fh-evolucao-card" role="listitem">
             <p>Total de evoluções pendentes</p>
-            <strong id="pendingEvolutionsCount">0</strong>
+            <strong id="pendingEvolutionsCount" class="fh-evolucao-total-number">0</strong>
         </article>
     </div>
 
@@ -60,14 +61,32 @@
                     <th scope="col">Horário</th>
                     <th scope="col">Procedimento</th>
                     <th scope="col">Pendências</th>
-                    <th scope="col">Ação</th>
                 </tr>
             </thead>
             <tbody id="pendingEvolutionsTableBody">
                 <tr>
-                    <td colspan="6" class="fh-evolucoes-empty">Nenhuma evolução pendente encontrada.</td>
+                    <td colspan="5" class="fh-evolucoes-empty">Nenhuma evolução pendente encontrada.</td>
                 </tr>
             </tbody>
         </table>
     </div>
+
+    <dialog id="evolucoesDetailsDialog" class="fh-evolucoes-dialog" aria-labelledby="evolucoesDetailsTitle">
+        <article class="fh-evolucoes-dialog-surface">
+            <header class="fh-evolucoes-dialog-header">
+                <div class="fh-evolucoes-dialog-copy">
+                    <p class="fh-evolucoes-dialog-kicker">Pendências de evolução</p>
+                    <h3 id="evolucoesDetailsTitle">-</h3>
+                    <p id="evolucoesDetailsSubtitle" class="fh-subtitle">-</p>
+                </div>
+                <button id="closeEvolucoesDetailsBtn" type="button" class="fh-btn fh-btn-ghost">Fechar</button>
+            </header>
+
+            <div class="fh-evolucoes-dialog-content">
+                <p id="evolucoesDetailsCount" class="fh-evolucoes-dialog-count">0</p>
+                <div id="evolucoesDetailsList" class="fh-evolucoes-dialog-list" aria-live="polite"></div>
+                <p id="evolucoesDetailsEmpty" class="fh-evolucoes-empty-state" hidden>Nenhuma pendência encontrada para este paciente.</p>
+            </div>
+        </article>
+    </dialog>
 </section>

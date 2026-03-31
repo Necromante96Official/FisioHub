@@ -22,6 +22,9 @@
     flex-direction: column;
     gap: var(--fh-s-3);
     overflow: visible;
+    width: 100%;
+    max-width: min(1260px, calc(100vw - 48px));
+    margin-inline: auto;
 }
 
 .fh-home-brand {
@@ -30,6 +33,19 @@
 
 .fh-home-main > section {
     width: 100%;
+}
+
+.fh-home-main > section:not(.fh-home-brand) {
+    border-radius: var(--fh-r-3);
+}
+
+.fh-home-main > section[data-include*="modules-grid"],
+.fh-home-main > section[data-include*="sidebar"],
+.fh-home-main > section[data-include*="header"] {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
+    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
+    padding: clamp(12px, 1.5vw, 18px);
 }
 
 .fh-home-main > .fh-panel-wrap {

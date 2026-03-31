@@ -4,9 +4,9 @@
     margin-inline: auto;
     border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
     border-radius: var(--fh-r-3);
-    padding: clamp(10px, 1.2vw, 14px);
-    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
-    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
+    padding: clamp(12px, 1.5vw, 18px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 96%, transparent), color-mix(in srgb, var(--fh-surface-2) 98%, transparent));
+    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.03);
     display: grid;
     gap: var(--fh-s-2);
     min-height: 0;
@@ -16,11 +16,20 @@
 
 .fh-evolucoes-headline {
     display: grid;
-    gap: 4px;
+    gap: 5px;
 }
 
 .fh-evolucoes-headline h2 {
     margin: 0;
+}
+
+.fh-evolucoes-kicker {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
 }
 
 .fh-evolucoes-cards {
@@ -30,12 +39,20 @@
 }
 
 .fh-evolucao-card {
-    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 76%, transparent);
     border-radius: var(--fh-r-2);
     padding: 12px;
     background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
     display: grid;
     gap: 6px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.fh-evolucao-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--fh-primary-2) 62%, transparent);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .fh-evolucao-card p {
@@ -48,6 +65,14 @@
 
 .fh-evolucao-card strong {
     font-size: clamp(1.3rem, 2vw, 1.8rem);
+}
+
+.fh-evolucao-patients-number {
+    color: color-mix(in srgb, var(--fh-primary-2) 88%, #ffffff 12%);
+}
+
+.fh-evolucao-total-number {
+    color: color-mix(in srgb, #ff8383 84%, #ffffff 16%);
 }
 
 .fh-evolucoes-toolbar {
@@ -83,6 +108,12 @@
     font-size: 0.8rem;
 }
 
+.fh-evolucoes-search:focus-visible,
+.fh-evolucoes-filter:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--fh-primary-2) 58%, transparent);
+    outline-offset: 1px;
+}
+
 .fh-evolucoes-search::placeholder {
     color: color-mix(in srgb, var(--fh-muted) 86%, transparent);
 }
@@ -115,74 +146,12 @@
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--fh-primary-2);
-    background: color-mix(in srgb, var(--fh-surface-2) 44%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 54%, transparent), color-mix(in srgb, var(--fh-surface) 46%, transparent));
 }
 
 .fh-evolucoes-empty {
     text-align: center;
     color: var(--fh-muted);
-}
-
-.fh-evolucoes-detail-row td {
-    padding-top: 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 70%, transparent);
-}
-
-.fh-evolucoes-detail-panel {
-    margin-top: 2px;
-    margin-bottom: 10px;
-    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 12px;
-    padding: 12px;
-    background: color-mix(in srgb, var(--fh-surface-2) 34%, transparent);
-    display: grid;
-    gap: 10px;
-}
-
-.fh-evolucoes-detail-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 8px 12px;
-    align-items: center;
-}
-
-.fh-evolucoes-detail-header h3 {
-    margin: 0;
-    font-size: 0.92rem;
-}
-
-.fh-evolucoes-detail-header p {
-    margin: 0;
-    font-size: 0.76rem;
-    color: var(--fh-muted);
-}
-
-.fh-evolucoes-detail-list {
-    display: grid;
-    gap: 8px;
-}
-
-.fh-evolucoes-detail-item {
-    border: 1px solid color-mix(in srgb, var(--fh-border) 66%, transparent);
-    border-radius: 10px;
-    padding: 10px 12px;
-    background: color-mix(in srgb, var(--fh-surface) 72%, transparent);
-    display: grid;
-    gap: 6px;
-}
-
-.fh-evolucoes-detail-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 12px;
-    font-size: 0.76rem;
-    color: var(--fh-muted);
-}
-
-.fh-evolucoes-detail-meta strong {
-    color: var(--fh-text);
-    font-weight: 700;
 }
 
 .fh-evolucao-details-btn {
@@ -200,6 +169,131 @@
 .fh-evolucao-details-btn:hover,
 .fh-evolucao-details-btn:focus-visible {
     border-color: color-mix(in srgb, var(--fh-primary-2) 72%, transparent);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.16);
+}
+
+.fh-evolucoes-dialog {
+    border: 0;
+    padding: 0;
+    width: min(820px, calc(100vw - 28px));
+    border-radius: var(--fh-r-2);
+    background: transparent;
+    color: var(--fh-text);
+}
+
+.fh-evolucoes-dialog::backdrop {
+    background: rgba(4, 11, 22, 0.64);
+    backdrop-filter: blur(3px);
+}
+
+.fh-evolucoes-dialog-surface {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 82%, transparent);
+    border-radius: var(--fh-r-2);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    overflow: hidden;
+    display: grid;
+    gap: var(--fh-s-2);
+}
+
+.fh-evolucoes-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--fh-s-2);
+    padding: 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+}
+
+.fh-evolucoes-dialog-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.fh-evolucoes-dialog-kicker {
+    margin: 0;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fh-muted);
+}
+
+.fh-evolucoes-dialog-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.fh-evolucoes-dialog-content {
+    display: grid;
+    gap: 10px;
+    padding: 0 12px 12px;
+}
+
+.fh-evolucoes-dialog-count {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.fh-evolucoes-dialog-list {
+    display: grid;
+    gap: 8px;
+    max-height: 360px;
+    overflow: auto;
+    padding-right: 2px;
+}
+
+.fh-evolucoes-dialog-list::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.fh-evolucoes-dialog-list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.fh-evolucoes-dialog-list::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+.fh-evolucoes-dialog-item {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 68%, transparent);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 28%, transparent);
+    display: grid;
+    gap: 8px;
+}
+
+.fh-evolucoes-dialog-item-main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px 12px;
+    align-items: center;
+}
+
+.fh-evolucoes-dialog-item-main strong {
+    font-size: 0.88rem;
+}
+
+.fh-evolucoes-dialog-item-main span,
+.fh-evolucoes-dialog-item p,
+.fh-evolucoes-dialog-item small {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.78rem;
+}
+
+.fh-evolucoes-dialog-item-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .fh-evolucao-done-btn {
@@ -217,6 +311,19 @@
 .fh-evolucao-done-btn:hover,
 .fh-evolucao-done-btn:focus-visible {
     border-color: color-mix(in srgb, #56d8a6 72%, transparent);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.16);
+}
+
+.fh-evolucoes-empty-state {
+    min-height: 140px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--fh-muted);
+    border: 1px dashed color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 18%, transparent);
+    padding: 16px;
 }
 
 @media (max-width: 900px) {
@@ -229,6 +336,26 @@
     }
 
     .fh-evolucoes-date-controls {
+        width: 100%;
+    }
+}
+
+@media (max-width: 720px) {
+    .fh-evolucoes-dialog {
+        width: min(760px, calc(100vw - 16px));
+    }
+
+    .fh-evolucoes-dialog-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fh-evolucoes-dialog-item-actions {
+        justify-content: stretch;
+    }
+
+    .fh-evolucoes-dialog-item-actions .fh-btn,
+    .fh-evolucoes-dialog-item-actions .fh-evolucao-done-btn {
         width: 100%;
     }
 }

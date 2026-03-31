@@ -108,38 +108,40 @@
     overflow: visible;
     color: var(--fh-text);
     box-shadow: 0 28px 54px rgba(0, 0, 0, 0.5);
-    transform-origin: center top;
+    transform-origin: center 18%;
+    will-change: transform, opacity;
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+    transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .fh-terms-dialog::backdrop {
-    background: linear-gradient(145deg, rgba(4, 11, 22, 0.46), rgba(7, 18, 34, 0.64));
-    backdrop-filter: blur(4px);
-    animation: fhTermsBackdropIn 0.52s cubic-bezier(0.2, 0.92, 0.22, 1) both;
+    background:
+        radial-gradient(circle at top, rgba(34, 72, 140, 0.12), transparent 40%),
+        linear-gradient(145deg, rgba(4, 11, 22, 0.38), rgba(7, 18, 34, 0.66));
+    backdrop-filter: blur(4px) saturate(1.03);
+    opacity: 0;
+    transition: opacity 0.18s ease;
 }
 
-.fh-terms-dialog[open] {
-    animation: none;
-}
-
+.fh-terms-dialog[open],
 .fh-terms-dialog.is-opening {
-    animation: fhTermsDialogEnter 0.52s cubic-bezier(0.16, 0.9, 0.2, 1) both;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.fh-terms-dialog[open]::backdrop,
+.fh-terms-dialog.is-opening::backdrop {
+    opacity: 1;
 }
 
 .fh-terms-dialog.is-closing {
-    animation: fhTermsDialogExit 0.32s ease-in both;
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
 }
 
 .fh-terms-dialog.is-closing::backdrop {
-    animation: fhTermsBackdropOut 0.32s ease-in both;
-}
-
-.fh-terms-dialog[open] .fh-terms-surface,
-.fh-terms-dialog.is-opening .fh-terms-surface {
-    animation: fhTermsSurfaceIn 0.52s cubic-bezier(0.16, 0.9, 0.2, 1) both;
-}
-
-.fh-terms-dialog.is-closing .fh-terms-surface {
-    animation: fhTermsSurfaceOut 0.32s ease-in both;
+    opacity: 0;
 }
 
 .fh-terms-surface {
@@ -147,11 +149,46 @@
     grid-template-rows: auto 1fr;
     min-height: 0;
     background:
-        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent)),
-        radial-gradient(circle at 12% 6%, color-mix(in srgb, var(--fh-primary-2) 16%, transparent) 0%, transparent 54%);
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--fh-primary-2) 14%, transparent) 0%, transparent 44%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
     border: 1px solid color-mix(in srgb, var(--fh-border) 88%, transparent);
     border-radius: calc(var(--fh-r-2) + 4px);
     overflow: hidden;
+    position: relative;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fh-terms-dialog[open] .fh-terms-surface,
+.fh-terms-dialog.is-opening .fh-terms-surface {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fh-terms-dialog.is-closing .fh-terms-surface {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fh-terms-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--fh-primary-2) 76%, #ffffff), transparent);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.fh-terms-surface::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 90% 8%, rgba(255, 255, 255, 0.06), transparent 24%),
+        radial-gradient(circle at 10% 0%, rgba(94, 155, 255, 0.08), transparent 28%);
+    pointer-events: none;
 }
 
 .fh-terms-header {
@@ -161,7 +198,11 @@
     gap: var(--fh-s-2);
     padding: 14px 16px;
     border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
-    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 86%, transparent), color-mix(in srgb, var(--fh-surface) 96%, transparent));
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 86%, transparent), color-mix(in srgb, var(--fh-surface) 96%, transparent)),
+        linear-gradient(90deg, color-mix(in srgb, var(--fh-primary-2) 12%, transparent), transparent 56%);
+    position: relative;
+    z-index: 1;
 }
 
 .fh-terms-header h2 {
@@ -189,27 +230,86 @@
 .fh-terms-brand {
     display: grid;
     justify-items: center;
-    gap: 8px;
+    gap: 12px;
     text-align: center;
     border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 12px;
-    padding: 12px;
-    background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
+    border-radius: 18px;
+    padding: 16px 14px;
+    background:
+        radial-gradient(circle at top, color-mix(in srgb, var(--fh-primary-2) 14%, transparent) 0%, transparent 60%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 34%, transparent), color-mix(in srgb, var(--fh-surface) 94%, transparent));
     position: sticky;
     top: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 14px 28px rgba(0, 0, 0, 0.18);
+    overflow: hidden;
+}
+
+    z-index: 1505;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    min-height: 174px;
+    border-radius: 16px;
+    padding: 14px;
+    background:
+        radial-gradient(circle at 50% 18%, color-mix(in srgb, var(--fh-primary-2) 10%, transparent) 0%, transparent 48%),
+    opacity: 1;
+    filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.42));
+    border: 1px solid color-mix(in srgb, var(--fh-border) 66%, transparent);
 }
 
 .fh-terms-brand img {
-    width: min(200px, 100%);
+    width: min(208px, 100%);
     height: auto;
     object-fit: contain;
-    border-radius: 10px;
-    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.35));
+    border-radius: 12px;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.30));
+}
+
+.fh-terms-brand-copy {
+    display: grid;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
+}
+
+.fh-terms-eyebrow {
+    margin: 0;
+    font-size: 0.69rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--fh-primary-2) 74%, #ffffff);
 }
 
 .fh-terms-details {
     display: grid;
     gap: 12px;
+    position: relative;
+    z-index: 1;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-header {
+    animation: fhTermsHeaderReveal 0.24s ease-out both;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-brand {
+    animation: fhTermsBrandReveal 0.26s ease-out both;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-details > section {
+    animation: fhTermsDetailReveal 0.22s ease-out both;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-details > section:nth-child(1) {
+    animation-delay: 0.02s;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-details > section:nth-child(2) {
+    animation-delay: 0.06s;
+}
+
+.fh-terms-dialog.is-opening .fh-terms-details > section:nth-child(3) {
+    animation-delay: 0.1s;
 }
 
 .fh-site-notifications {
@@ -229,12 +329,6 @@
     top: 14px;
     z-index: 6;
     width: min(340px, calc(100% - 28px));
-}
-
-.fh-backups-surface,
-.fh-conflict-surface,
-.fh-terms-surface {
-    position: relative;
 }
 
 .fh-site-toast {
@@ -281,7 +375,7 @@
 .fh-floating-home-btn {
     position: fixed;
     right: 20px;
-    bottom: 96px;
+    bottom: 100px;
     width: 52px;
     height: 52px;
     border-radius: 999px;
@@ -292,16 +386,24 @@
     justify-content: center;
     text-decoration: none;
     color: #ffffff;
-    z-index: 1001;
+    z-index: 1505;
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 10px 22px rgba(0, 0, 0, 0.42);
-    animation: fhFloatingHomeGlow 2.8s ease-in-out infinite;
+    animation:
+        fhFloatingHomeFloat 3.2s ease-in-out infinite,
+        fhFloatingHomeGlow 2.8s ease-in-out infinite;
+}
+
+.fh-floating-home-btn:hover,
+.fh-floating-home-btn:focus-visible {
+    transform: translateY(-4px) scale(1.03);
 }
 
 .fh-floating-home-icon {
     width: 24px;
     height: 24px;
     display: block;
-    filter: brightness(0) invert(1);
+    opacity: 1;
+    filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.42));
 }
 
 .fh-floating-home-toast {
@@ -327,43 +429,6 @@
     animation: fhFloatingHomeToastPulse 1.9s ease-in-out both;
 }
 
-@keyframes fhToastIn {
-    from {
-        opacity: 0;
-        transform: translateY(8px) scale(0.98);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes fhToastOut {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateY(6px) scale(0.98);
-    }
-}
-
-.fh-terms-brand p {
-    margin: 0;
-    font-size: 0.82rem;
-    color: color-mix(in srgb, var(--fh-muted) 88%, #ffffff 12%);
-}
-
-.fh-terms-content section {
-    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
-    border-radius: 12px;
-    padding: 10px 12px;
-    background: color-mix(in srgb, var(--fh-surface-2) 36%, transparent);
-}
-
 .fh-terms-content h3 {
     margin: 0 0 6px;
     font-size: 0.86rem;
@@ -381,7 +446,7 @@
 @keyframes fhTermsDialogEnter {
     from {
         opacity: 0;
-        transform: translateY(9px) scale(0.988);
+        transform: translateY(10px) scale(0.98);
     }
 
     to {
@@ -398,14 +463,74 @@
 
     to {
         opacity: 0;
-        transform: translateY(7px) scale(0.988);
+        transform: translateY(8px) scale(0.985);
     }
 }
 
-@keyframes fhTermsSurfaceIn {
+@keyframes fhTermsPanelEnter {
     from {
         opacity: 0;
-        transform: translateY(8px) scale(0.99);
+        transform: translateY(10px) scale(0.985);
+        filter: blur(2px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes fhTermsPanelExit {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
+        filter: blur(2px);
+    }
+}
+
+@keyframes fhTermsBackdropEnter {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fhTermsBackdropExit {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fhTermsHeaderReveal {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fhTermsBrandReveal {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
     }
 
     to {
@@ -414,35 +539,15 @@
     }
 }
 
-@keyframes fhTermsSurfaceOut {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-
-    to {
-        opacity: 0;
-        transform: translateY(8px) scale(0.99);
-    }
-}
-
-@keyframes fhTermsBackdropIn {
+@keyframes fhTermsDetailReveal {
     from {
         opacity: 0;
+        transform: translateY(6px);
     }
 
     to {
         opacity: 1;
-    }
-}
-
-@keyframes fhTermsBackdropOut {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
+        transform: translateY(0);
     }
 }
 
@@ -478,6 +583,51 @@
     }
 }
 
+@keyframes fhFloatingHomeFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-4px);
+    }
+}
+
+.fh-floating-home-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 100px;
+    width: 52px;
+    height: 52px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--fh-primary-2) 64%, transparent);
+    background: linear-gradient(145deg, color-mix(in srgb, var(--fh-primary) 54%, transparent), color-mix(in srgb, var(--fh-primary-2) 68%, transparent));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: #ffffff;
+    z-index: 1505;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 26%, transparent), 0 10px 22px rgba(0, 0, 0, 0.42);
+    animation:
+        fhFloatingHomeFloat 3.2s ease-in-out infinite,
+        fhFloatingHomeGlow 2.8s ease-in-out infinite;
+}
+
+.fh-floating-home-btn:hover,
+.fh-floating-home-btn:focus-visible {
+    transform: translateY(-4px) scale(1.03);
+}
+
+.fh-floating-home-icon {
+    width: 24px;
+    height: 24px;
+    display: block;
+    opacity: 1;
+    filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.42));
+}
+
 .fh-footer-brand,
 .fh-footer-year,
 .fh-footer-version,
@@ -494,7 +644,7 @@
     color: #fff;
     font-size: 0.66rem;
     letter-spacing: 0.14em;
-    text-transform: uppercase;
+    text-transform: none;
     line-height: 1;
 }
 
@@ -551,7 +701,7 @@
     }
 
     .fh-terms-brand img {
-        width: min(200px, 62vw);
+        width: min(208px, 62vw);
     }
 
     .fh-floating-home-btn {
@@ -574,12 +724,18 @@
     .fh-terms-dialog.is-opening,
     .fh-terms-dialog.is-closing {
         animation: none;
+        transition: none;
     }
 
     .fh-terms-dialog[open] .fh-terms-surface,
     .fh-terms-dialog.is-closing .fh-terms-surface,
     .fh-terms-dialog::backdrop {
         animation: none;
+        transition: none;
+    }
+
+    .fh-terms-surface {
+        transition: none;
     }
 
     .fh-floating-home-btn,

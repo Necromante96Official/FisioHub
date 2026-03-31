@@ -33,6 +33,10 @@ const resolveHoverMessage = (element) => {
             return "Limpa todos os dados das páginas, mantendo a Lista de Pacientes intacta.";
         case "clearOnlyDataBtn":
             return "Limpa todos os dados do sistema, sem exceções.";
+        case "backupsBtn":
+            return "Abre as opções de backup e restauração.";
+        case "footerTermsBtn":
+            return "Abre os termos de uso do sistema.";
         case "todayBtn":
             return "Volta a data de referência para o dia atual.";
         case "prevDayBtn":
@@ -91,15 +95,11 @@ const showDialogWithAnimation = (dialog) => {
     dialog.removeAttribute("data-closing");
     dialog.showModal();
     window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-            dialog.classList.add("is-opening");
-        });
+        dialog.classList.add("is-opening");
     });
-    const onOpenAnimationEnd = () => {
+    window.setTimeout(() => {
         dialog.classList.remove("is-opening");
-        dialog.removeEventListener("animationend", onOpenAnimationEnd);
-    };
-    dialog.addEventListener("animationend", onOpenAnimationEnd);
+    }, 180);
 };
 const requestDialogClose = (dialog, surfaceSelector, event) => {
     event?.preventDefault();
@@ -109,7 +109,6 @@ const requestDialogClose = (dialog, surfaceSelector, event) => {
     dialog.dataset.closing = "true";
     dialog.classList.remove("is-opening");
     dialog.classList.add("is-closing");
-    const surface = dialog.querySelector(surfaceSelector);
     const finalizeClose = () => {
         dialog.classList.remove("is-closing");
         dialog.removeAttribute("data-closing");
@@ -117,24 +116,7 @@ const requestDialogClose = (dialog, surfaceSelector, event) => {
             dialog.close();
         }
     };
-    const fallback = window.setTimeout(() => {
-        if (surface) {
-            surface.removeEventListener("animationend", onAnimationEnd);
-        }
-        finalizeClose();
-    }, 560);
-    const onAnimationEnd = () => {
-        window.clearTimeout(fallback);
-        if (surface) {
-            surface.removeEventListener("animationend", onAnimationEnd);
-        }
-        finalizeClose();
-    };
-    if (surface) {
-        surface.addEventListener("animationend", onAnimationEnd, { once: true });
-        return;
-    }
-    finalizeClose();
+    window.setTimeout(finalizeClose, 180);
 };
 const appendToast = (container, message) => {
     const toast = document.createElement("div");
@@ -339,5 +321,30 @@ export const bindHoverToasts = (options = {}) => {
             delete target.dataset.hoverToastId;
         });
     });
+};
+export const syncFooterMetadata = async () => {
+    const footerVersion = document.getElementById("footerVersion");
+    const footerCopyright = document.getElementById("footerCopyright");
+    const currentYear = String(new Date().getFullYear());
+    if (footerCopyright) {
+        footerCopyright.textContent = `© Copyright ${currentYear} FisioHub. Todos os direitos reservados.`;
+    }
+    if (!footerVersion) {
+        return;
+    }
+    try {
+        const response = await fetch("package.json", { cache: "no-store" });
+        if (!response.ok) {
+            return;
+        }
+        const packageInfo = (await response.json());
+        if (packageInfo.version) {
+            const normalizedVersion = String(packageInfo.version).replace(/^v/i, "");
+            footerVersion.textContent = `Versão: ${normalizedVersion}`;
+        }
+    }
+    catch {
+        return;
+    }
 };
 //# sourceMappingURL=ui-feedback.js.map

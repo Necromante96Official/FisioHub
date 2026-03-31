@@ -12,7 +12,11 @@
         <a id="footerAuthorLink" class="fh-footer-author" href="https://github.com/Necromante96Official" target="_blank"
           rel="noopener noreferrer">Necromante96Official</a>
         <span class="fh-footer-divider">•</span>
-        <span class="fh-footer-version">v0.37</span>
+        <span id="footerVersion" class="fh-footer-version">Versão: 0.4.0</span>
+      </div>
+
+      <div class="fh-footer-actions">
+        <button id="footerTermsBtn" class="fh-btn fh-terms-btn" type="button">Termos</button>
       </div>
 
     </div>
@@ -23,4 +27,42 @@
     <img class="fh-floating-home-icon" src="5.0_Assets/5.1_Images/home.svg" alt="Inicio" width="24" height="24">
   </a>
   <div class="fh-floating-home-toast" aria-hidden="true">Voltar ao Inicio</div>
+
+  <dialog id="termsDialog" class="fh-terms-dialog" aria-labelledby="termsTitle">
+    <article class="fh-terms-surface">
+      <header class="fh-terms-header">
+        <h2 id="termsTitle">Termos de uso</h2>
+        <button id="closeTermsDialogBtn" class="fh-btn fh-btn-ghost fh-terms-close" type="button">Fechar</button>
+      </header>
+
+      <div class="fh-terms-content">
+        <section class="fh-terms-brand" aria-label="Marca FisioHub">
+          <div class="fh-terms-brand-visual">
+            <img src="5.0_Assets/5.1_Images/logo.png" alt="Logo FisioHub" width="208" height="208">
+          </div>
+          <div class="fh-terms-brand-copy">
+            <p class="fh-terms-eyebrow">Sistema local-first</p>
+            <p>FisioHub trabalha localmente no navegador e usa os dados importados apenas no dispositivo atual.</p>
+          </div>
+        </section>
+
+        <div class="fh-terms-details">
+          <section>
+            <h3>Uso dos dados</h3>
+            <p>Os dados processados, backups e pendências ficam armazenados no navegador via localStorage, sem envio automático para serviços externos.</p>
+          </section>
+
+          <section>
+            <h3>Responsabilidade</h3>
+            <p>O usuário é responsável por manter backups válidos antes de limpar informações ou importar novas bases.</p>
+          </section>
+
+          <section>
+            <h3>Atualizações</h3>
+            <p>A versão exibida no rodapé é sincronizada automaticamente com o package.json e o ano é calculado pelo sistema no carregamento.</p>
+          </section>
+        </div>
+      </div>
+    </article>
+  </dialog>
 </footer>
