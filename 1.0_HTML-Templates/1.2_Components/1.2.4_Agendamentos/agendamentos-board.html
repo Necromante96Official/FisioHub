@@ -1,0 +1,110 @@
+<section class="fh-agendamentos-board" aria-label="Agendamentos">
+    <header class="fh-agendamentos-headline">
+        <div class="fh-agendamentos-title-block">
+            <p class="fh-agendamentos-kicker">Relatório operacional</p>
+            <h2>Agendamentos</h2>
+            <p class="fh-subtitle">Resumo consolidado de atendimentos e faltas já processados no sistema.</p>
+        </div>
+    </header>
+
+    <div class="fh-agendamentos-cards" role="list" aria-label="Indicadores de agendamentos">
+        <article class="fh-agendamentos-card fh-card-attended" role="listitem">
+            <p>Atendidos</p>
+            <strong id="agendamentosAttendedCount">0</strong>
+        </article>
+
+        <article class="fh-agendamentos-card fh-card-absences" role="listitem">
+            <p>Faltas</p>
+            <strong id="agendamentosAbsencesCount">0</strong>
+        </article>
+
+        <article class="fh-agendamentos-card fh-card-total" role="listitem">
+            <p>Total</p>
+            <strong id="agendamentosTotalCount">0</strong>
+        </article>
+    </div>
+
+    <div class="fh-agendamentos-toolbar" role="search">
+        <input id="agendamentosSearchInput" type="search" class="fh-agendamentos-search"
+            placeholder="Buscar por nome, procedimento, status ou data..." aria-label="Buscar agendamentos">
+        <select id="agendamentosSortSelect" class="fh-agendamentos-filter" aria-label="Ordenar agendamentos">
+            <option value="attended-desc">Mais atendimentos</option>
+            <option value="absences-desc">Mais faltas</option>
+            <option value="name-asc">Nome A-Z</option>
+            <option value="name-desc">Nome Z-A</option>
+        </select>
+    </div>
+
+    <div class="fh-agendamentos-summary-row">
+        <p class="fh-agendamentos-summary-label">Pacientes encontrados</p>
+        <strong id="agendamentosPatientsCount">0</strong>
+    </div>
+
+    <div class="fh-agendamentos-table-wrap">
+        <table class="fh-agendamentos-table">
+            <thead>
+                <tr>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Atendimentos</th>
+                    <th scope="col">Faltas</th>
+                    <th scope="col">Detalhes</th>
+                </tr>
+            </thead>
+            <tbody id="agendamentosTableBody">
+                <tr>
+                    <td colspan="4" class="fh-agendamentos-empty">Nenhum agendamento disponível. Importe os dados na página inicial.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <dialog id="agendamentosDetailsDialog" class="fh-agendamentos-dialog" aria-labelledby="agendamentosModalTitle">
+        <article class="fh-agendamentos-dialog-surface">
+            <header class="fh-agendamentos-dialog-header">
+                <div>
+                    <p class="fh-agendamentos-dialog-kicker">Detalhes do paciente</p>
+                    <h3 id="agendamentosModalTitle">-</h3>
+                </div>
+                <button id="agendamentosModalCloseBtn" type="button" class="fh-btn fh-btn-ghost">Fechar</button>
+            </header>
+
+            <div class="fh-agendamentos-dialog-summary">
+                <article class="fh-agendamentos-summary-card fh-summary-frequency">
+                    <p>Frequência</p>
+                    <strong id="agendamentosModalFrequency">0%</strong>
+                </article>
+                <article class="fh-agendamentos-summary-card fh-summary-attended">
+                    <p>Atendimentos</p>
+                    <strong id="agendamentosModalAttendedTotal">0</strong>
+                </article>
+                <article class="fh-agendamentos-summary-card fh-summary-absences">
+                    <p>Faltas</p>
+                    <strong id="agendamentosModalAbsenceTotal">0</strong>
+                </article>
+            </div>
+
+            <div class="fh-agendamentos-dialog-tabs" role="tablist" aria-label="Histórico de agendamentos">
+                <button type="button" class="fh-agendamentos-tab is-active" data-modal-tab="atendidos" aria-selected="true">
+                    Atendido
+                </button>
+                <button type="button" class="fh-agendamentos-tab" data-modal-tab="faltas" aria-selected="false">
+                    Faltou
+                </button>
+            </div>
+
+            <div class="fh-agendamentos-dialog-panels">
+                <section id="agendamentosModalAttendedPanel" class="fh-agendamentos-dialog-panel is-active" data-modal-panel="atendidos">
+                    <div id="agendamentosModalAttendedList" class="fh-agendamentos-history-list">
+                        <div class="fh-agendamentos-empty-state">Nenhum atendimento registrado.</div>
+                    </div>
+                </section>
+
+                <section id="agendamentosModalAbsencePanel" class="fh-agendamentos-dialog-panel" data-modal-panel="faltas">
+                    <div id="agendamentosModalAbsenceList" class="fh-agendamentos-history-list">
+                        <div class="fh-agendamentos-empty-state">Nenhuma falta registrada.</div>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </dialog>
+</section>

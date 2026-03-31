@@ -1,0 +1,406 @@
+.fh-agendamentos-board {
+    width: 100%;
+    max-width: min(1260px, calc(100vw - 48px));
+    margin-inline: auto;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 84%, transparent);
+    border-radius: var(--fh-r-3);
+    padding: clamp(12px, 1.5vw, 18px);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 95%, transparent), color-mix(in srgb, var(--fh-surface-2) 97%, transparent));
+    box-shadow: 0 22px 42px rgba(0, 0, 0, 0.34);
+    display: grid;
+    gap: var(--fh-s-2);
+    min-height: 0;
+    height: 100%;
+    grid-template-rows: auto auto auto auto minmax(0, 1fr);
+}
+
+.fh-agendamentos-headline {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--fh-s-2);
+    flex-wrap: wrap;
+}
+
+.fh-agendamentos-title-block {
+    display: grid;
+    gap: 6px;
+    max-width: 760px;
+}
+
+.fh-agendamentos-title-block h2 {
+    margin: 0;
+    line-height: 1.05;
+    font-size: clamp(1.5rem, 2.6vw, 2.05rem);
+}
+
+.fh-agendamentos-kicker {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.fh-agendamentos-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--fh-s-2);
+}
+
+.fh-agendamentos-card {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: var(--fh-r-2);
+    padding: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
+    display: grid;
+    gap: 6px;
+}
+
+.fh-agendamentos-card p {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--fh-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.fh-agendamentos-card strong {
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+}
+
+.fh-card-attended strong {
+    color: color-mix(in srgb, #56d8a6 84%, #ffffff 16%);
+}
+
+.fh-card-absences strong {
+    color: color-mix(in srgb, #ff8383 84%, #ffffff 16%);
+}
+
+.fh-card-total strong {
+    color: color-mix(in srgb, var(--fh-primary-2) 88%, #ffffff 12%);
+}
+
+.fh-agendamentos-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    gap: 10px;
+}
+
+.fh-agendamentos-search,
+.fh-agendamentos-filter {
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    background: color-mix(in srgb, var(--fh-surface) 88%, transparent);
+    color: var(--fh-text);
+    padding: 8px 10px;
+    font-size: 0.84rem;
+}
+
+.fh-agendamentos-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--fh-s-2);
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 68%, transparent);
+    background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
+}
+
+.fh-agendamentos-summary-row strong {
+    font-size: 1rem;
+}
+
+.fh-agendamentos-summary-label {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.fh-agendamentos-table-wrap {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: var(--fh-r-2);
+    overflow: auto;
+    min-height: 0;
+    max-height: 100%;
+    height: 100%;
+}
+
+.fh-agendamentos-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+}
+
+.fh-agendamentos-table th,
+.fh-agendamentos-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 70%, transparent);
+    text-align: left;
+    font-size: 0.86rem;
+}
+
+.fh-agendamentos-table th {
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--fh-primary-2);
+    background: color-mix(in srgb, var(--fh-surface-2) 44%, transparent);
+}
+
+.fh-agendamentos-empty {
+    text-align: center;
+    color: var(--fh-muted);
+}
+
+.fh-agendamentos-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+}
+
+.fh-pill-attended {
+    color: color-mix(in srgb, #dbfff1 84%, #ffffff 16%);
+    border-color: color-mix(in srgb, #56d8a6 64%, transparent);
+    background: color-mix(in srgb, #56d8a6 18%, transparent);
+}
+
+.fh-pill-absences {
+    color: color-mix(in srgb, #ffe1e1 84%, #ffffff 16%);
+    border-color: color-mix(in srgb, #ff8383 64%, transparent);
+    background: color-mix(in srgb, #ff8383 18%, transparent);
+}
+
+.fh-agendamentos-details-btn {
+    min-height: 32px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    background: color-mix(in srgb, var(--fh-surface-2) 30%, transparent);
+    color: var(--fh-text);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.fh-agendamentos-details-btn:hover,
+.fh-agendamentos-details-btn:focus-visible {
+    border-color: color-mix(in srgb, var(--fh-primary-2) 72%, transparent);
+}
+
+.fh-agendamentos-dialog {
+    border: 0;
+    padding: 0;
+    width: min(760px, calc(100vw - 28px));
+    border-radius: var(--fh-r-2);
+    background: transparent;
+    color: var(--fh-text);
+}
+
+.fh-agendamentos-dialog::backdrop {
+    background: rgba(4, 11, 22, 0.64);
+    backdrop-filter: blur(3px);
+}
+
+.fh-agendamentos-dialog-surface {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 82%, transparent);
+    border-radius: var(--fh-r-2);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    overflow: hidden;
+    display: grid;
+    gap: var(--fh-s-2);
+}
+
+.fh-agendamentos-dialog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--fh-s-2);
+    padding: 12px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+}
+
+.fh-agendamentos-dialog-kicker {
+    margin: 0 0 4px;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--fh-muted);
+}
+
+.fh-agendamentos-dialog-header h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.fh-agendamentos-dialog-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.fh-agendamentos-summary-card {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: grid;
+    gap: 4px;
+    background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
+}
+
+.fh-agendamentos-summary-card p {
+    margin: 0;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fh-muted);
+}
+
+.fh-agendamentos-summary-card strong {
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+}
+
+.fh-summary-frequency strong {
+    color: color-mix(in srgb, var(--fh-primary-2) 88%, #ffffff 12%);
+}
+
+.fh-summary-attended strong {
+    color: color-mix(in srgb, #56d8a6 84%, #ffffff 16%);
+}
+
+.fh-summary-absences strong {
+    color: color-mix(in srgb, #ff8383 84%, #ffffff 16%);
+}
+
+.fh-agendamentos-dialog-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 12px;
+}
+
+.fh-agendamentos-tab {
+    flex: 1;
+    min-height: 38px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    background: color-mix(in srgb, var(--fh-surface-2) 26%, transparent);
+    color: var(--fh-text);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.fh-agendamentos-tab.is-active {
+    background: color-mix(in srgb, var(--fh-primary-2) 18%, transparent);
+    border-color: color-mix(in srgb, var(--fh-primary-2) 72%, transparent);
+    color: var(--fh-text);
+}
+
+.fh-agendamentos-dialog-panels {
+    padding: 0 12px 12px;
+}
+
+.fh-agendamentos-dialog-panel {
+    display: none;
+}
+
+.fh-agendamentos-dialog-panel.is-active {
+    display: block;
+}
+
+.fh-agendamentos-history-list {
+    display: grid;
+    gap: 8px;
+    max-height: 320px;
+    overflow: auto;
+}
+
+.fh-agendamentos-history-item {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 66%, transparent);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: color-mix(in srgb, var(--fh-surface) 76%, transparent);
+    display: grid;
+    gap: 4px;
+}
+
+.fh-agendamentos-history-main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px 12px;
+}
+
+.fh-agendamentos-history-main strong {
+    font-size: 0.88rem;
+}
+
+.fh-agendamentos-history-main span,
+.fh-agendamentos-history-item p,
+.fh-agendamentos-history-item small {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.78rem;
+}
+
+.fh-history-atendido {
+    border-left: 3px solid color-mix(in srgb, #56d8a6 84%, transparent);
+}
+
+.fh-history-falta {
+    border-left: 3px solid color-mix(in srgb, #ff8383 84%, transparent);
+}
+
+.fh-agendamentos-empty-state {
+    min-height: 140px;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--fh-muted);
+    border: 1px dashed color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 18%, transparent);
+    padding: 16px;
+}
+
+@media (max-width: 1000px) {
+    .fh-agendamentos-cards,
+    .fh-agendamentos-dialog-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-agendamentos-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-agendamentos-headline {
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 720px) {
+    .fh-agendamentos-board {
+        padding: 10px;
+    }
+
+    .fh-agendamentos-dialog-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .fh-agendamentos-dialog-tabs {
+        flex-direction: column;
+    }
+}

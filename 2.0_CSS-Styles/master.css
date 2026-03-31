@@ -8,9 +8,11 @@
 @import url("2.4_Components/footer.css");
 @import url("2.4_Components/patients-board.css");
 @import url("2.4_Components/evolucoes-board.css");
+@import url("2.4_Components/agendamentos-board.css");
 @import url("2.3_Pages/home.css");
 @import url("2.3_Pages/pacientes.css");
 @import url("2.3_Pages/evolucoes.css");
+@import url("2.3_Pages/agendamentos.css");
 
 html {
     scrollbar-width: thin;
