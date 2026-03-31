@@ -12,7 +12,7 @@
         <a id="footerAuthorLink" class="fh-footer-author" href="https://github.com/Necromante96Official" target="_blank"
           rel="noopener noreferrer">Necromante96Official</a>
         <span class="fh-footer-divider">•</span>
-        <span id="footerVersion" class="fh-footer-version">Versão: 0.4.0</span>
+        <span id="footerVersion" class="fh-footer-version">Versão: 0.4.1</span>
       </div>
 
       <div class="fh-footer-actions">
@@ -31,35 +31,169 @@
   <dialog id="termsDialog" class="fh-terms-dialog" aria-labelledby="termsTitle">
     <article class="fh-terms-surface">
       <header class="fh-terms-header">
-        <h2 id="termsTitle">Termos de uso</h2>
+        <div class="fh-terms-header-copy">
+          <p class="fh-terms-kicker">Acordo de uso profissional colaborativo</p>
+          <h2 id="termsTitle">Termos de uso</h2>
+        </div>
         <button id="closeTermsDialogBtn" class="fh-btn fh-btn-ghost fh-terms-close" type="button">Fechar</button>
       </header>
 
       <div class="fh-terms-content">
-        <section class="fh-terms-brand" aria-label="Marca FisioHub">
+        <aside class="fh-terms-brand" aria-label="Resumo do acordo">
           <div class="fh-terms-brand-visual">
             <img src="5.0_Assets/5.1_Images/logo.png" alt="Logo FisioHub" width="208" height="208">
           </div>
           <div class="fh-terms-brand-copy">
-            <p class="fh-terms-eyebrow">Sistema local-first</p>
-            <p>FisioHub trabalha localmente no navegador e usa os dados importados apenas no dispositivo atual.</p>
+            <p class="fh-terms-eyebrow">Licença de uso profissional colaborativo</p>
+            <h3>FisioHub · ESEFID/UFRGS</h3>
+            <p>Software fornecido para uso interno da ESEFID/UFRGS - Clínica de Fisioterapia, com permissão expressa de Fernanda Tambosi Varella.</p>
           </div>
-        </section>
+          <ul class="fh-terms-chip-list" aria-label="Pontos de referência">
+            <li class="fh-terms-chip">Uso interno</li>
+            <li class="fh-terms-chip">LGPD</li>
+            <li class="fh-terms-chip">Sem comercialização</li>
+            <li class="fh-terms-chip">Suporte colaborativo</li>
+          </ul>
+          <div class="fh-terms-meta-card">
+            <p><strong>Desenvolvedor</strong><span>Necromante96Official</span></p>
+            <p><strong>Instituição parceira</strong><span>ESEFID/UFRGS - Clínica de Fisioterapia</span></p>
+            <p><strong>Data de criação</strong><span>Novembro de 2025</span></p>
+          </div>
+        </aside>
 
         <div class="fh-terms-details">
-          <section>
-            <h3>Uso dos dados</h3>
-            <p>Os dados processados, backups e pendências ficam armazenados no navegador via localStorage, sem envio automático para serviços externos.</p>
+          <section class="fh-terms-section fh-terms-section--highlight">
+            <h3>Visão geral</h3>
+            <p>Este software é fornecido em regime de colaboração profissional, com foco na otimização dos processos internos da clínica e na manutenção de um portfólio técnico do desenvolvedor.</p>
+            <p>A relação não representa vínculo formal de emprego ou contratação. O uso da ferramenta deve respeitar este documento e a finalidade interna acordada entre as partes.</p>
           </section>
 
-          <section>
-            <h3>Responsabilidade</h3>
-            <p>O usuário é responsável por manter backups válidos antes de limpar informações ou importar novas bases.</p>
+          <section class="fh-terms-section">
+            <h3>Natureza do acordo</h3>
+            <ul class="fh-terms-list">
+              <li>Colaboração profissional e voluntária entre as partes.</li>
+              <li>Desenvolvimento voltado à melhoria de processos internos.</li>
+              <li>Objetivo simultâneo de preservar o histórico do projeto em portfólio profissional.</li>
+              <li>Ausência de vínculo empregatício, contratual ou comercial.</li>
+            </ul>
           </section>
 
-          <section>
-            <h3>Atualizações</h3>
-            <p>A versão exibida no rodapé é sincronizada automaticamente com o package.json e o ano é calculado pelo sistema no carregamento.</p>
+          <section class="fh-terms-section">
+            <h3>Direitos do desenvolvedor</h3>
+            <ul class="fh-terms-list">
+              <li>Propriedade intelectual completa do código-fonte e de sua arquitetura.</li>
+              <li>Direito de incluir o projeto em portfólio profissional e estudos de caso.</li>
+              <li>Direito de descrever o projeto publicamente em canais como LinkedIn e GitHub.</li>
+              <li>Direito de solicitar menção ou crédito quando apropriado.</li>
+              <li>Direito de pausar ou descontinuar a manutenção mediante aviso prévio.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section">
+            <h3>Direitos da instituição</h3>
+            <ul class="fh-terms-list">
+              <li>Uso do sistema exclusivamente para operações internas.</li>
+              <li>Processamento seguro de dados de pacientes no ambiente local da clínica.</li>
+              <li>Solicitação de ajustes, correções técnicas e melhorias.</li>
+              <li>Acesso ao suporte técnico do desenvolvedor conforme disponibilidade.</li>
+              <li>Continuidade de uso de versões anteriores, se desejado.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section fh-terms-section--danger">
+            <h3>Restrições absolutas</h3>
+            <p class="fh-terms-section-intro">É terminantemente proibido:</p>
+            <ul class="fh-terms-list">
+              <li>Compartilhar o sistema com outras clínicas ou terceiros.</li>
+              <li>Copiar, clonar, duplicar ou distribuir o código.</li>
+              <li>Modificar o código sem consentimento do desenvolvedor.</li>
+              <li>Reivindicar autoria, propriedade ou licenciamento do software.</li>
+              <li>Vender, sublicenciar ou comercializar o sistema em qualquer formato.</li>
+              <li>Usar o código como base para produto comercial próprio.</li>
+              <li>Remover ou alterar créditos do desenvolvedor.</li>
+              <li>Realizar engenharia reversa, decomposição ou extração não autorizada.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section fh-terms-section--success">
+            <h3>Proteção de dados e privacidade</h3>
+            <ul class="fh-terms-list">
+              <li>Todos os dados são armazenados exclusivamente localmente no navegador.</li>
+              <li>Nenhuma informação é transmitida para servidores externos pelo sistema.</li>
+              <li>Os dados de pacientes devem ser tratados com observância à LGPD.</li>
+              <li>A ESEFID/UFRGS é responsável pela segurança dos dados armazenados em sua operação.</li>
+              <li>O desenvolvedor não possui acesso aos dados clínicos armazenados localmente.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section">
+            <h3>Suporte técnico</h3>
+            <ul class="fh-terms-list">
+              <li>O suporte é prestado conforme disponibilidade do desenvolvedor.</li>
+              <li>Inclui correções de bugs e problemas críticos.</li>
+              <li>Pode contemplar melhorias solicitadas pela direção da clínica.</li>
+              <li>É oferecido gratuitamente como parte do acordo colaborativo.</li>
+              <li>O contato ocorre diretamente com Lucas Tavares Mattos.</li>
+            </ul>
+            <p class="fh-terms-section-intro">O suporte não inclui treinamento formal de usuários, garantia de resposta em tempo real, disponibilidade 24/7 ou desenvolvimento de funcionalidades sob demanda.</p>
+          </section>
+
+          <section class="fh-terms-section">
+            <h3>Manutenção e atualizações</h3>
+            <ul class="fh-terms-list">
+              <li>Novas versões serão lançadas conforme necessidade técnica.</li>
+              <li>Melhorias serão discutidas com a direção da clínica antes da implementação.</li>
+              <li>Versões antigas continuarão funcionando, ainda que sem suporte ativo.</li>
+              <li>Quebras de compatibilidade serão evitadas sempre que possível.</li>
+              <li>A documentação será mantida e atualizada junto às versões.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section fh-terms-section--info">
+            <h3>Limite de responsabilidade</h3>
+            <p>O software é fornecido <strong>como está</strong>. O desenvolvedor não se responsabiliza por perda ou corrupção de dados, indisponibilidade do serviço, danos diretos ou indiretos, falhas causadas por uso indevido, problemas por negligência da instituição ou incompatibilidades com sistemas externos.</p>
+          </section>
+
+          <section class="fh-terms-section">
+            <h3>Encerramento de acesso</h3>
+            <ul class="fh-terms-list">
+              <li>O desenvolvedor pode descontinuar o projeto com aviso prévio mínimo de 1 mês.</li>
+              <li>O suporte técnico pode ser pausado em caso de violação dos termos.</li>
+              <li>Violação de propriedade intelectual pode motivar apuração e medidas cabíveis.</li>
+              <li>Cópias do código poderão ser recuperadas quando necessário para fins legais.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section">
+            <h3>Conformidade com a legislação</h3>
+            <ul class="fh-terms-list">
+              <li>Desenvolvimento em conformidade com a LGPD.</li>
+              <li>Respeito às normas do Conselho Federal de Fisioterapia.</li>
+              <li>Observância à legislação brasileira de direitos autorais.</li>
+              <li>Compatibilidade com as regulamentações internas da UFRGS.</li>
+            </ul>
+          </section>
+
+          <section class="fh-terms-section fh-terms-section--signature">
+            <h3>Identificação do acordo</h3>
+            <div class="fh-terms-meta-grid">
+              <div>
+                <span>Desenvolvedor</span>
+                <strong>Necromante96Official</strong>
+              </div>
+              <div>
+                <span>Instituição parceira</span>
+                <strong>ESEFID/UFRGS - Clínica de Fisioterapia</strong>
+              </div>
+              <div>
+                <span>Data de criação</span>
+                <strong>Novembro de 2025</strong>
+              </div>
+              <div>
+                <span>Versão referenciada</span>
+                <strong>FisioHub 0.4.1</strong>
+              </div>
+            </div>
           </section>
         </div>
       </div>
