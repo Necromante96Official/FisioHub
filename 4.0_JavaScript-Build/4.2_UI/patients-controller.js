@@ -371,7 +371,7 @@ export class PatientsController {
         const filtered = this.patientRecords.filter((record) => {
             const statusKind = record.statusFinanceiro.toLowerCase();
             const statusMatches = this.activeStatusFilter === "all" || statusKind === this.activeStatusFilter;
-            const searchBase = `${record.nome} ${record.fisioterapeuta} ${record.convenio} ${record.celular}`.toLowerCase();
+            const searchBase = `${record.nome} ${record.fisioterapeuta} ${record.convenio} ${record.celular} ${record.procedimentos}`.toLowerCase();
             const searchMatches = !this.activeSearch || searchBase.includes(this.activeSearch);
             return statusMatches && searchMatches;
         });

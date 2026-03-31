@@ -423,20 +423,211 @@
 
 .fh-required-field-row {
     display: flex;
-    align-items: stretch;
+    align-items: flex-start;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .fh-required-field-row .fh-required-input {
-    flex: 1 1 auto;
+    flex: 1 1 220px;
     min-width: 0;
 }
 
 .fh-required-search-btn {
-    min-width: 110px;
+    flex: 0 1 180px;
+    min-width: 180px;
     justify-content: center;
     text-align: center;
-    white-space: nowrap;
+    white-space: normal;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.fh-required-procedure-suggestions {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 64%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 20%, transparent);
+}
+
+.fh-required-procedure-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fh-required-procedure-option {
+    min-height: 34px;
+    padding: 8px 12px;
+    justify-content: center;
+    text-align: center;
+}
+
+.fh-required-empty {
+    margin: 0;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--fh-text-muted) 86%, #ffffff);
+}
+
+.fh-procedure-dialog {
+    border: 0;
+    padding: 0;
+    width: min(1120px, calc(100vw - 24px));
+    max-height: min(94dvh, 880px);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    background: transparent;
+    color: var(--fh-text);
+    box-shadow: 0 28px 54px rgba(0, 0, 0, 0.5);
+    overflow: visible;
+}
+
+.fh-procedure-dialog::backdrop {
+    background: rgba(4, 11, 22, 0.72);
+    backdrop-filter: blur(4px);
+}
+
+.fh-procedure-surface {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 88%, transparent);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    width: 100%;
+    height: min(94dvh, 880px);
+    max-height: min(94dvh, 880px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.fh-procedure-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+}
+
+.fh-procedure-header-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.fh-procedure-header h3 {
+    margin: 0;
+    font-size: clamp(0.95rem, 1.2vw, 1.08rem);
+}
+
+.fh-procedure-subtitle {
+    margin: 0;
+    color: var(--fh-muted);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+.fh-procedure-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px 16px 16px;
+    overflow: hidden;
+    min-height: 0;
+    flex: 1 1 auto;
+}
+
+.fh-procedure-search {
+    display: grid;
+    gap: 6px;
+}
+
+.fh-procedure-search span {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--fh-primary-2) 76%, #ffffff);
+}
+
+.fh-procedure-search-input {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    border-radius: 10px;
+    padding: 8px 10px;
+    background: color-mix(in srgb, var(--fh-surface-2) 24%, transparent);
+    color: var(--fh-text);
+    font-size: 0.9rem;
+    line-height: 1.3;
+}
+
+.fh-procedure-search-input:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--fh-primary-2) 58%, transparent);
+    outline-offset: 1px;
+}
+
+.fh-procedure-count {
+    margin: 0;
+    min-height: 1.2em;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--fh-primary-2) 72%, #ffffff);
+}
+
+.fh-procedure-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    align-content: start;
+    gap: 10px;
+    padding-right: 2px;
+    overflow: auto;
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    scrollbar-gutter: stable;
+}
+
+.fh-procedure-list::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.fh-procedure-list::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+.fh-procedure-list::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+.fh-procedure-option {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 72px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    text-align: left;
+    white-space: normal;
+    line-height: 1.4;
+    padding: 10px 12px;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    text-wrap: pretty;
+}
+
+.fh-procedure-empty {
+    margin: 0;
+    padding: 12px;
+    border: 1px dashed color-mix(in srgb, var(--fh-border) 70%, transparent);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--fh-surface-2) 16%, transparent);
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--fh-text-muted) 86%, #ffffff);
 }
 
 .fh-required-field span {
@@ -504,6 +695,26 @@
 
     .fh-required-search-btn {
         width: 100%;
+        min-width: 0;
+    }
+
+    .fh-procedure-dialog {
+        width: min(1040px, calc(100vw - 16px));
+        max-height: min(94dvh, 760px);
+    }
+
+    .fh-procedure-surface {
+        height: min(94dvh, 760px);
+        max-height: min(94dvh, 760px);
+    }
+
+    .fh-procedure-header {
+        flex-direction: column;
+    }
+
+    .fh-procedure-list {
+        grid-template-columns: 1fr;
+        max-height: none;
     }
 
     .fh-data-editor {

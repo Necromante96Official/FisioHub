@@ -28,10 +28,11 @@ const resolveHoverMessage = (element) => {
         case "processBtn":
             return "Processa os dados importados e prepara o resultado.";
         case "clearDataBtn":
-            return "Limpa os dados desta página sem apagar a Lista de Pacientes.";
+            return "Apaga apenas os dados importados.";
         case "clearAllDataBtn":
+            return "Limpa todos os dados das páginas, mantendo a Lista de Pacientes intacta.";
         case "clearOnlyDataBtn":
-            return "Remove todos os dados, mantendo a Lista de Pacientes.";
+            return "Limpa todos os dados do sistema, sem exceções.";
         case "todayBtn":
             return "Volta a data de referência para o dia atual.";
         case "prevDayBtn":
@@ -167,7 +168,7 @@ const showAnchoredToast = (anchor, message) => {
     const rect = anchor.getBoundingClientRect();
     const toastRect = toast.getBoundingClientRect();
     const gap = 10;
-    const top = Math.max(8, rect.top - toastRect.height - gap);
+    const top = rect.top - toastRect.height - gap;
     const left = Math.min(window.innerWidth - toastRect.width - 8, Math.max(8, rect.left + rect.width / 2 - toastRect.width / 2));
     toast.style.position = "fixed";
     toast.style.top = `${top}px`;

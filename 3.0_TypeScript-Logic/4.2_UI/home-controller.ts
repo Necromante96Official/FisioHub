@@ -114,12 +114,12 @@ export class HomeController {
 
         const clearDataBtn = document.getElementById("clearDataBtn");
         clearDataBtn?.addEventListener("click", () => {
-            this.clearOnlyPageDataPreservingPatientsList();
+            this.clearImportedDataOnly();
         });
 
         const clearAllDataBtn = document.getElementById("clearAllDataBtn");
         clearAllDataBtn?.addEventListener("click", () => {
-            this.clearImportedDataOnly();
+            this.clearOnlyPageDataPreservingPatientsList();
         });
 
         const importedDataEditor = document.getElementById("importedDataEditor") as HTMLTextAreaElement | null;
@@ -216,6 +216,12 @@ export class HomeController {
             return;
         }
 
+        const date = this.getCurrentDate();
+        if (this.hasAlreadyProcessedDate(date)) {
+            this.showSiteNotification(`Esses dados já foram enviados para a data ${this.formatDateForToast(date)}.`);
+            return;
+        }
+
         let linesForProcessing = [...stagedLines];
         const requiredFieldIssues = this.collectRequiredFieldIssues(linesForProcessing);
 
@@ -236,7 +242,6 @@ export class HomeController {
             this.renderImportedData();
         }
 
-        const date = this.getCurrentDate();
         const filtered = linesForProcessing.filter((line) => {
             const extracted = this.extractIsoDate(line);
             return !extracted || extracted === date;
@@ -430,7 +435,7 @@ export class HomeController {
         localStorage.removeItem(this.stagingDataStorageKey);
         localStorage.removeItem(this.legacyImportedDataStorageKey);
         this.renderImportedData();
-        this.showSiteNotification("Dados importados do painel foram limpos.");
+        this.showSiteNotification("O texto da lista de dados importados foi limpo.");
     }
 
     private clearOnlyPageDataPreservingPatientsList(): void {
@@ -450,7 +455,7 @@ export class HomeController {
         this.nextItemId = 1;
         this.setDate(this.todayIso());
         this.renderImportedData();
-        this.showSiteNotification("Dados das páginas foram limpos. A Lista de Pacientes foi preservada.");
+        this.showSiteNotification("Os dados das páginas foram limpos. A Lista de Pacientes foi preservada.");
     }
 
     private appendEvolucoesPendingBatch(batch: EvolucoesPendingBatch): void {
@@ -489,6 +494,18 @@ export class HomeController {
         } catch {
             return [];
         }
+    }
+
+    private hasAlreadyProcessedDate(referenceDateIso: string): boolean {
+        const currentMeta = this.parseProcessedMeta(localStorage.getItem(this.processedMetaStorageKey));
+        const hasCurrentMeta = currentMeta.referenceDateIso === referenceDateIso
+            && (localStorage.getItem(this.processedDataStorageKey) ?? "").trim().length > 0;
+
+        if (hasCurrentMeta) {
+            return true;
+        }
+
+        return this.readEvolucoesPendingHistory().some((batch) => batch.referenceDateIso === referenceDateIso);
     }
 
     private clearAllFisioHubStorage(): void {
@@ -971,7 +988,14 @@ export class HomeController {
         const confirmBtn = document.getElementById("confirmPatientConflictBtn") as HTMLButtonElement | null;
         const autoFillBtn = document.getElementById("autoFillRequiredBtn") as HTMLButtonElement | null;
 
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn) {
+        const procedureSearchDialog = document.getElementById("procedureSearchDialog") as HTMLDialogElement | null;
+        const procedureSearchInput = document.getElementById("procedureSearchInput") as HTMLInputElement | null;
+        const procedureSearchList = document.getElementById("procedureSearchList") as HTMLDivElement | null;
+        const procedureSearchCount = document.getElementById("procedureSearchCount") as HTMLParagraphElement | null;
+        const procedureSearchEmpty = document.getElementById("procedureSearchEmpty") as HTMLParagraphElement | null;
+        const closeProcedureSearchBtn = document.getElementById("closeProcedureSearchBtn") as HTMLButtonElement | null;
+
+        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureSearchDialog || !procedureSearchInput || !procedureSearchList || !procedureSearchCount || !procedureSearchEmpty || !closeProcedureSearchBtn) {
             return Promise.resolve(null);
         }
 
@@ -985,6 +1009,9 @@ export class HomeController {
         autoFillBtn.textContent = "Auto completar";
 
         const savedPatientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
+        const procedureSuggestions = this.collectProcedureSuggestions(savedPatientsRecords);
+
+        procedureSearchDialog.dataset.issueIndex = "";
 
         list.innerHTML = issues.map((issue) => {
             const fields = issue.missingFields.map((field) => {
@@ -995,14 +1022,21 @@ export class HomeController {
                     return `
                                                 <label class="fh-required-field">
                                                     <span>${this.escapeHtml(label)}</span>
-                                                    <input
-                                                        class="fh-required-input"
-                                                        type="text"
-                                                        data-required-field="${field}"
-                                                        data-issue-index="${issue.blockIndex}"
-                                                        value="${this.escapeHtmlAttr(value)}"
-                                                        autocomplete="off"
-                                                        required>
+                                                    <div class="fh-required-field-row">
+                                                        <input
+                                                            class="fh-required-input"
+                                                            type="text"
+                                                            data-required-field="${field}"
+                                                            data-issue-index="${issue.blockIndex}"
+                                                            value="${this.escapeHtmlAttr(value)}"
+                                                            autocomplete="off"
+                                                            required>
+                                                        <button
+                                                            type="button"
+                                                            class="fh-btn fh-btn-ghost fh-required-search-btn"
+                                                            data-procedure-search-toggle="${issue.blockIndex}"
+                                                            data-hover-description="Busca procedimentos já cadastrados na lista de pacientes.">${procedureSuggestions.length > 0 ? "Procurar registrados" : "Sem registros"}</button>
+                                                    </div>
                                                 </label>
                                         `;
                 }
@@ -1059,6 +1093,10 @@ export class HomeController {
 
             const closeDialogAsync = (): void => {
                 window.setTimeout(() => {
+                    if (procedureSearchDialog.open) {
+                        procedureSearchDialog.close();
+                    }
+
                     if (dialog.open) dialog.close();
                 }, 0);
             };
@@ -1103,6 +1141,75 @@ export class HomeController {
             const getRecordValueByField = (record: PatientRecord, field: RequiredFieldKey): string => {
                 if (field === "convenio") return record.convenio;
                 return record.procedimentos;
+            };
+
+            const getFilteredProcedureSuggestions = (query: string): string[] => {
+                const normalizedQuery = this.normalizeKey(query);
+
+                if (!normalizedQuery) {
+                    return procedureSuggestions;
+                }
+
+                return procedureSuggestions.filter((procedure) => this.normalizeKey(procedure).includes(normalizedQuery));
+            };
+
+            const renderProcedureSearchResults = (): void => {
+                const query = procedureSearchInput.value;
+                const filteredSuggestions = getFilteredProcedureSuggestions(query);
+
+                procedureSearchCount.textContent = procedureSuggestions.length === 0
+                    ? "Nenhum procedimento foi encontrado na Lista de Pacientes."
+                    : `${filteredSuggestions.length} de ${procedureSuggestions.length} procedimento(s) encontrados`;
+
+                if (procedureSuggestions.length === 0) {
+                    procedureSearchList.innerHTML = "";
+                    procedureSearchEmpty.hidden = false;
+                    procedureSearchEmpty.textContent = "Nenhum procedimento cadastrado foi encontrado na lista de pacientes.";
+                    return;
+                }
+
+                if (filteredSuggestions.length === 0) {
+                    procedureSearchList.innerHTML = "";
+                    procedureSearchEmpty.hidden = false;
+                    procedureSearchEmpty.textContent = "Nenhum procedimento corresponde à busca atual.";
+                    return;
+                }
+
+                procedureSearchEmpty.hidden = true;
+                procedureSearchList.innerHTML = filteredSuggestions.map((procedure) => `
+                    <button
+                        type="button"
+                        class="fh-btn fh-btn-ghost fh-procedure-option"
+                        data-procedure-choice="${this.escapeHtmlAttr(procedure)}">
+                        ${this.escapeHtml(procedure)}
+                    </button>
+                `).join("");
+            };
+
+            const openProcedureSearchDialog = (issueIndex: number): void => {
+                if (procedureSearchDialog.open) {
+                    procedureSearchDialog.close();
+                }
+
+                procedureSearchDialog.dataset.issueIndex = String(issueIndex);
+                procedureSearchInput.value = "";
+                procedureSearchInput.disabled = procedureSuggestions.length === 0;
+                renderProcedureSearchResults();
+
+                if (!procedureSearchDialog.open) {
+                    procedureSearchDialog.showModal();
+                }
+
+                window.setTimeout(() => {
+                    procedureSearchInput.focus();
+                    procedureSearchInput.select();
+                }, 0);
+            };
+
+            const closeProcedureSearchDialog = (): void => {
+                if (procedureSearchDialog.open) {
+                    procedureSearchDialog.close();
+                }
             };
 
             const onInput = (): void => {
@@ -1153,6 +1260,53 @@ export class HomeController {
 
                 if (!targetElement) return;
 
+                const searchButton = targetElement.closest("button[data-procedure-search-toggle]") as HTMLButtonElement | null;
+                if (searchButton) {
+                    const issueIndex = Number(searchButton.dataset.procedureSearchToggle ?? "");
+                    if (!Number.isFinite(issueIndex)) return;
+                    openProcedureSearchDialog(issueIndex);
+                    return;
+                }
+            };
+
+            const onProcedureSearchInput = (): void => {
+                renderProcedureSearchResults();
+            };
+
+            const onProcedureSearchListClick = (event: MouseEvent): void => {
+                const rawTarget = event.target;
+                const targetElement = rawTarget instanceof Element
+                    ? rawTarget
+                    : rawTarget instanceof Node
+                        ? rawTarget.parentElement
+                        : null;
+
+                if (!targetElement) return;
+
+                const choiceButton = targetElement.closest("button[data-procedure-choice]") as HTMLButtonElement | null;
+                if (!choiceButton) return;
+
+                const issueIndex = Number(procedureSearchDialog.dataset.issueIndex ?? "");
+                const procedure = choiceButton.dataset.procedureChoice?.trim() ?? "";
+
+                if (!Number.isFinite(issueIndex) || this.isMissingRequiredValue(procedure)) return;
+
+                const input = list.querySelector(`input[data-issue-index="${issueIndex}"][data-required-field="procedimentos"]`) as HTMLInputElement | null;
+                if (!input) return;
+
+                input.value = procedure;
+                this.showSiteNotification("Procedimento registrado aplicado ao campo de correção.");
+                updateConfirmState();
+                closeProcedureSearchDialog();
+            };
+
+            const onProcedureSearchClose = (): void => {
+                procedureSearchDialog.dataset.issueIndex = "";
+            };
+
+            const onProcedureSearchCancel = (event: Event): void => {
+                event.preventDefault();
+                closeProcedureSearchDialog();
             };
 
             const onConfirm = (): void => {
@@ -1194,11 +1348,22 @@ export class HomeController {
 
             list.addEventListener("click", onListClick, { signal });
             list.addEventListener("input", onInput, { signal });
+            procedureSearchInput.addEventListener("input", onProcedureSearchInput, { signal });
+            procedureSearchList.addEventListener("click", onProcedureSearchListClick, { signal });
+            closeProcedureSearchBtn.addEventListener("click", closeProcedureSearchDialog, { signal });
             confirmBtn.addEventListener("click", onConfirm, { signal });
             autoFillBtn.addEventListener("click", onAutoProcess, { signal });
             exitBtn.addEventListener("click", onExit, { once: true, signal });
+            procedureSearchDialog.addEventListener("cancel", onProcedureSearchCancel, { signal });
+            procedureSearchDialog.addEventListener("close", onProcedureSearchClose, { signal });
             dialog.addEventListener("cancel", onCancel, { signal });
             dialog.addEventListener("close", onClose, { signal });
+
+            procedureSearchDialog.addEventListener("click", (event) => {
+                if (event.target === procedureSearchDialog) {
+                    closeProcedureSearchDialog();
+                }
+            }, { signal });
 
             if (!dialog.open) {
                 dialog.showModal();
@@ -1366,6 +1531,15 @@ export class HomeController {
 
     private todayIso(): string {
         return this.toIso(new Date());
+    }
+
+    private formatDateForToast(value: string): string {
+        const date = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(date.getTime())) {
+            return value;
+        }
+
+        return new Intl.DateTimeFormat("pt-BR").format(date);
     }
 
     private renderImportedData(): void {

@@ -11,6 +11,7 @@ export class EvolucoesController {
     theme = new ThemeManager();
     allPendingRecords = [];
     visiblePendingRecords = [];
+    expandedDetails = new Set();
     activeSearch = "";
     activeDateMode = "all";
     activeSpecificDate = this.todayIso();
@@ -67,6 +68,20 @@ export class EvolucoesController {
         const tableBody = document.getElementById("pendingEvolutionsTableBody");
         tableBody?.addEventListener("click", (event) => {
             const target = event.target;
+            const detailsButton = target.closest("button[data-patient-details]");
+            if (detailsButton) {
+                const patientKey = detailsButton.dataset.patientDetails;
+                if (!patientKey)
+                    return;
+                if (this.expandedDetails.has(patientKey)) {
+                    this.expandedDetails.delete(patientKey);
+                }
+                else {
+                    this.expandedDetails.add(patientKey);
+                }
+                this.render();
+                return;
+            }
             const button = target.closest("button[data-signature]");
             if (!button)
                 return;
@@ -127,7 +142,11 @@ export class EvolucoesController {
         this.allPendingRecords = this.getPendingRecords();
         this.syncFilters(this.allPendingRecords);
         this.visiblePendingRecords = this.getVisibleRecords(this.allPendingRecords);
-        const countsByPatient = this.getCountsByPatient(this.visiblePendingRecords);
+        const visibleGroups = this.groupRecordsByPatient(this.visiblePendingRecords);
+        const countsByPatient = new Map();
+        visibleGroups.forEach((group) => {
+            countsByPatient.set(group.nomeNormalizado, group.records.length);
+        });
         const uniquePatients = new Set(this.visiblePendingRecords.map((record) => record.nomeNormalizado));
         this.setText("pendingPatientsCount", String(uniquePatients.size));
         this.setText("pendingEvolutionsCount", String(this.visiblePendingRecords.length));
@@ -145,33 +164,143 @@ export class EvolucoesController {
             tableBody.appendChild(row);
             return;
         }
-        this.visiblePendingRecords.forEach((record) => {
+        visibleGroups.forEach((group) => {
+            const firstRecord = group.records[0];
+            const isExpanded = this.expandedDetails.has(group.nomeNormalizado);
             const row = document.createElement("tr");
             const nameCell = document.createElement("td");
-            nameCell.textContent = record.nome;
-            const dateCell = document.createElement("td");
-            dateCell.textContent = record.dataLabel;
+            nameCell.textContent = group.nome;
+            const detailsCell = document.createElement("td");
+            const detailsButton = document.createElement("button");
+            detailsButton.type = "button";
+            detailsButton.className = "fh-evolucao-details-btn";
+            detailsButton.dataset.patientDetails = group.nomeNormalizado;
+            detailsButton.setAttribute("aria-expanded", isExpanded ? "true" : "false");
+            detailsButton.textContent = isExpanded ? "Ocultar detalhes" : "Ver mais...";
+            detailsCell.appendChild(detailsButton);
             const timeCell = document.createElement("td");
-            timeCell.textContent = record.horario;
+            timeCell.textContent = firstRecord.horario;
             const procedureCell = document.createElement("td");
-            procedureCell.textContent = record.procedimento;
+            procedureCell.textContent = firstRecord.procedimento;
             const pendingCell = document.createElement("td");
-            pendingCell.textContent = String(countsByPatient.get(record.nomeNormalizado) ?? 1);
+            pendingCell.textContent = String(countsByPatient.get(group.nomeNormalizado) ?? group.records.length);
             const actionCell = document.createElement("td");
             const doneButton = document.createElement("button");
             doneButton.type = "button";
             doneButton.className = "fh-evolucao-done-btn";
-            doneButton.dataset.signature = record.assinatura;
+            doneButton.dataset.signature = firstRecord.assinatura;
             doneButton.textContent = "Evoluído";
             actionCell.appendChild(doneButton);
             row.appendChild(nameCell);
-            row.appendChild(dateCell);
+            row.appendChild(detailsCell);
             row.appendChild(timeCell);
             row.appendChild(procedureCell);
             row.appendChild(pendingCell);
             row.appendChild(actionCell);
             tableBody.appendChild(row);
+            if (!isExpanded) {
+                return;
+            }
+            const detailRow = document.createElement("tr");
+            detailRow.className = "fh-evolucoes-detail-row";
+            const detailCell = document.createElement("td");
+            detailCell.colSpan = 6;
+            const detailPanel = document.createElement("div");
+            detailPanel.className = "fh-evolucoes-detail-panel";
+            const detailHeader = document.createElement("div");
+            detailHeader.className = "fh-evolucoes-detail-header";
+            const titleWrapper = document.createElement("div");
+            const title = document.createElement("h3");
+            title.textContent = `Pendências de ${group.nome}`;
+            const subtitle = document.createElement("p");
+            subtitle.textContent = "Todas as datas, horários e procedimentos pendentes deste paciente.";
+            titleWrapper.appendChild(title);
+            titleWrapper.appendChild(subtitle);
+            const count = document.createElement("p");
+            count.textContent = `${group.records.length} item(ns) pendente(s)`;
+            detailHeader.appendChild(titleWrapper);
+            detailHeader.appendChild(count);
+            const detailList = document.createElement("div");
+            detailList.className = "fh-evolucoes-detail-list";
+            group.records.forEach((pendingRecord) => {
+                const detailItem = document.createElement("div");
+                detailItem.className = "fh-evolucoes-detail-item";
+                const meta = document.createElement("div");
+                meta.className = "fh-evolucoes-detail-meta";
+                const datePair = document.createElement("span");
+                const dateLabel = document.createElement("span");
+                dateLabel.textContent = "Data: ";
+                const dateValue = document.createElement("strong");
+                dateValue.textContent = pendingRecord.dataLabel;
+                datePair.appendChild(dateLabel);
+                datePair.appendChild(dateValue);
+                const timePair = document.createElement("span");
+                const timeLabel = document.createElement("span");
+                timeLabel.textContent = "Horário: ";
+                const timeValue = document.createElement("strong");
+                timeValue.textContent = pendingRecord.horario;
+                timePair.appendChild(timeLabel);
+                timePair.appendChild(timeValue);
+                const procedurePair = document.createElement("span");
+                const procedureLabel = document.createElement("span");
+                procedureLabel.textContent = "Procedimento: ";
+                const procedureValue = document.createElement("strong");
+                procedureValue.textContent = pendingRecord.procedimento;
+                procedurePair.appendChild(procedureLabel);
+                procedurePair.appendChild(procedureValue);
+                meta.appendChild(datePair);
+                meta.appendChild(timePair);
+                meta.appendChild(procedurePair);
+                detailItem.appendChild(meta);
+                detailList.appendChild(detailItem);
+            });
+            detailPanel.appendChild(detailHeader);
+            detailPanel.appendChild(detailList);
+            detailCell.appendChild(detailPanel);
+            detailRow.appendChild(detailCell);
+            tableBody.appendChild(detailRow);
         });
+    }
+    groupRecordsByPatient(records) {
+        const groups = new Map();
+        records.forEach((record) => {
+            const existing = groups.get(record.nomeNormalizado);
+            if (existing) {
+                existing.records.push(record);
+                return;
+            }
+            groups.set(record.nomeNormalizado, {
+                nome: record.nome,
+                nomeNormalizado: record.nomeNormalizado,
+                records: [record]
+            });
+        });
+        const orderedGroups = Array.from(groups.values());
+        orderedGroups.sort((groupA, groupB) => {
+            const firstA = groupA.records[0];
+            const firstB = groupB.records[0];
+            const byName = groupA.nome.localeCompare(groupB.nome, "pt-BR", { sensitivity: "base" });
+            if (this.activeSort === "name-asc") {
+                if (byName !== 0)
+                    return byName;
+                return firstA.dataIso.localeCompare(firstB.dataIso) || firstA.horario.localeCompare(firstB.horario);
+            }
+            const countA = groupA.records.length;
+            const countB = groupB.records.length;
+            if (this.activeSort === "pending-desc") {
+                if (countB !== countA)
+                    return countB - countA;
+                if (byName !== 0)
+                    return byName;
+                return firstA.dataIso.localeCompare(firstB.dataIso) || firstA.horario.localeCompare(firstB.horario);
+            }
+            if (countA !== countB)
+                return countA - countB;
+            if (byName !== 0)
+                return byName;
+            return firstA.dataIso.localeCompare(firstB.dataIso) || firstA.horario.localeCompare(firstB.horario);
+        });
+        return orderedGroups;
     }
     syncFilters(records) {
         this.syncDateControls();
