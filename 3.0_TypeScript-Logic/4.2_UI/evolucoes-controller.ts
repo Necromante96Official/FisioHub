@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type PendingEvolutionRecord = {
     nome: string;
@@ -63,6 +63,13 @@ export class EvolucoesController {
             dialogId: "termsDialog",
             triggerButtonId: "footerTermsBtn",
             closeButtonId: "closeTermsDialogBtn"
+        });
+        bindAnalysisDialog({
+            dialogId: "analysisDialog",
+            triggerButtonId: "footerAnalysisBtn",
+            closeButtonId: "closeAnalysisDialogBtn",
+            printButtonId: "analysisPrintBtn",
+            textButtonId: "analysisTextBtn"
         });
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
@@ -276,10 +283,10 @@ export class EvolucoesController {
             pendingCell.textContent = String(countsByPatient.get(group.nomeNormalizado) ?? group.records.length);
 
             row.appendChild(nameCell);
-            row.appendChild(detailsCell);
             row.appendChild(timeCell);
             row.appendChild(procedureCell);
             row.appendChild(pendingCell);
+            row.appendChild(detailsCell);
 
             tableBody.appendChild(row);
         });

@@ -1,0 +1,71 @@
+============================================================
+ZENFISIO COLLECTOR - DADOS COLETADOS
+Data: 01/04/2026, 10:35:21
+Total: 5 agendamentos
+============================================================
+
+--- Agendamento 1 ---
+Coletado em: 01/04/2026, 10:35:17
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Fernanda Tambosi Varella
+Paciente: Teste Para Fichas de Avaliação
+Celular: +55 (51) 999990000
+Convenio: Baixa Renda - ISENTO
+
+------------------------------------------------------------
+
+--- Agendamento 2 ---
+Coletado em: 01/04/2026, 10:35:18
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Gustavo Alexandre Scheffer da Silva
+Celular: +55 (51) 989259654
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 3 ---
+Coletado em: 01/04/2026, 10:35:19
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Lucas Rodrigues da Rosa
+Celular: +55 (51) 981074630
+Convenio: Atleta UFRGS DPSD/PRAE - ISENTO
+Status: Atendido
+Procedimentos: Fisioterapia Musculoesquelética CLINIFISIO 2X/semana - Isento
+
+------------------------------------------------------------
+
+--- Agendamento 4 ---
+Coletado em: 01/04/2026, 10:35:20
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Angela Mara da Silva Nunes
+Celular: +55 (51) 996243321
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 5 ---
+Coletado em: 01/04/2026, 10:35:20
+
+Horario: 17:00 - 18:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Nicolas Barbarini de Andrade
+Celular: +55 (51) 992542501
+Convenio: Atleta UFRGS DPSD/PRAE - ISENTO
+Status: Atendido
+Procedimentos: Fisioterapia Musculoesquelética CLINIFISIO 2X/semana - Isento
+
+------------------------------------------------------------
+

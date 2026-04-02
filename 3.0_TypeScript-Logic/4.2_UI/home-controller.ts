@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type BackupPayload, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type ImportedItem = {
     id: number;
@@ -50,6 +50,13 @@ export class HomeController {
             dialogId: "termsDialog",
             triggerButtonId: "footerTermsBtn",
             closeButtonId: "closeTermsDialogBtn"
+        });
+        bindAnalysisDialog({
+            dialogId: "analysisDialog",
+            triggerButtonId: "footerAnalysisBtn",
+            closeButtonId: "closeAnalysisDialogBtn",
+            printButtonId: "analysisPrintBtn",
+            textButtonId: "analysisTextBtn"
         });
         this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
@@ -1166,9 +1173,13 @@ export class HomeController {
                 return Array.from(list.querySelectorAll("input[data-required-field]")) as HTMLInputElement[];
             };
 
+            const hasMissingRequiredInputs = (): boolean => {
+                return allInputs().some((input) => this.isMissingRequiredValue(input.value));
+            };
+
             const updateConfirmState = (): void => {
-                const hasMissing = allInputs().some((input) => this.isMissingRequiredValue(input.value));
-                confirmBtn.disabled = hasMissing;
+                confirmBtn.disabled = false;
+                confirmBtn.dataset.hasMissingRequiredInputs = hasMissingRequiredInputs() ? "true" : "false";
             };
 
             const findRecordForIssue = (issue: RequiredFieldIssue, records: PatientRecord[]): PatientRecord | null => {
@@ -1371,7 +1382,11 @@ export class HomeController {
             };
 
             const onConfirm = (): void => {
-                if (confirmBtn.disabled) return;
+                if (hasMissingRequiredInputs()) {
+                    this.showSiteNotification("Ainda faltam campos obrigatorios para preencher.");
+                    updateConfirmState();
+                    return;
+                }
 
                 corrections.clear();
 

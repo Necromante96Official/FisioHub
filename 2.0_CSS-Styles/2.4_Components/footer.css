@@ -51,13 +51,9 @@
 .fh-footer-bottomline {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 10px;
-}
-
-.fh-footer-spacer {
-    min-width: 1px;
 }
 
 .fh-footer-actions {
@@ -65,6 +61,11 @@
     align-items: center;
     justify-self: end;
     grid-column: 3;
+}
+
+.fh-footer-actions--start {
+    justify-self: start;
+    grid-column: 1;
 }
 
 .fh-footer-meta {
@@ -96,6 +97,747 @@
     border-color: color-mix(in srgb, var(--fh-primary-2) 72%, #ffffff);
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--fh-primary-2) 38%, transparent), 0 10px 20px rgba(5, 18, 33, 0.36);
     transform: translateY(-3px);
+}
+
+.fh-analysis-btn {
+    min-height: 30px;
+    padding: 6px 14px;
+    border: 1px solid color-mix(in srgb, #7dd3fc 50%, var(--fh-border));
+    border-radius: 999px;
+    background:
+        linear-gradient(145deg, color-mix(in srgb, #0f172a 70%, var(--fh-surface) 30%), color-mix(in srgb, #12263d 78%, var(--fh-surface-2) 22%)),
+        linear-gradient(90deg, color-mix(in srgb, #38bdf8 26%, transparent), transparent 58%);
+    color: #e6f8ff;
+    font-size: 0.69rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transform: translateY(-2px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, color 0.2s ease, filter 0.2s ease;
+}
+
+.fh-analysis-btn:hover,
+.fh-analysis-btn:focus-visible {
+    color: #ffffff;
+    border-color: color-mix(in srgb, #7dd3fc 72%, #ffffff);
+    box-shadow: 0 0 0 1px color-mix(in srgb, #38bdf8 44%, transparent), 0 12px 24px rgba(6, 20, 35, 0.40);
+    filter: brightness(1.04);
+    transform: translateY(-3px);
+}
+
+.fh-analysis-dialog {
+    border: 0;
+    padding: 0;
+    width: min(1120px, calc(100vw - 18px));
+    height: min(88dvh, 820px);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    background: transparent;
+    overflow: hidden;
+    color: var(--fh-text);
+    box-shadow: 0 30px 56px rgba(0, 0, 0, 0.54);
+    transform-origin: center center;
+    will-change: transform, opacity;
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fh-analysis-dialog::backdrop {
+    background:
+        radial-gradient(circle at top, rgba(41, 94, 165, 0.18), transparent 40%),
+        linear-gradient(145deg, rgba(4, 11, 22, 0.46), rgba(7, 18, 34, 0.72));
+    backdrop-filter: blur(5px) saturate(1.05);
+    opacity: 0;
+    transition: opacity 0.18s ease;
+}
+
+.fh-analysis-dialog[open],
+.fh-analysis-dialog.is-opening {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.fh-analysis-dialog[open]::backdrop,
+.fh-analysis-dialog.is-opening::backdrop {
+    opacity: 1;
+}
+
+.fh-analysis-dialog.is-closing {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+}
+
+.fh-analysis-dialog.is-closing::backdrop {
+    opacity: 0;
+}
+
+.fh-analysis-surface {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+    min-height: 0;
+    background:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, #38bdf8 12%, transparent) 0%, transparent 44%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 92%, transparent), color-mix(in srgb, var(--fh-surface-2) 96%, transparent));
+    border: 1px solid color-mix(in srgb, var(--fh-border) 88%, transparent);
+    border-radius: calc(var(--fh-r-2) + 4px);
+    overflow: hidden;
+    position: relative;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.fh-analysis-dialog[open] .fh-analysis-surface,
+.fh-analysis-dialog.is-opening .fh-analysis-surface {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fh-analysis-dialog.is-closing .fh-analysis-surface {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fh-analysis-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, #38bdf8 78%, #ffffff), transparent);
+    opacity: 0.9;
+    pointer-events: none;
+}
+
+.fh-analysis-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fh-s-2);
+    padding: 14px 16px;
+    border-bottom: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 86%, transparent), color-mix(in srgb, var(--fh-surface) 96%, transparent)),
+        linear-gradient(90deg, color-mix(in srgb, #38bdf8 12%, transparent), transparent 56%);
+    position: relative;
+    z-index: 1;
+}
+
+.fh-analysis-header-copy {
+    display: grid;
+    gap: 4px;
+}
+
+.fh-analysis-header-copy h2 {
+    margin: 0;
+    font-size: clamp(1rem, 1.4vw, 1.18rem);
+}
+
+.fh-analysis-header-copy p {
+    margin: 0;
+    color: color-mix(in srgb, var(--fh-text) 84%, var(--fh-muted));
+    max-width: 68ch;
+}
+
+.fh-analysis-header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.fh-analysis-action-btn {
+    min-height: 30px;
+    padding-inline: 12px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--fh-border) 78%, transparent);
+}
+
+.fh-analysis-body {
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.fh-analysis-loading,
+.fh-analysis-report-stage {
+    position: absolute;
+    inset: 0;
+    display: none;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.fh-analysis-loading.is-active,
+.fh-analysis-report-stage.is-active {
+    display: grid;
+}
+
+.fh-analysis-loading {
+    grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    gap: 24px;
+    padding: clamp(18px, 2.4vw, 28px);
+    background:
+        radial-gradient(circle at 20% 12%, rgba(56, 189, 248, 0.12), transparent 35%),
+        radial-gradient(circle at 82% 20%, rgba(16, 185, 129, 0.09), transparent 30%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface) 94%, transparent), color-mix(in srgb, var(--fh-surface-2) 98%, transparent));
+}
+
+.fh-analysis-loader {
+    position: relative;
+    width: min(240px, 58vw);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    isolation: isolate;
+}
+
+.fh-analysis-loader-ring,
+.fh-analysis-loader-core {
+    position: absolute;
+    border-radius: 50%;
+}
+
+.fh-analysis-loader-ring--outer {
+    inset: 0;
+    border: 1px solid color-mix(in srgb, #38bdf8 52%, transparent);
+    box-shadow: 0 0 24px rgba(56, 189, 248, 0.12), inset 0 0 20px rgba(56, 189, 248, 0.08);
+    animation: fh-analysis-spin 8s linear infinite;
+}
+
+.fh-analysis-loader-ring--middle {
+    inset: 18%;
+    border: 1px dashed color-mix(in srgb, #7dd3fc 46%, transparent);
+    opacity: 0.92;
+    animation: fh-analysis-spin-reverse 6s linear infinite;
+}
+
+.fh-analysis-loader-ring--inner {
+    inset: 34%;
+    border: 1px solid color-mix(in srgb, #10b981 36%, transparent);
+    box-shadow: inset 0 0 18px rgba(16, 185, 129, 0.08);
+    animation: fh-analysis-spin 4.8s linear infinite;
+}
+
+.fh-analysis-loader-core {
+    inset: 40%;
+    background:
+        radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.18) 22%, transparent 24%),
+        radial-gradient(circle at center, rgba(56, 189, 248, 0.9), rgba(15, 23, 42, 0.9) 68%);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 24px rgba(56, 189, 248, 0.22);
+    animation: fh-analysis-pulse 1.8s ease-in-out infinite;
+}
+
+.fh-analysis-loading-copy {
+    display: grid;
+    gap: 12px;
+    align-content: center;
+    max-width: 620px;
+    justify-self: start;
+}
+
+.fh-analysis-loading-kicker,
+.fh-analysis-kicker {
+    margin: 0;
+    color: #7dd3fc;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.fh-analysis-loading-copy h3 {
+    margin: 0;
+    font-size: clamp(1.35rem, 2.3vw, 1.95rem);
+    line-height: 1.05;
+}
+
+.fh-analysis-loading-copy p {
+    margin: 0;
+    color: color-mix(in srgb, var(--fh-text) 84%, var(--fh-muted));
+    max-width: 58ch;
+}
+
+.fh-analysis-loading-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.fh-analysis-loading-steps span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--fh-surface-2) 82%, transparent);
+    border: 1px solid color-mix(in srgb, var(--fh-border) 72%, transparent);
+    color: color-mix(in srgb, var(--fh-text) 88%, var(--fh-muted));
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.fh-analysis-report-stage {
+    padding: clamp(16px, 2vw, 24px);
+    overflow: hidden;
+}
+
+.fh-analysis-report-content {
+    height: 100%;
+    overflow: auto;
+    min-height: 0;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
+}
+
+.fh-analysis-report-shell {
+    display: grid;
+    gap: 14px;
+    min-height: 100%;
+}
+
+.fh-analysis-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+    gap: 14px;
+    align-items: stretch;
+}
+
+.fh-analysis-hero-copy,
+.fh-analysis-hero-meta,
+.fh-analysis-metric-card,
+.fh-analysis-module-card,
+.fh-analysis-insight-card {
+    border: 1px solid color-mix(in srgb, var(--fh-border) 74%, transparent);
+    border-radius: 18px;
+    background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 34%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 42%, transparent), color-mix(in srgb, var(--fh-surface) 96%, transparent));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02), 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.fh-analysis-hero-copy {
+    padding: 16px 18px;
+}
+
+.fh-analysis-hero-copy h3 {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+}
+
+.fh-analysis-hero-copy p:last-child {
+    margin: 8px 0 0;
+    color: color-mix(in srgb, var(--fh-text) 82%, var(--fh-muted));
+    max-width: 68ch;
+}
+
+.fh-analysis-hero-meta {
+    display: grid;
+    gap: 10px;
+    padding: 16px 18px;
+}
+
+.fh-analysis-hero-meta div {
+    display: grid;
+    gap: 4px;
+}
+
+.fh-analysis-hero-meta span,
+.fh-analysis-module-head span {
+    color: color-mix(in srgb, var(--fh-text) 60%, var(--fh-muted));
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.fh-analysis-hero-meta strong {
+    font-size: 0.95rem;
+}
+
+.fh-analysis-hero-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.fh-analysis-metric-card {
+    padding: 16px 16px 15px;
+    display: grid;
+    gap: 6px;
+}
+
+.fh-analysis-metric-card--primary {
+    background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.14), transparent 32%),
+        linear-gradient(180deg, color-mix(in srgb, #0f172a 75%, var(--fh-surface) 25%), color-mix(in srgb, var(--fh-surface) 92%, transparent));
+}
+
+.fh-analysis-metric-card--accent {
+    background:
+        radial-gradient(circle at top right, rgba(16, 185, 129, 0.14), transparent 32%),
+        linear-gradient(180deg, color-mix(in srgb, #0f1b29 72%, var(--fh-surface) 28%), color-mix(in srgb, var(--fh-surface) 92%, transparent));
+}
+
+.fh-analysis-metric-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7dd3fc;
+}
+
+.fh-analysis-metric-card strong {
+    font-size: clamp(1.25rem, 2vw, 1.8rem);
+    line-height: 1;
+}
+
+.fh-analysis-metric-card small {
+    color: color-mix(in srgb, var(--fh-text) 76%, var(--fh-muted));
+}
+
+.fh-analysis-module-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.fh-analysis-module-card,
+.fh-analysis-insight-card {
+    padding: 16px 18px;
+    display: grid;
+    gap: 10px;
+}
+
+.fh-analysis-module-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.fh-analysis-module-head h4 {
+    margin: 0;
+    font-size: 0.98rem;
+}
+
+.fh-analysis-module-list,
+.fh-analysis-insight-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.fh-analysis-module-list li,
+.fh-analysis-insight-list li {
+    display: grid;
+    gap: 2px;
+    color: color-mix(in srgb, var(--fh-text) 88%, var(--fh-muted));
+}
+
+.fh-analysis-module-list strong {
+    color: var(--fh-text);
+}
+
+.fh-analysis-insight-card {
+    background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 32%),
+        linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 50%, transparent), color-mix(in srgb, var(--fh-surface) 94%, transparent));
+}
+
+@keyframes fh-analysis-spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fh-analysis-spin-reverse {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+@keyframes fh-analysis-pulse {
+    0%,
+    100% {
+        transform: scale(0.96);
+        filter: brightness(0.98);
+    }
+
+    50% {
+        transform: scale(1);
+        filter: brightness(1.08);
+    }
+}
+
+@media (max-width: 820px) {
+    .fh-footer-content {
+        gap: 5px;
+    }
+
+    .fh-footer-bottomline {
+        grid-template-columns: 1fr;
+        justify-items: center;
+    }
+
+    .fh-footer-actions--start,
+    .fh-footer-meta,
+    .fh-footer-actions {
+        grid-column: auto;
+        justify-self: center;
+    }
+
+    .fh-analysis-dialog {
+        width: min(100vw, calc(100vw - 10px));
+        height: min(90dvh, 860px);
+    }
+
+    .fh-analysis-header,
+    .fh-analysis-loading {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-analysis-hero,
+    .fh-analysis-hero-grid,
+    .fh-analysis-module-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-analysis-header {
+        align-items: flex-start;
+    }
+
+    .fh-analysis-header-actions {
+        justify-content: flex-start;
+    }
+
+    .fh-analysis-loader {
+        width: min(208px, 64vw);
+    }
+
+    .fh-terms-content {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-terms-brand {
+        position: static;
+    }
+
+    .fh-terms-brand-visual {
+        min-height: 148px;
+    }
+
+    .fh-terms-meta-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fh-floating-home-btn {
+        width: 48px;
+        height: 48px;
+        right: 14px;
+        bottom: 92px;
+    }
+
+    .fh-floating-home-toast {
+        right: 14px;
+        bottom: 148px;
+        font-size: 0.72rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .fh-terms-dialog[open],
+    .fh-terms-dialog.is-opening,
+    .fh-terms-dialog.is-closing,
+    .fh-terms-surface,
+    .fh-analysis-dialog[open],
+    .fh-analysis-dialog.is-opening,
+    .fh-analysis-dialog.is-closing,
+    .fh-analysis-surface,
+    .fh-site-toast,
+    .fh-site-toast.is-leaving,
+    .fh-floating-home-btn,
+    .fh-floating-home-toast,
+    .fh-floating-home-toast.is-visible {
+        animation: none;
+        transition: none;
+    }
+
+    .fh-analysis-loader-ring--outer,
+    .fh-analysis-loader-ring--middle,
+    .fh-analysis-loader-ring--inner,
+    .fh-analysis-loader-core {
+        animation: none;
+    }
+}
+
+@media print {
+    body {
+        background: #ffffff;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    body > * {
+        visibility: hidden !important;
+    }
+
+    .fh-analysis-dialog[open],
+    .fh-analysis-dialog[open] * {
+        visibility: visible !important;
+        color: #000000 !important;
+        text-shadow: none !important;
+        box-shadow: none !important;
+    }
+
+    .fh-analysis-dialog {
+        display: block !important;
+        position: static !important;
+        width: 100% !important;
+        height: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+
+    .fh-analysis-dialog::backdrop {
+        background: transparent !important;
+    }
+
+    .fh-analysis-surface {
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        min-height: auto !important;
+        background: #ffffff !important;
+        border-color: #000000 !important;
+    }
+
+    .fh-analysis-header,
+    .fh-analysis-hero,
+    .fh-analysis-hero-copy,
+    .fh-analysis-hero-meta,
+    .fh-analysis-hero-grid,
+    .fh-analysis-module-grid,
+    .fh-analysis-insight-card,
+    .fh-analysis-metric-card,
+    .fh-analysis-module-card {
+        background: #ffffff !important;
+        background-image: none !important;
+    }
+
+    .fh-analysis-header,
+    .fh-analysis-header-copy,
+    .fh-analysis-header-copy p,
+    .fh-analysis-kicker,
+    .fh-analysis-hero,
+    .fh-analysis-hero-copy,
+    .fh-analysis-hero-copy p,
+    .fh-analysis-hero-copy h3,
+    .fh-analysis-hero-meta,
+    .fh-analysis-hero-meta span,
+    .fh-analysis-hero-meta strong,
+    .fh-analysis-loading,
+    .fh-analysis-loading * {
+        color: #000000 !important;
+    }
+
+    .fh-analysis-hero,
+    .fh-analysis-hero-copy,
+    .fh-analysis-hero-meta,
+    .fh-analysis-hero-grid,
+    .fh-analysis-module-grid,
+    .fh-analysis-insight-card {
+        border-color: #000000 !important;
+    }
+
+    .fh-analysis-hero,
+    .fh-analysis-hero-copy,
+    .fh-analysis-hero-meta,
+    .fh-analysis-hero-grid,
+    .fh-analysis-module-grid,
+    .fh-analysis-insight-card,
+    .fh-analysis-metric-card,
+    .fh-analysis-module-card {
+        box-shadow: none !important;
+    }
+
+    .fh-analysis-header-actions,
+    .fh-analysis-loading,
+    .fh-floating-home-btn,
+    .fh-floating-home-toast,
+    .fh-site-notifications {
+        display: none !important;
+    }
+
+    .fh-analysis-report-stage {
+        display: grid !important;
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+
+    .fh-analysis-report-content {
+        overflow: visible !important;
+        padding-right: 0 !important;
+    }
+
+    .fh-analysis-report-content *,
+    .fh-analysis-report-content h1,
+    .fh-analysis-report-content h2,
+    .fh-analysis-report-content h3,
+    .fh-analysis-report-content h4,
+    .fh-analysis-report-content p,
+    .fh-analysis-report-content span,
+    .fh-analysis-report-content li,
+    .fh-analysis-report-content strong,
+    .fh-analysis-report-content small {
+        color: #000000 !important;
+    }
+
+    .fh-analysis-report-content .fh-analysis-metric-card,
+    .fh-analysis-report-content .fh-analysis-module-card,
+    .fh-analysis-report-content .fh-analysis-insight-card {
+        border-color: #000000 !important;
+        background: #ffffff !important;
+        background-image: none !important;
+    }
+
+    .fh-analysis-report-content .fh-analysis-metric-card strong,
+    .fh-analysis-report-content .fh-analysis-hero-meta strong,
+    .fh-analysis-report-content .fh-analysis-module-head span {
+        color: #000000 !important;
+    }
+
+    .fh-analysis-report-content .fh-analysis-metric-label,
+    .fh-analysis-report-content .fh-analysis-module-head h4,
+    .fh-analysis-report-content .fh-analysis-module-list strong,
+    .fh-analysis-report-content .fh-analysis-insight-list li,
+    .fh-analysis-report-content .fh-analysis-hero-copy p,
+    .fh-analysis-report-content .fh-analysis-hero-copy h3,
+    .fh-analysis-report-content .fh-analysis-hero-meta span {
+        color: #000000 !important;
+    }
+
+    .fh-analysis-report-content .fh-analysis-metric-card::before,
+    .fh-analysis-report-content .fh-analysis-metric-card::after,
+    .fh-analysis-report-content .fh-analysis-module-card::before,
+    .fh-analysis-report-content .fh-analysis-insight-card::before {
+        display: none !important;
+    }
 }
 
 .fh-terms-dialog {
@@ -751,10 +1493,7 @@
         justify-items: center;
     }
 
-    .fh-footer-spacer {
-        display: none;
-    }
-
+    .fh-footer-actions--start,
     .fh-footer-meta,
     .fh-footer-actions {
         grid-column: auto;
@@ -1275,10 +2014,7 @@
         justify-items: center;
     }
 
-    .fh-footer-spacer {
-        display: none;
-    }
-
+    .fh-footer-actions--start,
     .fh-footer-meta,
     .fh-footer-actions {
         grid-column: auto;

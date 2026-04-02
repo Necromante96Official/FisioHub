@@ -216,7 +216,13 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.fh-patient-details-actions .fh-btn {
+    flex: 0 0 auto;
 }
 
 .fh-patient-details-content {

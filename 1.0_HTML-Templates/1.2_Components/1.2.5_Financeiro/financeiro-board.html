@@ -1,0 +1,184 @@
+<section class="fh-financeiro-board" aria-label="Análise financeira">
+    <header class="fh-financeiro-headline">
+        <div class="fh-financeiro-title-block">
+            <p class="fh-financeiro-kicker">Resumo monetário local</p>
+            <h2>Análise Financeira</h2>
+            <p class="fh-subtitle">Consolidação dos atendimentos processados com separação por convênio, frequência e receita estimada.</p>
+        </div>
+    </header>
+
+    <div class="fh-financeiro-cards" role="list" aria-label="Indicadores financeiros">
+        <article class="fh-financeiro-card fh-card-pagantes" role="listitem">
+            <p>Pacientes pagantes</p>
+            <strong id="financeiroPagantesCount">0</strong>
+        </article>
+
+        <article class="fh-financeiro-card fh-card-isentos" role="listitem">
+            <p>Pacientes isentos</p>
+            <strong id="financeiroIsentosCount">0</strong>
+        </article>
+
+        <article class="fh-financeiro-card fh-card-receita" role="listitem">
+            <p>Receita total</p>
+            <strong id="financeiroReceitaTotal">R$ 0,00</strong>
+        </article>
+    </div>
+
+    <div class="fh-financeiro-toolbar" role="search">
+        <input id="financeiroSearchInput" type="search" class="fh-financeiro-search"
+            placeholder="Buscar por paciente, convênio, procedimento, data ou horário..." aria-label="Buscar na análise financeira">
+
+        <div class="fh-financeiro-tabs" role="tablist" aria-label="Seções financeiras">
+            <button id="financeiroTabPacientes" type="button" class="fh-financeiro-tab is-active" data-finance-tab="pacientes" aria-selected="true">Pacientes</button>
+            <button id="financeiroTabEspecialidades" type="button" class="fh-financeiro-tab" data-finance-tab="especialidades" aria-selected="false">Especialidades Gerais</button>
+        </div>
+    </div>
+
+    <div class="fh-financeiro-panels">
+        <section class="fh-financeiro-panel is-active" data-finance-panel="pacientes">
+            <div class="fh-financeiro-columns">
+                <article class="fh-financeiro-column fh-column-isentos" aria-label="Pacientes isentos">
+                    <header class="fh-financeiro-column-head">
+                        <div>
+                            <p class="fh-financeiro-column-kicker">Convênios sem cobrança</p>
+                            <h3>Isentos</h3>
+                        </div>
+                        <strong id="financeiroIsentosColumnCount">0</strong>
+                    </header>
+                    <div id="financeiroIsentosList" class="fh-financeiro-list">
+                        <div class="fh-financeiro-empty-state">Nenhum paciente isento encontrado.</div>
+                    </div>
+                </article>
+
+                <article class="fh-financeiro-column fh-column-pagantes" aria-label="Pacientes pagantes">
+                    <header class="fh-financeiro-column-head">
+                        <div>
+                            <p class="fh-financeiro-column-kicker">Convênios com faturamento</p>
+                            <h3>Pagantes</h3>
+                        </div>
+                        <strong id="financeiroPagantesColumnCount">0</strong>
+                    </header>
+                    <div id="financeiroPagantesList" class="fh-financeiro-list">
+                        <div class="fh-financeiro-empty-state">Nenhum paciente pagante encontrado.</div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <section class="fh-financeiro-panel" data-finance-panel="especialidades">
+            <div class="fh-financeiro-table-wrap">
+                <table class="fh-financeiro-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Especialidade</th>
+                            <th scope="col">Atendimentos</th>
+                            <th scope="col">Pagantes</th>
+                            <th scope="col">Isentos</th>
+                            <th scope="col">Pacientes</th>
+                            <th scope="col">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="financeiroSpecialtiesTableBody">
+                        <tr>
+                            <td colspan="6" class="fh-financeiro-empty-table">Nenhuma especialidade encontrada.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <dialog id="financeiroPatientDialog" class="fh-financeiro-dialog" aria-labelledby="financeiroPatientDialogTitle">
+        <article class="fh-financeiro-dialog-surface">
+            <header class="fh-financeiro-dialog-header">
+                <div>
+                    <p class="fh-financeiro-dialog-kicker">Histórico financeiro do paciente</p>
+                    <h3 id="financeiroPatientDialogTitle">-</h3>
+                </div>
+                <button id="financeiroPatientDialogCloseBtn" type="button" class="fh-btn fh-btn-ghost">Fechar</button>
+            </header>
+
+            <div class="fh-financeiro-dialog-summary">
+                <article class="fh-financeiro-summary-card">
+                    <p>Atendimentos</p>
+                    <strong id="financeiroPatientDialogAttendances">0</strong>
+                </article>
+                <article class="fh-financeiro-summary-card">
+                    <p>Valor total</p>
+                    <strong id="financeiroPatientDialogValue">R$ 0,00</strong>
+                </article>
+                <article class="fh-financeiro-summary-card">
+                    <p>Convênios</p>
+                    <strong id="financeiroPatientDialogConvenios">0</strong>
+                </article>
+            </div>
+
+            <div id="financeiroPatientHistoryList" class="fh-financeiro-history-list">
+                <div class="fh-financeiro-empty-state">Selecione um paciente para ver o histórico.</div>
+            </div>
+        </article>
+    </dialog>
+
+    <dialog id="financeiroSpecialtyDialog" class="fh-financeiro-dialog" aria-labelledby="financeiroSpecialtyDialogTitle">
+        <article class="fh-financeiro-dialog-surface">
+            <header class="fh-financeiro-dialog-header">
+                <div>
+                    <p class="fh-financeiro-dialog-kicker">Detalhes por frequência</p>
+                    <h3 id="financeiroSpecialtyDialogTitle">-</h3>
+                </div>
+                <button id="financeiroSpecialtyDialogCloseBtn" type="button" class="fh-btn fh-btn-ghost">Fechar</button>
+            </header>
+
+            <div class="fh-financeiro-dialog-summary">
+                <article class="fh-financeiro-summary-card">
+                    <p>Atendimentos</p>
+                    <strong id="financeiroSpecialtyDialogAttendances">0</strong>
+                </article>
+                <article class="fh-financeiro-summary-card">
+                    <p>Pacientes</p>
+                    <strong id="financeiroSpecialtyDialogPatients">0</strong>
+                </article>
+                <article class="fh-financeiro-summary-card">
+                    <p>Receita</p>
+                    <strong id="financeiroSpecialtyDialogValue">R$ 0,00</strong>
+                </article>
+                <article class="fh-financeiro-summary-card">
+                    <p>Convênios</p>
+                    <strong id="financeiroSpecialtyDialogConvenios">0</strong>
+                </article>
+            </div>
+
+            <div class="fh-financeiro-dialog-controls">
+                <div class="fh-financeiro-dialog-tabs" role="tablist" aria-label="Frequências da especialidade">
+                    <button type="button" class="fh-financeiro-modal-tab is-active" data-specialty-modal-frequency="1" aria-selected="true">1x por semana</button>
+                    <button type="button" class="fh-financeiro-modal-tab" data-specialty-modal-frequency="2" aria-selected="false">2x por semana</button>
+                    <button type="button" class="fh-financeiro-modal-tab" data-specialty-modal-frequency="3" aria-selected="false">3x por semana</button>
+                </div>
+
+                <select id="financeiroSpecialtyStatusFilter" class="fh-financeiro-status-filter" aria-label="Filtrar por status financeiro">
+                    <option value="all">Todos</option>
+                    <option value="pagante">Pagantes</option>
+                    <option value="isento">Isentos</option>
+                </select>
+            </div>
+
+            <div class="fh-financeiro-modal-panels">
+                <section class="fh-financeiro-modal-panel is-active" data-specialty-modal-panel="1">
+                    <div id="financeiroSpecialtyPanel1" class="fh-financeiro-modal-list">
+                        <div class="fh-financeiro-empty-state">Nenhum paciente nessa frequência.</div>
+                    </div>
+                </section>
+                <section class="fh-financeiro-modal-panel" data-specialty-modal-panel="2">
+                    <div id="financeiroSpecialtyPanel2" class="fh-financeiro-modal-list">
+                        <div class="fh-financeiro-empty-state">Nenhum paciente nessa frequência.</div>
+                    </div>
+                </section>
+                <section class="fh-financeiro-modal-panel" data-specialty-modal-panel="3">
+                    <div id="financeiroSpecialtyPanel3" class="fh-financeiro-modal-list">
+                        <div class="fh-financeiro-empty-state">Nenhum paciente nessa frequência.</div>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </dialog>
+</section>

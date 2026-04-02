@@ -1,9 +1,11 @@
+import { buildAnalysisReportData, buildAnalysisReportText, renderAnalysisReportMarkup } from "./analysis-report.js";
 const DEFAULT_MODAL_SURFACE_SELECTORS = [
     ".fh-conflict-surface",
     ".fh-backups-surface",
     ".fh-terms-surface",
     ".fh-patient-details-surface"
 ];
+const analysisDialogStates = new WeakMap();
 const normalizeText = (value) => value.replace(/\s+/g, " ").trim().toLowerCase();
 const getControlLabel = (element) => {
     return element.getAttribute("aria-label")?.trim()
@@ -37,6 +39,14 @@ const resolveHoverMessage = (element) => {
             return "Abre as opções de backup e restauração.";
         case "footerTermsBtn":
             return "Abre os termos de uso do sistema.";
+        case "footerAnalysisBtn":
+            return "Abre a análise consolidada da operação.";
+        case "analysisPrintBtn":
+            return "Abre a impressão em formato A4.";
+        case "analysisTextBtn":
+            return "Baixa o relatório em arquivo .txt.";
+        case "closeAnalysisDialogBtn":
+            return "Fecha a janela de análise.";
         case "todayBtn":
             return "Volta a data de referência para o dia atual.";
         case "prevDayBtn":
@@ -124,14 +134,18 @@ const appendToast = (container, message) => {
     toast.textContent = message;
     container.appendChild(toast);
     const beginClose = () => {
+        if (!toast.isConnected) {
+            return;
+        }
         toast.classList.add("is-leaving");
         const remove = () => {
             toast.removeEventListener("animationend", remove);
             toast.remove();
         };
-        toast.addEventListener("animationend", remove);
+        toast.addEventListener("animationend", remove, { once: true });
+        window.setTimeout(remove, 260);
     };
-    window.setTimeout(beginClose, 2600);
+    window.setTimeout(beginClose, 3000);
 };
 const showAnchoredToast = (anchor, message) => {
     const existing = anchor.dataset.hoverToastId;
@@ -234,6 +248,149 @@ export const bindTermsDialog = (options) => {
     });
     dialog.addEventListener("cancel", (event) => {
         requestDialogClose(dialog, surfaceSelector, event);
+    });
+};
+const ensureAnalysisState = (dialog) => {
+    const existing = analysisDialogStates.get(dialog);
+    if (existing) {
+        return existing;
+    }
+    const created = {
+        timerId: null,
+        reportData: null
+    };
+    analysisDialogStates.set(dialog, created);
+    return created;
+};
+const clearAnalysisTimer = (state) => {
+    if (state.timerId !== null) {
+        window.clearTimeout(state.timerId);
+        state.timerId = null;
+    }
+};
+const setAnalysisLoadingState = (dialog, loadingSelector, reportSelector) => {
+    dialog.dataset.analysisState = "loading";
+    const loadingElement = dialog.querySelector(loadingSelector);
+    const reportElement = dialog.querySelector(reportSelector);
+    loadingElement?.classList.add("is-active");
+    reportElement?.classList.remove("is-active");
+};
+const setAnalysisReportState = (dialog, loadingSelector, reportSelector, data) => {
+    dialog.dataset.analysisState = "ready";
+    const loadingElement = dialog.querySelector(loadingSelector);
+    const reportElement = dialog.querySelector(reportSelector);
+    const reportContent = dialog.querySelector("[data-analysis-report-content]");
+    if (reportContent) {
+        reportContent.innerHTML = renderAnalysisReportMarkup(data);
+    }
+    loadingElement?.classList.remove("is-active");
+    reportElement?.classList.add("is-active");
+};
+const downloadAnalysisText = (data) => {
+    const content = buildAnalysisReportText(data);
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    const datePart = data.generatedAtIso.slice(0, 10).replace(/-/g, "");
+    anchor.href = url;
+    anchor.download = `fisiohub-analise-${datePart}.txt`;
+    anchor.rel = "noopener";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
+};
+const openAnalysisPrintView = (dialog) => {
+    dialog.dataset.printMode = "true";
+    window.requestAnimationFrame(() => {
+        window.print();
+        window.setTimeout(() => {
+            delete dialog.dataset.printMode;
+        }, 100);
+    });
+};
+export const bindAnalysisDialog = (options) => {
+    const dialog = document.getElementById(options.dialogId);
+    if (!dialog) {
+        return;
+    }
+    const triggerButton = document.getElementById(options.triggerButtonId);
+    const closeButton = document.getElementById(options.closeButtonId);
+    const printButton = document.getElementById(options.printButtonId);
+    const textButton = document.getElementById(options.textButtonId);
+    const loadingSelector = options.loadingSelector ?? ".fh-analysis-loading";
+    const reportSelector = options.reportSelector ?? ".fh-analysis-report-stage";
+    const surfaceSelector = options.surfaceSelector ?? ".fh-analysis-surface";
+    const state = ensureAnalysisState(dialog);
+    const setActionsEnabled = (enabled) => {
+        if (printButton) {
+            printButton.disabled = !enabled;
+        }
+        if (textButton) {
+            textButton.disabled = !enabled;
+        }
+    };
+    const startAnalysis = () => {
+        clearAnalysisTimer(state);
+        state.reportData = buildAnalysisReportData();
+        setActionsEnabled(false);
+        setAnalysisLoadingState(dialog, loadingSelector, reportSelector);
+        state.timerId = window.setTimeout(() => {
+            if (!dialog.open || dialog.dataset.closing === "true") {
+                return;
+            }
+            if (!state.reportData) {
+                state.reportData = buildAnalysisReportData();
+            }
+            setAnalysisReportState(dialog, loadingSelector, reportSelector, state.reportData);
+            setActionsEnabled(true);
+        }, 1400);
+    };
+    triggerButton?.addEventListener("click", () => {
+        if (dialog.open) {
+            return;
+        }
+        showDialogWithAnimation(dialog);
+        startAnalysis();
+    });
+    closeButton?.addEventListener("click", () => {
+        clearAnalysisTimer(state);
+        requestDialogClose(dialog, surfaceSelector);
+    });
+    printButton?.addEventListener("click", () => {
+        if (!state.reportData) {
+            state.reportData = buildAnalysisReportData();
+            setAnalysisReportState(dialog, loadingSelector, reportSelector, state.reportData);
+        }
+        openAnalysisPrintView(dialog);
+    });
+    textButton?.addEventListener("click", () => {
+        if (!state.reportData) {
+            state.reportData = buildAnalysisReportData();
+            setAnalysisReportState(dialog, loadingSelector, reportSelector, state.reportData);
+        }
+        downloadAnalysisText(state.reportData);
+    });
+    dialog.addEventListener("cancel", (event) => {
+        clearAnalysisTimer(state);
+        requestDialogClose(dialog, surfaceSelector, event);
+    });
+    dialog.addEventListener("close", () => {
+        clearAnalysisTimer(state);
+        setActionsEnabled(false);
+        state.reportData = null;
+        delete dialog.dataset.analysisState;
+        delete dialog.dataset.printMode;
+        const loadingElement = dialog.querySelector(loadingSelector);
+        const reportElement = dialog.querySelector(reportSelector);
+        loadingElement?.classList.remove("is-active");
+        reportElement?.classList.remove("is-active");
+    });
+    dialog.addEventListener("click", (event) => {
+        if (event.target === dialog) {
+            clearAnalysisTimer(state);
+            requestDialogClose(dialog, surfaceSelector, event);
+        }
     });
 };
 export const startFloatingHomeHint = (selector = ".fh-floating-home-toast") => {

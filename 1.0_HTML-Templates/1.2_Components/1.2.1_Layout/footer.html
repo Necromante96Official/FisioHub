@@ -6,13 +6,15 @@
     </div>
 
     <div class="fh-footer-line fh-footer-bottomline">
-      <span class="fh-footer-spacer" aria-hidden="true"></span>
+      <div class="fh-footer-actions fh-footer-actions--start">
+        <button id="footerAnalysisBtn" class="fh-btn fh-analysis-btn" type="button">Análise</button>
+      </div>
 
       <div class="fh-footer-meta" role="presentation">
         <a id="footerAuthorLink" class="fh-footer-author" href="https://github.com/Necromante96Official" target="_blank"
           rel="noopener noreferrer">Necromante96Official</a>
         <span class="fh-footer-divider">•</span>
-        <span id="footerVersion" class="fh-footer-version">Versão: 0.4.1</span>
+        <span id="footerVersion" class="fh-footer-version">Versão: 0.4.2</span>
       </div>
 
       <div class="fh-footer-actions">
@@ -21,6 +23,50 @@
 
     </div>
   </div>
+
+  <dialog id="analysisDialog" class="fh-analysis-dialog" aria-labelledby="analysisTitle">
+    <article class="fh-analysis-surface">
+      <header class="fh-analysis-header">
+        <div class="fh-analysis-header-copy">
+          <p class="fh-analysis-kicker">Painel executivo premium</p>
+          <h2 id="analysisTitle">Análise consolidada</h2>
+          <p>Leitura cruzada de Evoluções Pendentes, Financeiro e Agendamentos com exportação pronta para impressão e texto.</p>
+        </div>
+
+        <div class="fh-analysis-header-actions">
+          <button id="analysisTextBtn" class="fh-btn fh-btn-ghost fh-analysis-action-btn" type="button" disabled>TXT</button>
+          <button id="analysisPrintBtn" class="fh-btn fh-analysis-action-btn" type="button" disabled>Imprimir A4</button>
+          <button id="closeAnalysisDialogBtn" class="fh-btn fh-btn-ghost fh-analysis-action-btn" type="button">Fechar</button>
+        </div>
+      </header>
+
+      <div class="fh-analysis-body">
+        <section class="fh-analysis-loading is-active">
+          <div class="fh-analysis-loader" aria-hidden="true">
+            <span class="fh-analysis-loader-ring fh-analysis-loader-ring--outer"></span>
+            <span class="fh-analysis-loader-ring fh-analysis-loader-ring--middle"></span>
+            <span class="fh-analysis-loader-ring fh-analysis-loader-ring--inner"></span>
+            <span class="fh-analysis-loader-core"></span>
+          </div>
+
+          <div class="fh-analysis-loading-copy">
+            <p class="fh-analysis-loading-kicker">Processando panorama institucional</p>
+            <h3>Consolidando dados da operação</h3>
+            <p>Normalizando registros, cruzando módulos e preparando uma visão executiva para consulta imediata.</p>
+            <div class="fh-analysis-loading-steps" aria-hidden="true">
+              <span>Coletando dados</span>
+              <span>Normalizando campos</span>
+              <span>Gerando relatório</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-analysis-report-stage">
+          <div class="fh-analysis-report-content" data-analysis-report-content></div>
+        </section>
+      </div>
+    </article>
+  </dialog>
 
   <div id="siteNotifications" class="fh-site-notifications" aria-live="polite" aria-atomic="false"></div>
   <a class="fh-floating-home-btn" href="index.html" aria-label="Voltar ao Inicio">
@@ -191,7 +237,7 @@
               </div>
               <div>
                 <span>Versão referenciada</span>
-                <strong>FisioHub 0.4.1</strong>
+                <strong>FisioHub 0.4.2</strong>
               </div>
             </div>
           </section>

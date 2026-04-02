@@ -1,0 +1,777 @@
+============================================================
+ZENFISIO COLLECTOR - DADOS COLETADOS
+Data: 01/04/2026, 10:45:58
+Total: 59 agendamentos
+============================================================
+
+--- Agendamento 1 ---
+Coletado em: 01/04/2026, 10:45:15
+
+Horario: 08:00 - 09:00
+Fisioterapeuta: Filipe Chipaux Gomes
+Paciente: Arthur Lopes Arruda
+Celular: +55 (51) 985590697
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 2 ---
+Coletado em: 01/04/2026, 10:45:15
+
+Horario: 08:00 - 09:00
+Fisioterapeuta: Elen Jenifer Azambuja
+Paciente: Miguel de Moura Portes
+Celular: +55 (51) 985445633
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 3 ---
+Coletado em: 01/04/2026, 10:45:16
+
+Horario: 08:00 - 09:00
+Fisioterapeuta: Amanda da Costa Leite de Fraga
+Paciente: Lorenzo Matos Daltrozo
+Celular: +55 (51) 992226648
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 4 ---
+Coletado em: 01/04/2026, 10:45:17
+
+Horario: 08:00 - 09:00
+Fisioterapeuta: Júlia Abbad Marques
+Paciente: Mike Dylan da Silva Ribeiro
+Celular: +55 (51) 996002257
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Disciplina Prática em Pediatria
+
+------------------------------------------------------------
+
+--- Agendamento 5 ---
+Coletado em: 01/04/2026, 10:45:17
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Gustavo Luís Barua Freitas
+Paciente: Rosaura Eli Azevedo
+Celular: +55 (51) 984270928
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 6 ---
+Coletado em: 01/04/2026, 10:45:18
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Bruna Santos Liberato de Mattos
+Paciente: Ieda Silva dos Santos
+Celular: +55 (51) 994372112
+Convenio: Bolsa Família - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 7 ---
+Coletado em: 01/04/2026, 10:45:19
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Guilherme Gibrowski de Oliveira
+Paciente: Sônia Nunes
+Celular: +55 (51) 991383114
+Convenio: Baixa Renda - ISENTO
+Status: Presenca confirmada
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 8 ---
+Coletado em: 01/04/2026, 10:45:19
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Giordano Mayer de Freitas
+Paciente: Paulo Joel Antonov
+Celular: +55 (51) 995205866
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 9 ---
+Coletado em: 01/04/2026, 10:45:20
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Leticia Rodrigues Ferreira
+Paciente: Judith Maria Plentz
+Celular: +55 (51) 991792759
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 10 ---
+Coletado em: 01/04/2026, 10:45:21
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Nailê Troian de Souza
+Paciente: Nely de Aguiar Lucas
+Celular: +55 (51) 997799976
+Convenio: Encaminhamento Hospital Público - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 11 ---
+Coletado em: 01/04/2026, 10:45:22
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Gustavo Luís Barua Freitas
+Paciente: Antônio Carlos Cortes
+Celular: +55 (51) 999823366
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 12 ---
+Coletado em: 01/04/2026, 10:45:23
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Bruna Santos Liberato de Mattos
+Paciente: Marilene da Silva Martins
+Celular: +55 (51) 996626787
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 13 ---
+Coletado em: 01/04/2026, 10:45:23
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Giordano Mayer de Freitas
+Paciente: Alvaro César Storni Carapeços
+Celular: +55 (51) 991479787
+Convenio: Benefício de prestação continuada (BPC) - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 14 ---
+Coletado em: 01/04/2026, 10:45:24
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Guilherme Gibrowski de Oliveira
+Paciente: João Luiz Dulor Canaparro
+Celular: +55 (51) 984025501
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+
+------------------------------------------------------------
+
+--- Agendamento 15 ---
+Coletado em: 01/04/2026, 10:45:25
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Nailê Troian de Souza
+Paciente: Gabriele Alves dos Santos
+Celular: +55 (51) 993476927
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+
+------------------------------------------------------------
+
+--- Agendamento 16 ---
+Coletado em: 01/04/2026, 10:45:25
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Leticia Rodrigues Ferreira
+Paciente: Reni Teresinha Rodrigues de Oliveira
+Celular: +55 (51) 984891444
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 17 ---
+Coletado em: 01/04/2026, 10:45:26
+
+Horario: 10:05 - 11:05
+Fisioterapeuta: Guilherme Gibrowski de Oliveira
+Paciente: Sônia Nunes
+Celular: +55 (51) 991383114
+Convenio: Baixa Renda - ISENTO
+
+------------------------------------------------------------
+
+--- Agendamento 18 ---
+Coletado em: 01/04/2026, 10:45:27
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Bruna Santos Liberato de Mattos
+Paciente: Carlos Alberto Almeida dos Santos
+Celular: +55 (51) 980161600
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+
+------------------------------------------------------------
+
+--- Agendamento 19 ---
+Coletado em: 01/04/2026, 10:45:28
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Bruna Santos Liberato de Mattos
+Paciente: Eva Maria Ferreira da Rosa
+Celular: +55 (51) 992571916
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 20 ---
+Coletado em: 01/04/2026, 10:45:28
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Giordano Mayer de Freitas
+Paciente: Romero Miguel
+Celular: +55 (51) 986191180
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 21 ---
+Coletado em: 01/04/2026, 10:45:29
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Leticia Rodrigues Ferreira
+Paciente: Iara Henriques
+Celular: +55 (51) 993869911
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 22 ---
+Coletado em: 01/04/2026, 10:45:30
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Gustavo Luís Barua Freitas
+Paciente: Mário Roberto Generosi Brauner
+Celular: +55 (51) 989196336
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 23 ---
+Coletado em: 01/04/2026, 10:45:30
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Nailê Troian de Souza
+Paciente: Catia Eliziane de Almeida da Rosa
+Celular: +55 (51) 985611825
+Convenio: Baixa Renda - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Grupo Postural Observações: Devido a questões de saúde da estagiária Nailê, desmarcamos este atendimento
+
+------------------------------------------------------------
+
+--- Agendamento 24 ---
+Coletado em: 01/04/2026, 10:45:31
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Guilherme Teixeira Lopes
+Paciente: Cecilia Lopes Ferreira
+Celular: +55 (51) 998805140
+Convenio: Encaminhamento Hospital Público - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 25 ---
+Coletado em: 01/04/2026, 10:45:32
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Juline Machado Klippel
+Paciente: Maria Ines Coutinho Mendes Braga
+Celular: +55 (51) 997115423
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 26 ---
+Coletado em: 01/04/2026, 10:45:33
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Marina Bonotto Weiler
+Paciente: Ana Maria da Costa
+Celular: +55 (51) 996066974
+Convenio: Baixa Renda - ISENTO
+Status: Faltou
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 27 ---
+Coletado em: 01/04/2026, 10:45:33
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Willian Correa Verdum
+Paciente: Maria de Lourdes Proença
+Celular: +55 (51) 991378375
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 28 ---
+Coletado em: 01/04/2026, 10:45:34
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Lucas Rocha de Oliveira Fontoura
+Paciente: Renata Mendes Niches
+Celular: +55 (51) 991874554
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Geral Fisioterapia Esportiva 1x/semana Particular
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 29 ---
+Coletado em: 01/04/2026, 10:45:35
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Isabela da Cruz dos Reis
+Paciente: Santa Marta Blanco Sousa
+Celular: +55 (51) 996748883
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Onco e Dermato 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 30 ---
+Coletado em: 01/04/2026, 10:45:35
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Roseane Victória Sackis Ávila
+Paciente: Stéfani Paola Veiga de Moura
+Celular: +55 (54) 981252935
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 31 ---
+Coletado em: 01/04/2026, 10:45:36
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Márcia Guimarães Lourenço
+Paciente: Cristina Fabichak
+Celular: +55 (51) 984029504
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 32 ---
+Coletado em: 01/04/2026, 10:45:37
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Thaís Fraga Hardt
+Paciente: José Antônio Alencastro Gomes Dias
+Celular: +55 (51) 91221061
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia PIMP 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 33 ---
+Coletado em: 01/04/2026, 10:45:38
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Cecília de Oliveira Martins
+Paciente: Pablo Breitenbach Scherer
+Celular: +55 (51) 992677267
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Geral Fisioterapia Esportiva 1x/semana Particular
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 34 ---
+Coletado em: 01/04/2026, 10:45:38
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Amanda Stephanny Pilz
+Paciente: Camila Canani Nunes
+Celular: +55 (51) 992582267
+Convenio: Particular
+Status: Nao atendido
+
+------------------------------------------------------------
+
+--- Agendamento 35 ---
+Coletado em: 01/04/2026, 10:45:40
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Rodrigo Freitas Mantovani
+Paciente: Volmar Correa Vieira
+Celular: +55 (51) 985010368
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculo Esquelética 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 36 ---
+Coletado em: 01/04/2026, 10:45:40
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Guilherme Teixeira Lopes
+Paciente: Amanda Conceição Silva Machado
+Celular: +55 (51) 981557636
+Convenio: Baixa Renda - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 37 ---
+Coletado em: 01/04/2026, 10:45:41
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Marina Bonotto Weiler
+Paciente: Rosecler de Souza Vaz
+Celular: +55 (51) 985536998
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 38 ---
+Coletado em: 01/04/2026, 10:45:42
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Willian Correa Verdum
+Paciente: Rosa Maria Antunes Prestes Daminelli
+Celular: +55 (51) 992510118
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 39 ---
+Coletado em: 01/04/2026, 10:45:42
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Isabela da Cruz dos Reis
+Paciente: Helena dos Santos Costa
+Celular: +55 (51) 991951077
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento de Fisioterapia Pélvica 1 x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 40 ---
+Coletado em: 01/04/2026, 10:45:43
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Yasmin Lai Noms
+Paciente: Cecilia de Oliveira Martins
+Celular: +55 (51) 991412299
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 41 ---
+Coletado em: 01/04/2026, 10:45:44
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Yasmin Machado Fortunato
+Paciente: Nalu Flor Guarda de Menezes
+Celular: +55 (51) 983505868
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Geral Fisioterapia Esportiva 2x/semana Particular
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 42 ---
+Coletado em: 01/04/2026, 10:45:44
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Juline Machado Klippel
+Paciente: Simoni Gomes Totti
+Celular: +55 (51) 996163406
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 43 ---
+Coletado em: 01/04/2026, 10:45:45
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Roseane Victória Sackis Ávila
+Paciente: Gabriel de Oliveira Quevedo
+Celular: +55 (51) 993316475
+Convenio: Atleta UFRGS DPSD/PRAE - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Esportiva 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 44 ---
+Coletado em: 01/04/2026, 10:45:45
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Amanda Stephanny Pilz
+Paciente: Inês Germany Gaiger
+Celular: +55 (51) 991629275
+Convenio: Particular
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 45 ---
+Coletado em: 01/04/2026, 10:45:46
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Márcia Guimarães Lourenço
+Paciente: Ione dos Santos
+Celular: +55 (51) 996120447
+Convenio: Cadastro Único - ISENTO
+Status: Faltou
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 46 ---
+Coletado em: 01/04/2026, 10:45:47
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Giovana Wagner
+Paciente: Aylla Barbosa dos Santos
+Celular: +55 (51) 983163597
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 47 ---
+Coletado em: 01/04/2026, 10:45:47
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Nicolas Roberto Garcia Maria
+Paciente: Murilo Silva Pezzi
+Celular: +55 (51) 995455085
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia PIMP 1x semanaAtendimento - Pa...
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 48 ---
+Coletado em: 01/04/2026, 10:45:48
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Thaís Fraga Hardt
+Paciente: Caetano Hermann Macedo
+Celular: +55 (51) 998965055
+Convenio: Baixa Renda - ISENTO
+Status: Nao atendido
+
+------------------------------------------------------------
+
+--- Agendamento 49 ---
+Coletado em: 01/04/2026, 10:45:49
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Rodrigo Freitas Mantovani
+Paciente: Rafael Cecagno
+Celular: +55 (51) 996136469
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculo Esquelética 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 50 ---
+Coletado em: 01/04/2026, 10:45:50
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Guilherme Teixeira Lopes
+Paciente: Cristina Dias Soares Bertolini
+Celular: +55 (51) 999732663
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana
+
+------------------------------------------------------------
+
+--- Agendamento 51 ---
+Coletado em: 01/04/2026, 10:45:51
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Lucas Rocha de Oliveira Fontoura
+Paciente: Flávia Costa Sonaglio
+Celular: +55 (51) 982455206
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Geral Fisioterapia Esportiva 2x/semana Particular
+
+------------------------------------------------------------
+
+--- Agendamento 52 ---
+Coletado em: 01/04/2026, 10:45:52
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Cecília de Oliveira Martins
+Paciente: Gabe Machado de Moura
+Celular: +55 (53) 999465445
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+
+------------------------------------------------------------
+
+--- Agendamento 53 ---
+Coletado em: 01/04/2026, 10:45:52
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Roseane Victória Sackis Ávila
+Paciente: Júlio dos Santos Scalon
+Celular: +55 (54) 991644120
+Convenio: Atleta UFRGS DPSD/PRAE - ISENTO
+Status: Presenca confirmada
+Procedimentos: Atendimento Fisioterapia Esportiva 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 54 ---
+Coletado em: 01/04/2026, 10:45:53
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Marina Bonotto Weiler
+Paciente: Márcia Costa da Silva
+Celular: +55 (51) 995950793
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Oncologia e Dermatofuncional 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 55 ---
+Coletado em: 01/04/2026, 10:45:54
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Thaís Fraga Hardt
+Paciente: Leonora Schelski Nunes
+Celular: +55 (51) 983323852
+Convenio: Particular
+Status: Atencao
+
+------------------------------------------------------------
+
+--- Agendamento 56 ---
+Coletado em: 01/04/2026, 10:45:54
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Willian Correa Verdum
+Paciente: Iracema Lourdes da Silva
+Celular: +55 (51) 986937824
+Convenio: Baixa Renda - ISENTO
+Status: Nao atendido
+
+------------------------------------------------------------
+
+--- Agendamento 57 ---
+Coletado em: 01/04/2026, 10:45:55
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Nicolas Roberto Garcia Maria
+Paciente: Levi Azevedo de Paula
+Celular: +55 (51) 990154717
+Convenio: Cadastro Único - ISENTO
+Status: Presenca confirmada
+
+------------------------------------------------------------
+
+--- Agendamento 58 ---
+Coletado em: 01/04/2026, 10:45:56
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Gabriella Ribeiro Moreira
+Paciente: Agatha Quadros da Cunha
+Celular: +55 (51) 983089432
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Geral Fisioterapia Esportiva 2x/semana Particular
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 59 ---
+Coletado em: 01/04/2026, 10:45:57
+
+Horario: 17:00 - 18:00
+Fisioterapeuta: Rodrigo Freitas Mantovani
+Paciente: Vilma Romann Xavier
+Celular: +55 (51) 992263031
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculo Esquelética 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+

@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
@@ -23,6 +23,13 @@ export class HomeController {
             dialogId: "termsDialog",
             triggerButtonId: "footerTermsBtn",
             closeButtonId: "closeTermsDialogBtn"
+        });
+        bindAnalysisDialog({
+            dialogId: "analysisDialog",
+            triggerButtonId: "footerAnalysisBtn",
+            closeButtonId: "closeAnalysisDialogBtn",
+            printButtonId: "analysisPrintBtn",
+            textButtonId: "analysisTextBtn"
         });
         this.setDate(this.getStoredReferenceDate() ?? this.todayIso());
         this.loadStagingDataFromStorage();
@@ -980,9 +987,12 @@ export class HomeController {
             const allInputs = () => {
                 return Array.from(list.querySelectorAll("input[data-required-field]"));
             };
+            const hasMissingRequiredInputs = () => {
+                return allInputs().some((input) => this.isMissingRequiredValue(input.value));
+            };
             const updateConfirmState = () => {
-                const hasMissing = allInputs().some((input) => this.isMissingRequiredValue(input.value));
-                confirmBtn.disabled = hasMissing;
+                confirmBtn.disabled = false;
+                confirmBtn.dataset.hasMissingRequiredInputs = hasMissingRequiredInputs() ? "true" : "false";
             };
             const findRecordForIssue = (issue, records) => {
                 const patientName = issue.lookupName.trim();
@@ -1156,8 +1166,11 @@ export class HomeController {
                 closeProcedureSearchDialog();
             };
             const onConfirm = () => {
-                if (confirmBtn.disabled)
+                if (hasMissingRequiredInputs()) {
+                    this.showSiteNotification("Ainda faltam campos obrigatorios para preencher.");
+                    updateConfirmState();
                     return;
+                }
                 corrections.clear();
                 issues.forEach((issue) => {
                     const issueInputs = Array.from(list.querySelectorAll(`input[data-issue-index="${issue.blockIndex}"]`));

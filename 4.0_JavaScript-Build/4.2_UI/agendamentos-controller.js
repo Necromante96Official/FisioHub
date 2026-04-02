@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class AgendamentosController {
     appId = "app";
     pageTemplate = "1.0_HTML-Templates/1.1_Pages/agendamentos.html";
@@ -24,6 +24,13 @@ export class AgendamentosController {
             dialogId: "termsDialog",
             triggerButtonId: "footerTermsBtn",
             closeButtonId: "closeTermsDialogBtn"
+        });
+        bindAnalysisDialog({
+            dialogId: "analysisDialog",
+            triggerButtonId: "footerAnalysisBtn",
+            closeButtonId: "closeAnalysisDialogBtn",
+            printButtonId: "analysisPrintBtn",
+            textButtonId: "analysisTextBtn"
         });
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });

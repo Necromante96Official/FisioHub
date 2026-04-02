@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
-import { bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
     private readonly appId = "app";
@@ -25,6 +25,13 @@ export class PatientsController {
             dialogId: "termsDialog",
             triggerButtonId: "footerTermsBtn",
             closeButtonId: "closeTermsDialogBtn"
+        });
+        bindAnalysisDialog({
+            dialogId: "analysisDialog",
+            triggerButtonId: "footerAnalysisBtn",
+            closeButtonId: "closeAnalysisDialogBtn",
+            printButtonId: "analysisPrintBtn",
+            textButtonId: "analysisTextBtn"
         });
         this.patientRecords = this.parsePatientsFromStorage();
         this.bindHandlers();
@@ -123,6 +130,7 @@ export class PatientsController {
         const closeButton = document.getElementById("closePatientDetailsDialogBtn");
         const editButton = document.getElementById("editPatientDetailsBtn");
         const saveButton = document.getElementById("savePatientDetailsBtn");
+        const deleteButton = document.getElementById("deletePatientDetailsBtn");
 
         closeButton?.addEventListener("click", () => {
             if (dialog.open) {
@@ -136,6 +144,10 @@ export class PatientsController {
 
         saveButton?.addEventListener("click", () => {
             this.savePatientDetails();
+        });
+
+        deleteButton?.addEventListener("click", () => {
+            this.deletePatientDetails();
         });
 
         dialog.addEventListener("click", (event) => {
@@ -412,6 +424,36 @@ export class PatientsController {
         this.setDetailsEditMode(false);
         this.render();
         this.showSiteNotification("Detalhes do paciente atualizados com sucesso.");
+    }
+
+    private deletePatientDetails(): void {
+        if (this.selectedRecordIndex === null) {
+            return;
+        }
+
+        const record = this.patientRecords[this.selectedRecordIndex];
+        if (!record) {
+            return;
+        }
+
+        this.patientRecords.splice(this.selectedRecordIndex, 1);
+
+        if (this.patientRecords.length > 0) {
+            localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.patientRecords));
+        } else {
+            localStorage.removeItem(this.patientsRecordsStorageKey);
+        }
+
+        this.setDetailsEditMode(false);
+        this.selectedRecordIndex = null;
+
+        const dialog = this.getDetailsDialog();
+        if (dialog.open) {
+            dialog.close();
+        }
+
+        this.render();
+        this.showSiteNotification(`Paciente "${record.nome}" excluído com sucesso.`);
     }
 
     private formatDateTime(value: string): string {

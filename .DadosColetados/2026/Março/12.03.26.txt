@@ -1,0 +1,420 @@
+============================================================
+ZENFISIO COLLECTOR - DADOS COLETADOS
+Data: 01/04/2026, 10:41:08
+Total: 31 agendamentos
+============================================================
+
+--- Agendamento 1 ---
+Coletado em: 01/04/2026, 10:40:42
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Liliana Furtado Maciel
+Paciente: Luiz Fernando Nunes da Silva
+Celular: +55 (51) 999877872
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 2 ---
+Coletado em: 01/04/2026, 10:40:43
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Julia do Amaral Gamarra
+Paciente: Giuseppina Vuoto Di Lorenzo
+Celular: +55 (51) 993730606
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 3 ---
+Coletado em: 01/04/2026, 10:40:43
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Vitor Aresi Delavald
+Paciente: Sônia Elisabete Andrades Paixão
+Celular: +55 (51) 991924536
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 4 ---
+Coletado em: 01/04/2026, 10:40:44
+
+Horario: 09:00 - 10:00
+Fisioterapeuta: Mariana Gauer da Silveira
+Paciente: Vera de Fátima Inda
+Celular: +55 (51) 999970600
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 3x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 5 ---
+Coletado em: 01/04/2026, 10:40:45
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Eduarda da Cruz de Souza
+Paciente: Carlos Rogério Furastê Soares
+Celular: +55 (51) 981685616
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 6 ---
+Coletado em: 01/04/2026, 10:40:46
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Vitor Aresi Delavald
+Paciente: Denisia da Silva Paiva
+Celular: +55 (51) 986871171
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 7 ---
+Coletado em: 01/04/2026, 10:40:47
+
+Horario: 10:00 - 11:00
+Fisioterapeuta: Mariana Gauer da Silveira
+Paciente: Maria Helena Paiva Chiossi
+Celular: +55 (51) 996748317
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 8 ---
+Coletado em: 01/04/2026, 10:40:48
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Liliana Furtado Maciel
+Paciente: Maria Luisa Di Luca Almeida
+Celular: +55 (51) 992782166
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 9 ---
+Coletado em: 01/04/2026, 10:40:48
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Julia do Amaral Gamarra
+Paciente: Denise Schaun Brose
+Celular: +55 (51) 992920293
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 10 ---
+Coletado em: 01/04/2026, 10:40:49
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Guilherme dos Santos Goulart
+Paciente: Rosimeire dos Santos
+Celular: +55 (51) 997335794
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 11 ---
+Coletado em: 01/04/2026, 10:40:50
+
+Horario: 11:00 - 12:00
+Fisioterapeuta: Mariana Gauer da Silveira
+Paciente: Maria do Carmo Ruthes
+Celular: +55 (51) 981267414
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 12 ---
+Coletado em: 01/04/2026, 10:40:51
+
+Horario: 13:00 - 14:00
+Fisioterapeuta: Fernanda Tambosi Varella
+Paciente: Thomás Bortoluzzi Heemann
+Celular: +55 (51) 981702130
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Neurofuncional Adulto 2x semana
+
+------------------------------------------------------------
+
+--- Agendamento 13 ---
+Coletado em: 01/04/2026, 10:40:52
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Gustavo Alexandre Scheffer da Silva
+Celular: +55 (51) 989259654
+Convenio: Particular
+Status: Nao atendido
+Procedimentos: Fisioterapia Musculoesquelética CLINIFISIO 2X/semana
+
+------------------------------------------------------------
+
+--- Agendamento 14 ---
+Coletado em: 01/04/2026, 10:40:53
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Luisa Rachelle Boaz
+Paciente: Caetano Rodrigues Gross
+Celular: +55 (51) 998846601
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 15 ---
+Coletado em: 01/04/2026, 10:40:53
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Lucas Schmitz Castanheiro
+Paciente: Andreia Gomes dos Santos
+Celular: +55 (51) 989531470
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Educação Fisioterapia Pélvica 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 16 ---
+Coletado em: 01/04/2026, 10:40:54
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: José Francisco da Silveira Júnior
+Paciente: Isadora Machado da Silva
+Celular: +55 (51) 993258563
+Convenio: Baixa Renda - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 17 ---
+Coletado em: 01/04/2026, 10:40:55
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Victória Ribeiro Rodrigues
+Paciente: Vicenzo Raldi Fusco
+Celular: +55 (51) 996244957
+Convenio: Particular
+Status: Presenca confirmada
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 18 ---
+Coletado em: 01/04/2026, 10:40:56
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Rodrigo Freitas Mantovani
+Paciente: Israel Azaf Soares Marques
+Celular: +55 (51) 990157125
+Convenio: Aluno PRAE - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 19 ---
+Coletado em: 01/04/2026, 10:40:56
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Lorenzo Mesquita Torres
+Paciente: Luma Gabriela de Oliviera
+Celular: +55 (51) 997814156
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Educação Fisioterapia Pélvica 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 20 ---
+Coletado em: 01/04/2026, 10:40:57
+
+Horario: 14:00 - 15:00
+Fisioterapeuta: Laura Martins dos Santos
+Paciente: Maria de Lourdes Rodrigues Chaves
+Celular: +55 (51) 991252256
+Convenio: Particular
+Status: Agendado
+Procedimentos: Atendimento Fisioterapia Neuropediátrica ESTÁGIO 2x semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 21 ---
+Coletado em: 01/04/2026, 10:40:58
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Victória Ribeiro Rodrigues
+Paciente: Bernardo Cherubim da Silva
+Celular: +55 (51) 995765862
+Convenio: Baixa Renda - ISENTO
+Status: Faltou
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 22 ---
+Coletado em: 01/04/2026, 10:40:59
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Laura Martins dos Santos
+Paciente: Micaela de Pedro Barcelos
+Celular: +55 (51) 993385322
+Convenio: Baixa Renda - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica ESTÁGIO 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 23 ---
+Coletado em: 01/04/2026, 10:40:59
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Patricia Melo Silva
+Paciente: Hadassa Vitória de Mello Moura
+Celular: +55 (51) 999923809
+Convenio: Benefício de prestação continuada (BPC) - ISENTO
+Status: Nao atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica ESTÁGIO 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 24 ---
+Coletado em: 01/04/2026, 10:41:00
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Gabriel Gonçalves da Rosa
+Paciente: Maristela Somavilla da Silva
+Celular: +55 (51) 984199724
+Convenio: Cadastro Único - ISENTO
+Status: Faltou
+Procedimentos: Atendimento de Fisioterapia Pélvica 1 x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 25 ---
+Coletado em: 01/04/2026, 10:41:01
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: José Francisco da Silveira Júnior
+Paciente: Haryel Kuczkovski Pilla
+Celular: +55 (51) 981372427
+Convenio: Benefício de prestação continuada (BPC) - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 26 ---
+Coletado em: 01/04/2026, 10:41:01
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Luisa Rachelle Boaz
+Paciente: Yuri de Assunção
+Celular: +55 (51) 986090854
+Convenio: Benefício de prestação continuada (BPC) - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 27 ---
+Coletado em: 01/04/2026, 10:41:02
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Rodrigo Aranda Padilha
+Celular: +55 (51) 993735709
+Convenio: Particular
+Status: Atendido
+Procedimentos: Fisioterapia Musculoesquelética CLINIFISIO 2X/semana
+Valor: R$ 20,00
+
+------------------------------------------------------------
+
+--- Agendamento 28 ---
+Coletado em: 01/04/2026, 10:41:03
+
+Horario: 15:00 - 16:00
+Fisioterapeuta: Isabela da Cruz dos Reis
+Paciente: Bella Antônio Pereira
+Celular: +55 (51) 986065916
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Neuropediátrica 1x semana
+Valor: R$ 25,00
+
+------------------------------------------------------------
+
+--- Agendamento 29 ---
+Coletado em: 01/04/2026, 10:41:04
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Angela Mara da Silva Nunes
+Celular: +55 (51) 996243321
+Convenio: Particular
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 3x semana
+Valor: R$ 15,00
+
+------------------------------------------------------------
+
+--- Agendamento 30 ---
+Coletado em: 01/04/2026, 10:41:05
+
+Horario: 16:00 - 17:00
+Fisioterapeuta: Rodrigo Freitas Mantovani
+Paciente: Luiz Inácio Viau de Oliveira
+Celular: +55 (21) 976249793
+Convenio: Cadastro Único - ISENTO
+Status: Atendido
+Procedimentos: Atendimento Fisioterapia Músculoesquelética 2x semana - isento
+
+------------------------------------------------------------
+
+--- Agendamento 31 ---
+Coletado em: 01/04/2026, 10:41:05
+
+Horario: 17:00 - 18:00
+Fisioterapeuta: Guilherme Einloft Dias
+Paciente: Lucas Rodrigues da Rosa
+Celular: +55 (51) 981074630
+Convenio: Atleta UFRGS DPSD/PRAE - ISENTO
+Status: Atendido
+Procedimentos: Fisioterapia Musculoesquelética CLINIFISIO 2X/semana - Isento
+
+------------------------------------------------------------
+

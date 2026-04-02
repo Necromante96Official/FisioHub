@@ -65,6 +65,7 @@
 
 .fh-evolucao-card strong {
     font-size: clamp(1.3rem, 2vw, 1.8rem);
+    text-align: center;
 }
 
 .fh-evolucao-patients-number {
@@ -147,6 +148,18 @@
     text-transform: uppercase;
     color: var(--fh-primary-2);
     background: linear-gradient(180deg, color-mix(in srgb, var(--fh-surface-2) 54%, transparent), color-mix(in srgb, var(--fh-surface) 46%, transparent));
+}
+.fh-evolucoes-table th:nth-child(3),
+.fh-evolucoes-table th:nth-child(4),
+.fh-evolucoes-table th:nth-child(5),
+.fh-evolucoes-table td:nth-child(3),
+.fh-evolucoes-table td:nth-child(4),
+.fh-evolucoes-table td:nth-child(5) {
+    text-align: center;
+}
+
+.fh-evolucoes-table td:nth-child(5) {
+    font-weight: 700;
 }
 
 .fh-evolucoes-empty {
@@ -234,6 +247,7 @@
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    text-align: center;
 }
 
 .fh-evolucoes-dialog-list {
