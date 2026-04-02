@@ -1,5 +1,5 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
-import { FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
+import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
 import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
@@ -7,7 +7,6 @@ export class PatientsController {
     private readonly pageTemplate = "1.0_HTML-Templates/1.1_Pages/pacientes.html";
     private readonly processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     private readonly patientsRecordsStorageKey = FISIOHUB_STORAGE_KEYS.PATIENTS_RECORDS;
-    private readonly legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     private readonly theme = new ThemeManager();
     private patientRecords: PatientRecord[] = [];
     private activeSearch = "";
@@ -51,7 +50,11 @@ export class PatientsController {
         });
 
         if (this.patientRecords.length === 0) {
-            this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
+            if (this.isPatientsFallbackSuppressed()) {
+                this.showSiteNotification("Backup sem pacientes carregado. A lista de pacientes foi ocultada neste modo.");
+            } else {
+                this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
+            }
         }
     }
 
@@ -223,14 +226,13 @@ export class PatientsController {
             return fromRecords;
         }
 
+        if (this.isPatientsFallbackSuppressed()) {
+            return [];
+        }
+
         const processedRaw = localStorage.getItem(this.processedDataStorageKey) ?? "";
         if (processedRaw.trim()) {
             return this.parsePatientsFromLines(processedRaw);
-        }
-
-        const legacyRaw = localStorage.getItem(this.legacyImportedDataStorageKey) ?? "";
-        if (legacyRaw.trim()) {
-            return this.parsePatientsFromLines(legacyRaw);
         }
 
         return [];
@@ -262,6 +264,10 @@ export class PatientsController {
         } catch {
             return [];
         }
+    }
+
+    private isPatientsFallbackSuppressed(): boolean {
+        return localStorage.getItem(FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED) === "true";
     }
 
     private parsePatientsFromLines(raw: string): PatientRecord[] {

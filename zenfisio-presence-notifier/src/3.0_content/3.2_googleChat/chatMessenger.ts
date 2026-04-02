@@ -49,9 +49,10 @@ const isEligibleInput = (element: HTMLElement): boolean => {
   return !element.hasAttribute("aria-hidden");
 };
 
-const findVisibleMatch = (collection: Iterable<HTMLElement>): HTMLElement | null => {
-  for (const element of collection) {
-    if (isEligibleInput(element)) {
+const findVisibleMatch = (collection: ArrayLike<HTMLElement>): HTMLElement | null => {
+  for (let index = 0; index < collection.length; index += 1) {
+    const element = collection[index];
+    if (element && isEligibleInput(element)) {
       return element;
     }
   }

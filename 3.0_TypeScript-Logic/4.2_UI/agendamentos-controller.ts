@@ -40,7 +40,6 @@ export class AgendamentosController {
     private readonly processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     private readonly processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     private readonly evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
-    private readonly legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     private readonly theme = new ThemeManager();
 
     private allRecords: AgendamentoRecord[] = [];
@@ -327,11 +326,6 @@ export class AgendamentosController {
         const processedMeta = this.parseProcessedMeta(localStorage.getItem(this.processedMetaStorageKey));
         if (processedRaw.trim()) {
             return this.deduplicateRecords(this.parseRecordsFromLines(this.parseRawLines(processedRaw), processedMeta?.referenceDateIso ?? this.todayIso(), 0));
-        }
-
-        const legacyRaw = localStorage.getItem(this.legacyImportedDataStorageKey) ?? "";
-        if (legacyRaw.trim()) {
-            return this.deduplicateRecords(this.parseRecordsFromLines(this.parseRawLines(legacyRaw), this.todayIso(), 0));
         }
 
         return [];

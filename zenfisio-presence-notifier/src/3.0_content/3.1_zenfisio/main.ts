@@ -57,10 +57,10 @@ const ensureStyles = (): void => {
       left: 20px;
       top: 20px;
       z-index: 2147483647;
-      width: min(392px, calc(100vw - 28px));
-      min-height: 248px;
-      border-radius: 26px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
+      width: min(298px, calc(100vw - 20px));
+      min-height: 202px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
       overflow: hidden;
       color: #fff;
       font-family: Segoe UI, Arial, sans-serif;
@@ -73,43 +73,63 @@ const ensureStyles = (): void => {
         border-color 180ms ease,
         background 180ms ease,
         transform 180ms ease;
-      backdrop-filter: blur(14px);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+      backdrop-filter: blur(16px);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
     }
 
     .${CARD_CLASS}[data-minimized="false"] {
-      background: linear-gradient(180deg, rgba(17, 22, 33, 0.96), rgba(9, 13, 20, 0.96));
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 42%),
+        linear-gradient(180deg, rgba(17, 24, 39, 0.98), rgba(8, 12, 21, 0.98));
     }
 
     .${CARD_CLASS}[data-enabled="true"][data-minimized="false"] {
-      border-color: rgba(110, 231, 183, 0.22);
-      box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.38),
-        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-        0 0 0 1px rgba(46, 125, 50, 0.18);
+      background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.24), transparent 38%),
+        linear-gradient(180deg, rgba(8, 47, 31, 0.98), rgba(4, 20, 15, 0.98));
     }
 
     .${CARD_CLASS}[data-enabled="false"][data-minimized="false"] {
-      border-color: rgba(248, 113, 113, 0.24);
+      background:
+        radial-gradient(circle at top left, rgba(239, 68, 68, 0.24), transparent 38%),
+        linear-gradient(180deg, rgba(58, 12, 17, 0.98), rgba(24, 8, 10, 0.98));
+    }
+
+    .${CARD_CLASS}[data-enabled="true"][data-minimized="false"] {
+      border-color: rgba(110, 231, 183, 0.30);
       box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.38),
-        0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-        0 0 0 1px rgba(198, 40, 40, 0.16);
+        0 18px 44px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(34, 197, 94, 0.10) inset;
+    }
+
+    .${CARD_CLASS}[data-enabled="false"][data-minimized="false"] {
+      border-color: rgba(248, 113, 113, 0.26);
+      box-shadow:
+        0 18px 44px rgba(0, 0, 0, 0.42),
+        0 0 0 1px rgba(239, 68, 68, 0.10) inset;
     }
 
     .${CARD_CLASS}[data-minimized="true"] {
-      width: 248px;
-      min-height: 84px;
-      border-color: rgba(255, 255, 255, 0.16);
-      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.34);
+      width: 236px;
+      min-height: 136px;
+      border-color: rgba(255, 255, 255, 0.12);
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.34),
+        0 0 0 1px rgba(255, 255, 255, 0.03) inset;
     }
 
     .${CARD_CLASS}[data-enabled="true"][data-minimized="true"] {
-      background: linear-gradient(135deg, #0c7a36 0%, #12b76a 52%, #0ea5e9 100%);
+      background:
+        radial-gradient(circle at top left, rgba(34, 197, 94, 0.32), transparent 38%),
+        linear-gradient(180deg, rgba(6, 78, 59, 0.98), rgba(3, 46, 31, 0.98));
     }
 
     .${CARD_CLASS}[data-enabled="false"][data-minimized="true"] {
-      background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 54%, #f97316 100%);
+      background:
+        radial-gradient(circle at top left, rgba(239, 68, 68, 0.32), transparent 38%),
+        linear-gradient(180deg, rgba(127, 29, 29, 0.98), rgba(69, 10, 10, 0.98));
     }
 
     .zen-state-card__accent {
@@ -119,11 +139,11 @@ const ensureStyles = (): void => {
     }
 
     .${CARD_CLASS}[data-enabled="true"] .zen-state-card__accent {
-      background: linear-gradient(90deg, #34d399, #06b6d4, #8b5cf6);
+      background: linear-gradient(90deg, #22c55e, #16a34a, #15803d);
     }
 
     .${CARD_CLASS}[data-enabled="false"] .zen-state-card__accent {
-      background: linear-gradient(90deg, #f87171, #ef4444, #f59e0b);
+      background: linear-gradient(90deg, #f87171, #ef4444, #b91c1c);
     }
 
     .${CARD_CLASS}[data-minimized="true"] .zen-state-card__accent {
@@ -132,20 +152,22 @@ const ensureStyles = (): void => {
 
     .zen-state-card__content {
       display: grid;
-      gap: 14px;
-      padding: 16px;
+      gap: 12px;
+      padding: 12px;
     }
 
     .zen-state-card__expanded {
       display: grid;
-      gap: 14px;
+      gap: 12px;
     }
 
     .zen-state-card__compact {
       display: grid;
       gap: 10px;
       align-items: center;
-      min-height: 76px;
+      justify-items: center;
+      min-height: 132px;
+      text-align: center;
     }
 
     .${CARD_CLASS}[data-minimized="false"] .zen-state-card__compact {
@@ -185,8 +207,8 @@ const ensureStyles = (): void => {
     }
 
     .zen-state-card__title {
-      font-size: 16px;
-      font-weight: 900;
+      font-size: 15px;
+      font-weight: 850;
       letter-spacing: -0.02em;
       line-height: 1.1;
     }
@@ -202,90 +224,91 @@ const ensureStyles = (): void => {
       align-items: center;
       justify-content: center;
       width: fit-content;
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 999px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      background: rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.07);
       color: #ffd2d2;
     }
 
     .zen-state-card__pill.is-on {
-      background: rgba(46, 125, 50, 0.26);
-      color: #b9ffd0;
+      background: rgba(34, 197, 94, 0.22);
+      color: #dcfce7;
     }
 
     .zen-state-card__pill.is-off {
-      background: rgba(198, 40, 40, 0.24);
-      color: #ffd2d2;
+      background: rgba(239, 68, 68, 0.22);
+      color: #fee2e2;
     }
 
     .zen-state-card__state {
-      font-size: 20px;
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-
-    .zen-state-card__state.is-on {
-      color: #ecfff2;
-    }
-
-    .zen-state-card__state.is-off {
-      color: #fff1f1;
-    }
-
-    .zen-state-card__state-note {
-      font-size: 12px;
-      color: rgba(255, 255, 255, 0.76);
-    }
-
-    .zen-state-card__panel {
       display: grid;
-      gap: 10px;
-      padding: 14px;
-      border-radius: 18px;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      gap: 6px;
+      justify-items: center;
+      padding: 6px 0 2px;
     }
 
-    .zen-state-card__panel-label {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.56);
-    }
-
-    .zen-state-card__panel-value {
-      font-size: 20px;
+    .zen-state-card__state-label {
+      font-size: 11px;
       font-weight: 900;
-      letter-spacing: -0.03em;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.55);
     }
 
-    .zen-state-card__panel-help {
-      font-size: 12px;
-      line-height: 1.5;
-      color: rgba(255, 255, 255, 0.72);
+    .zen-state-card__state-value {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 1000;
+      letter-spacing: -0.05em;
+    }
+
+    .zen-state-card__state-value.is-on {
+      color: #bbf7d0;
+    }
+
+    .zen-state-card__state-value.is-off {
+      color: #fecaca;
+    }
+
+    .zen-state-card__shortcut {
+      display: grid;
+      gap: 5px;
+      justify-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.2;
+    }
+
+    .zen-state-card__shortcut code {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      font: inherit;
+      color: #fff;
     }
 
     .zen-state-card__actions {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      gap: 8px;
     }
 
     .zen-state-card__button {
       border: none;
-      border-radius: 14px;
-      padding: 12px 14px;
+      border-radius: 12px;
+      padding: 10px 12px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
       color: #fff;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.16);
       transition: transform 120ms ease, filter 120ms ease, opacity 120ms ease;
     }
 
@@ -299,73 +322,37 @@ const ensureStyles = (): void => {
     }
 
     .zen-state-card__button--primary {
-      background: linear-gradient(135deg, #2b6cb0, #3b82f6);
+      background: linear-gradient(135deg, #2563eb, #60a5fa);
     }
 
     .zen-state-card__button--secondary {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
     .zen-state-card__button--danger {
-      background: linear-gradient(135deg, #7f1d1d, #dc2626);
-    }
-
-    .zen-state-card__button--ghost {
-      background: rgba(255, 255, 255, 0.08);
+      background: linear-gradient(135deg, #991b1b, #ef4444);
     }
 
     .zen-state-card__button--full {
       grid-column: 1 / -1;
     }
 
-    .zen-state-card__footer {
-      text-align: center;
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.56);
-    }
-
-    .zen-state-card__compact-top {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 8px;
-      align-items: start;
-    }
-
-    .zen-state-card__compact-labels {
-      display: grid;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .zen-state-card__compact-title {
-      font-size: 14px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-    }
-
-    .zen-state-card__compact-state {
-      font-size: 20px;
-      line-height: 1;
-      font-weight: 1000;
-      letter-spacing: -0.05em;
-    }
-
-    .zen-state-card__compact-state.is-on {
-      color: #ecfff2;
-    }
-
-    .zen-state-card__compact-state.is-off {
-      color: #fff1f1;
+    .zen-state-card__button--ghost {
+      background: rgba(255, 255, 255, 0.06);
     }
 
     .zen-state-card__compact-button {
       width: 100%;
       min-width: 0;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.14);
+      max-width: 100%;
       justify-self: stretch;
+    }
+
+    .zen-state-card__footer {
+      text-align: center;
+      font-size: 10px;
+      color: rgba(255, 255, 255, 0.50);
     }
 
     .zen-state-card__move-hint {
@@ -373,6 +360,7 @@ const ensureStyles = (): void => {
       font-size: 11px;
       font-weight: 700;
       color: rgba(255, 255, 255, 0.72);
+      text-align: center;
     }
 
     .${CARD_CLASS}.is-move-hint .zen-state-card__move-hint {
@@ -438,37 +426,26 @@ const createFloatingStateCard = async (): Promise<void> => {
   const compactView = document.createElement("div");
   compactView.className = "zen-state-card__compact";
 
-  const compactTop = document.createElement("div");
-  compactTop.className = "zen-state-card__compact-top zen-state-card__drag-handle";
-
-  const compactLabels = document.createElement("div");
-  compactLabels.className = "zen-state-card__compact-labels";
-
-  const compactTitle = document.createElement("div");
-  compactTitle.className = "zen-state-card__compact-title";
-  compactTitle.textContent = "Zenfisio Notifier";
-
   const compactState = document.createElement("div");
-  compactState.className = "zen-state-card__compact-state";
-  compactState.textContent = "DESATIVADO";
+  compactState.className = "zen-state-card__state-value";
+  compactState.textContent = "OFF";
 
-  compactLabels.appendChild(compactTitle);
-  compactLabels.appendChild(compactState);
+  const compactStateWrap = document.createElement("div");
+  compactStateWrap.className = "zen-state-card__state";
+  compactStateWrap.appendChild(compactState);
+
+  const compactShortcut = document.createElement("div");
+  compactShortcut.className = "zen-state-card__shortcut";
+  compactShortcut.innerHTML = '<span>Atalho</span><code>Control + Shift + Z</code>';
 
   const compactButton = document.createElement("button");
   compactButton.type = "button";
   compactButton.className = "zen-state-card__button zen-state-card__button--ghost zen-state-card__compact-button";
-  compactButton.textContent = "Expandir";
+  compactButton.textContent = "Maximizar";
 
-  compactTop.appendChild(compactLabels);
-  compactTop.appendChild(compactButton);
-
-  const compactHint = document.createElement("div");
-  compactHint.className = "zen-state-card__move-hint";
-  compactHint.textContent = "Arraste pelo topo para mover.";
-
-  compactView.appendChild(compactTop);
-  compactView.appendChild(compactHint);
+  compactView.appendChild(compactStateWrap);
+  compactView.appendChild(compactShortcut);
+  compactView.appendChild(compactButton);
 
   const expandedView = document.createElement("div");
   expandedView.className = "zen-state-card__expanded";
@@ -482,22 +459,12 @@ const createFloatingStateCard = async (): Promise<void> => {
   const titleRow = document.createElement("div");
   titleRow.className = "zen-state-card__title-row";
 
-  const title = document.createElement("div");
-  title.className = "zen-state-card__title";
-  title.textContent = "Zenfisio Notifier";
-
   const statusPill = document.createElement("span");
   statusPill.className = "zen-state-card__pill is-off";
   statusPill.textContent = "OFF";
 
-  const subtitle = document.createElement("div");
-  subtitle.className = "zen-state-card__subtitle";
-  subtitle.textContent = "Controle visual da extensao na Zenfisio";
-
-  titleRow.appendChild(title);
   titleRow.appendChild(statusPill);
   brand.appendChild(titleRow);
-  brand.appendChild(subtitle);
 
   const minimizeButton = document.createElement("button");
   minimizeButton.type = "button";
@@ -506,25 +473,6 @@ const createFloatingStateCard = async (): Promise<void> => {
 
   header.appendChild(brand);
   header.appendChild(minimizeButton);
-
-  const statusPanel = document.createElement("div");
-  statusPanel.className = "zen-state-card__panel";
-
-  const statusLabel = document.createElement("div");
-  statusLabel.className = "zen-state-card__panel-label";
-  statusLabel.textContent = "Estado atual";
-
-  const statusValue = document.createElement("div");
-  statusValue.className = "zen-state-card__panel-value";
-  statusValue.textContent = "Notifier desativado";
-
-  const statusHelp = document.createElement("div");
-  statusHelp.className = "zen-state-card__panel-help";
-  statusHelp.textContent = "Atalhos e ações continuam funcionando. O card pode ser reposicionado e sua posição fica salva.";
-
-  statusPanel.appendChild(statusLabel);
-  statusPanel.appendChild(statusValue);
-  statusPanel.appendChild(statusHelp);
 
   const actions = document.createElement("div");
   actions.className = "zen-state-card__actions";
@@ -539,29 +487,17 @@ const createFloatingStateCard = async (): Promise<void> => {
   clearButton.className = "zen-state-card__button zen-state-card__button--secondary";
   clearButton.textContent = "Limpar cache";
 
-  const moveButton = document.createElement("button");
-  moveButton.type = "button";
-  moveButton.className = "zen-state-card__button zen-state-card__button--danger";
-  moveButton.textContent = "Reposicionar";
-
-  const expandButton = document.createElement("button");
-  expandButton.type = "button";
-  expandButton.className = "zen-state-card__button zen-state-card__button--secondary zen-state-card__button--full";
-  expandButton.textContent = "Minimizar";
+  const historyButton = document.createElement("button");
+  historyButton.type = "button";
+  historyButton.className = "zen-state-card__button zen-state-card__button--secondary";
+  historyButton.textContent = "Ver historico";
 
   actions.appendChild(toggleButton);
   actions.appendChild(clearButton);
-  actions.appendChild(moveButton);
-  actions.appendChild(expandButton);
-
-  const footer = document.createElement("div");
-  footer.className = "zen-state-card__footer";
-  footer.textContent = "Dica: arraste pelo topo para mudar o local.";
+  actions.appendChild(historyButton);
 
   expandedView.appendChild(header);
-  expandedView.appendChild(statusPanel);
   expandedView.appendChild(actions);
-  expandedView.appendChild(footer);
 
   content.appendChild(compactView);
   content.appendChild(expandedView);
@@ -575,9 +511,8 @@ const createFloatingStateCard = async (): Promise<void> => {
     card.dataset.enabled = String(enabled);
     statusPill.textContent = enabled ? "ON" : "OFF";
     statusPill.className = `zen-state-card__pill ${enabled ? "is-on" : "is-off"}`;
-    statusValue.textContent = enabled ? "Notifier ativado" : "Notifier desativado";
-    compactState.textContent = enabled ? "ATIVADO" : "DESATIVADO";
-    compactState.className = `zen-state-card__compact-state ${enabled ? "is-on" : "is-off"}`;
+    compactState.textContent = enabled ? "ON" : "OFF";
+    compactState.className = `zen-state-card__state-value ${enabled ? "is-on" : "is-off"}`;
   };
 
   const clampToViewport = async (position: CardPosition): Promise<void> => {
@@ -597,15 +532,8 @@ const createFloatingStateCard = async (): Promise<void> => {
   const applyMinimizedState = async (minimized: boolean): Promise<void> => {
     currentMinimized = minimized;
     card.dataset.minimized = String(minimized);
-    minimizeButton.textContent = minimized ? "Expandir" : "Minimizar";
-    expandButton.textContent = minimized ? "Expandir" : "Minimizar";
-    compactButton.textContent = "Expandir";
-
-    if (minimized) {
-      compactHint.textContent = "Arraste pelo topo para mover.";
-    } else {
-      compactHint.textContent = "Arraste o card para reposicionar.";
-    }
+    minimizeButton.textContent = minimized ? "Maximizar" : "Minimizar";
+    compactButton.textContent = "Maximizar";
 
     await savePreferences({ position: currentPosition, minimized: currentMinimized });
     await clampToViewport(currentPosition);
@@ -648,14 +576,8 @@ const createFloatingStateCard = async (): Promise<void> => {
     window.addEventListener("pointerup", onPointerUp, true);
   };
 
-  const promptMoveMode = (): void => {
-    card.classList.add("is-move-hint");
-    showToast("Arraste o topo do card para reposicionar.", "warn");
-    window.setTimeout(() => card.classList.remove("is-move-hint"), 2200);
-  };
-
   header.addEventListener("pointerdown", startDrag);
-  compactTop.addEventListener("pointerdown", startDrag);
+  compactView.addEventListener("pointerdown", startDrag);
 
   minimizeButton.addEventListener("click", event => {
     event.stopPropagation();
@@ -665,11 +587,6 @@ const createFloatingStateCard = async (): Promise<void> => {
   compactButton.addEventListener("click", event => {
     event.stopPropagation();
     void applyMinimizedState(false);
-  });
-
-  expandButton.addEventListener("click", event => {
-    event.stopPropagation();
-    void applyMinimizedState(!currentMinimized);
   });
 
   toggleButton.addEventListener("click", async event => {
@@ -693,9 +610,13 @@ const createFloatingStateCard = async (): Promise<void> => {
     }
   });
 
-  moveButton.addEventListener("click", event => {
+  historyButton.addEventListener("click", event => {
     event.stopPropagation();
-    promptMoveMode();
+    const historyUrl = chrome.runtime.getURL("src/4.0_ui/popup.html");
+    const opened = window.open(historyUrl, "_blank", "noopener,noreferrer,width=420,height=640");
+    if (!opened) {
+      showToast("Nao foi possivel abrir o historico.", "error");
+    }
   });
 
   onStateChange(value => {

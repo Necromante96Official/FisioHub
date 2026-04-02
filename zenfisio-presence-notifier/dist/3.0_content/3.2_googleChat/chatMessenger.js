@@ -2,34 +2,66 @@ const INPUT_SELECTORS = [
     "div[contenteditable='true'][role='textbox']",
     "div[contenteditable='true'][aria-label*='Mensagem']",
     "div[contenteditable='true'][aria-label*='message']",
-    "div[role='combobox'][contenteditable='true']"
+    "div[contenteditable='true'][data-placeholder*='Mensagem']",
+    "div[contenteditable='true'][data-placeholder*='message']",
+    "div[contenteditable='true'][data-emoji-root='true']",
+    "div[contenteditable='true'][data-tab='true']",
+    "div[role='combobox'][contenteditable='true']",
+    "div.editable[contenteditable='true']",
+    "div[contenteditable='true'][aria-label*='Chat']",
+    "div[contenteditable='true'][aria-label*='Bate-papo']",
+    "[aria-label='Mensagem'][contenteditable='true']",
+    "[aria-label*='Enviar mensagem'][contenteditable='true']"
 ];
 const SEND_BUTTON_SELECTORS = [
     "button[aria-label='Enviar mensagem']",
     "button[aria-label='Send message']",
+    "button[data-tooltip='Send message']",
+    "button[data-tooltip='Enviar mensagem']",
+    "button[aria-label*='Enviar'][data-tooltip*='Mensagem']",
+    "button[aria-label*='Send'][data-tooltip*='Message']",
     "div[role='button'][aria-label*='Enviar']",
-    "div[role='button'][aria-label*='Send']"
+    "div[role='button'][data-tooltip*='Enviar']",
+    "div[role='button'][aria-label*='Send']",
+    "div[role='button'][data-tooltip*='Send']",
+    "span[data-tooltip*='Enviar'] button",
+    "span[data-tooltip*='Send'] button"
 ];
 const WAIT_TIMEOUT_MS = 45000;
-const findVisibleEditable = () => {
-    for (const selector of INPUT_SELECTORS) {
-        const list = Array.from(document.querySelectorAll(selector));
-        for (const element of list) {
-            if (!element.isContentEditable) {
-                continue;
-            }
-            const rect = element.getBoundingClientRect();
-            if (rect.width === 0 || rect.height === 0) {
-                continue;
-            }
-            const style = window.getComputedStyle(element);
-            if (style.display === "none" || style.visibility === "hidden") {
-                continue;
-            }
+const isEligibleInput = (element) => {
+    if (!element.isContentEditable) {
+        return false;
+    }
+    const style = window.getComputedStyle(element);
+    if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+        return false;
+    }
+    const rect = element.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+        return false;
+    }
+    return !element.hasAttribute("aria-hidden");
+};
+const findVisibleMatch = (collection) => {
+    for (let index = 0; index < collection.length; index += 1) {
+        const element = collection[index];
+        if (element && isEligibleInput(element)) {
             return element;
         }
     }
     return null;
+};
+const findFirstMatch = () => {
+    for (const selector of INPUT_SELECTORS) {
+        const candidate = findVisibleMatch(document.querySelectorAll(selector));
+        if (candidate) {
+            return candidate;
+        }
+    }
+    return findVisibleMatch(document.querySelectorAll("[contenteditable='true']"));
+};
+const findVisibleEditable = () => {
+    return findFirstMatch();
 };
 const waitForEditableInput = () => {
     return new Promise((resolve, reject) => {
@@ -61,7 +93,11 @@ const waitForEditableInput = () => {
     });
 };
 const findSendButton = (input) => {
-    const roots = [input.parentElement || document, document];
+    const roots = [
+        input.closest("footer") || input.parentElement || document,
+        input.parentElement || document,
+        document
+    ];
     for (const root of roots) {
         for (const selector of SEND_BUTTON_SELECTORS) {
             const button = root.querySelector(selector);
@@ -114,7 +150,7 @@ export const deliverChatMessage = async (messageText) => {
     }
     const input = await waitForEditableInput();
     setInputText(input, messageText);
-    await new Promise(resolve => window.setTimeout(resolve, 120));
+    await new Promise(resolve => window.setTimeout(resolve, 150));
     const sendButton = findSendButton(input);
     if (sendButton) {
         sendButton.click();

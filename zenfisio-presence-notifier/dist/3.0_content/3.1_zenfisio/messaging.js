@@ -32,3 +32,18 @@ export const clearHistoryFromBackground = async () => {
         });
     });
 };
+export const listHistoryFromBackground = async () => {
+    return new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage({ type: MESSAGE_TYPES.HISTORY_LIST }, response => {
+            if (chrome.runtime.lastError) {
+                reject(new Error(chrome.runtime.lastError.message));
+                return;
+            }
+            if (!response || response.ok !== true || !Array.isArray(response.list)) {
+                resolve([]);
+                return;
+            }
+            resolve(response.list);
+        });
+    });
+};

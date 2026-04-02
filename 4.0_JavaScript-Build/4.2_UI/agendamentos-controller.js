@@ -7,7 +7,6 @@ export class AgendamentosController {
     processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
-    legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     theme = new ThemeManager();
     allRecords = [];
     visibleGroups = [];
@@ -250,10 +249,6 @@ export class AgendamentosController {
         const processedMeta = this.parseProcessedMeta(localStorage.getItem(this.processedMetaStorageKey));
         if (processedRaw.trim()) {
             return this.deduplicateRecords(this.parseRecordsFromLines(this.parseRawLines(processedRaw), processedMeta?.referenceDateIso ?? this.todayIso(), 0));
-        }
-        const legacyRaw = localStorage.getItem(this.legacyImportedDataStorageKey) ?? "";
-        if (legacyRaw.trim()) {
-            return this.deduplicateRecords(this.parseRecordsFromLines(this.parseRawLines(legacyRaw), this.todayIso(), 0));
         }
         return [];
     }

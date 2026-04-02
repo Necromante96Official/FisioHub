@@ -1,5 +1,6 @@
 import { MESSAGE_TYPES } from "../../1.0_shared/constants.js";
 import type { StatusEventPayload } from "../../1.0_shared/types.js";
+import type { HistoryEntry } from "../../1.0_shared/types.js";
 
 export type DispatchResult = {
   ok: boolean;
@@ -45,6 +46,24 @@ export const clearHistoryFromBackground = async (): Promise<boolean> => {
       }
 
       resolve(true);
+    });
+  });
+};
+
+export const listHistoryFromBackground = async (): Promise<HistoryEntry[]> => {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPES.HISTORY_LIST }, response => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
+      }
+
+      if (!response || response.ok !== true || !Array.isArray(response.list)) {
+        resolve([]);
+        return;
+      }
+
+      resolve(response.list as HistoryEntry[]);
     });
   });
 };

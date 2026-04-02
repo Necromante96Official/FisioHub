@@ -1,5 +1,5 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
-import { FISIOHUB_STORAGE_KEYS, type BackupPayload, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
+import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type BackupPayload, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
 import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type ImportedItem = {
@@ -30,7 +30,6 @@ type RequiredFieldIssue = {
 export class HomeController {
     private readonly appId = "app";
     private readonly homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
-    private readonly legacyImportedDataStorageKey = FISIOHUB_STORAGE_KEYS.LEGACY_IMPORTED_DATA;
     private readonly stagingDataStorageKey = FISIOHUB_STORAGE_KEYS.STAGING_DATA;
     private readonly processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     private readonly evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
@@ -363,38 +362,16 @@ export class HomeController {
     }
 
     private exportBackup(kind: BackupPayload["kind"]): void {
-        const stagingData = localStorage.getItem(this.stagingDataStorageKey) ?? "";
-        const processedData = localStorage.getItem(this.processedDataStorageKey) ?? "";
-        const processedMeta = this.parseProcessedMeta(localStorage.getItem(this.processedMetaStorageKey));
-        const patientsRecords = this.parsePatientsRecords(localStorage.getItem(this.patientsRecordsStorageKey));
-
         const payload: BackupPayload = {
-            schema: "fisiohub-backup-v2",
+            schema: "fisiohub-backup-v3",
             kind,
-            createdAtIso: new Date().toISOString()
+            createdAtIso: new Date().toISOString(),
+            storageEntries: this.collectBackupStorageEntries(kind)
         };
-
-        if (kind === "all") {
-            payload.stagingData = stagingData;
-            payload.processedData = processedData;
-            payload.patientsRecords = patientsRecords;
-            payload.processedMeta = processedMeta;
-        }
-
-        if (kind === "patients-only") {
-            payload.patientsRecords = patientsRecords;
-            payload.processedMeta = processedMeta;
-        }
-
-        if (kind === "all-without-patients") {
-            payload.stagingData = stagingData;
-            payload.processedData = processedData;
-            payload.processedMeta = processedMeta;
-        }
 
         const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        const fileName = `fisiohub-backup-${kind}-${this.todayIso()}.json`;
+        const fileName = `fisiohub-backup-${this.getBackupFileSlug(kind)}-${this.todayIso()}.json`;
 
         const link = document.createElement("a");
         link.href = url;
@@ -414,26 +391,41 @@ export class HomeController {
             return;
         }
 
+        const backupEntries = this.collectBackupStorageEntriesFromPayload(payload);
+        const entriesToApply = this.filterBackupStorageEntriesByKind(backupEntries, kind);
+
+        if (Object.keys(entriesToApply).length === 0) {
+            this.showSiteNotification("Arquivo de backup sem dados compatíveis com esta opção.");
+            return;
+        }
+
         if (kind === "all") {
-            localStorage.setItem(this.stagingDataStorageKey, this.toSafeText(payload.stagingData));
-            localStorage.setItem(this.processedDataStorageKey, this.toSafeText(payload.processedData));
-            localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.toSafePatientsRecords(payload.patientsRecords)));
-            localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
+            this.clearAllFisioHubStorage();
+            this.setPatientsFallbackSuppressed(false);
+            this.setFinanceFallbackSuppressed(false);
+            this.applyBackupStorageEntries(entriesToApply);
         }
 
         if (kind === "patients-only") {
-            localStorage.setItem(this.patientsRecordsStorageKey, JSON.stringify(this.toSafePatientsRecords(payload.patientsRecords)));
-
-            if (payload.processedMeta) {
-                localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
-            }
+            this.clearAllFisioHubStorage([this.patientsRecordsStorageKey]);
+            this.setPatientsFallbackSuppressed(false);
+            this.setFinanceFallbackSuppressed(true);
+            this.applyBackupStorageEntries(entriesToApply);
         }
 
         if (kind === "all-without-patients") {
-            localStorage.setItem(this.stagingDataStorageKey, this.toSafeText(payload.stagingData));
-            localStorage.setItem(this.processedDataStorageKey, this.toSafeText(payload.processedData));
-            localStorage.removeItem(this.patientsRecordsStorageKey);
-            localStorage.setItem(this.processedMetaStorageKey, JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta)));
+            this.clearAllFisioHubStorage();
+            this.setPatientsFallbackSuppressed(true);
+            this.setFinanceFallbackSuppressed(false);
+            this.applyBackupStorageEntries(entriesToApply);
+        }
+
+        const referenceDateIso = kind === "patients-only"
+            ? null
+            : this.resolveBackupReferenceDate(payload, entriesToApply);
+
+        if (referenceDateIso) {
+            this.setDate(referenceDateIso);
         }
 
         this.loadStagingDataFromStorage();
@@ -443,6 +435,8 @@ export class HomeController {
 
     private clearAllStoredData(): void {
         this.clearAllFisioHubStorage();
+        this.setPatientsFallbackSuppressed(false);
+        this.setFinanceFallbackSuppressed(false);
 
         this.importedItems = [];
         this.nextItemId = 1;
@@ -501,14 +495,12 @@ export class HomeController {
         this.importedItems = [];
         this.nextItemId = 1;
         localStorage.removeItem(this.stagingDataStorageKey);
-        localStorage.removeItem(this.legacyImportedDataStorageKey);
         this.renderImportedData();
         this.showSiteNotification("O texto da lista de dados importados foi limpo.");
     }
 
     private clearOnlyPageDataPreservingPatientsList(): void {
         const keysToRemove = [
-            this.legacyImportedDataStorageKey,
             this.stagingDataStorageKey,
             this.processedDataStorageKey,
             this.processedMetaStorageKey,
@@ -576,17 +568,163 @@ export class HomeController {
         return this.readEvolucoesPendingHistory().some((batch) => batch.referenceDateIso === referenceDateIso);
     }
 
-    private clearAllFisioHubStorage(): void {
+    private clearAllFisioHubStorage(excludedKeys: string[] = []): void {
+        const excluded = new Set(excludedKeys);
         const keysToRemove: string[] = [];
 
         for (let index = 0; index < localStorage.length; index += 1) {
             const key = localStorage.key(index);
-            if (key && key.startsWith("fisiohub-")) {
+            if (key && key.startsWith("fisiohub-") && !excluded.has(key)) {
                 keysToRemove.push(key);
             }
         }
 
         keysToRemove.forEach((key) => localStorage.removeItem(key));
+    }
+
+    private collectBackupStorageEntries(kind: BackupPayload["kind"]): Record<string, string> {
+        const entries: Record<string, string> = {};
+        const keys = this.listFisioHubStorageKeys();
+
+        keys.forEach((key) => {
+            if (kind === "patients-only" && key !== this.patientsRecordsStorageKey) {
+                return;
+            }
+
+            if (kind === "all-without-patients" && key === this.patientsRecordsStorageKey) {
+                return;
+            }
+
+            const value = localStorage.getItem(key);
+            if (typeof value === "string") {
+                entries[key] = value;
+            }
+        });
+
+        return entries;
+    }
+
+    private collectBackupStorageEntriesFromPayload(payload: Partial<BackupPayload>): Record<string, string> {
+        if (payload.storageEntries && typeof payload.storageEntries === "object" && !Array.isArray(payload.storageEntries)) {
+            const entries: Record<string, string> = {};
+
+            Object.entries(payload.storageEntries).forEach(([key, value]) => {
+                if (typeof value === "string") {
+                    entries[key] = value;
+                }
+            });
+
+            return entries;
+        }
+
+        const entries: Record<string, string> = {};
+
+        if (typeof payload.stagingData === "string") {
+            entries[this.stagingDataStorageKey] = payload.stagingData;
+        }
+
+        if (typeof payload.processedData === "string") {
+            entries[this.processedDataStorageKey] = payload.processedData;
+        }
+
+        if (payload.patientsRecords !== undefined) {
+            entries[this.patientsRecordsStorageKey] = JSON.stringify(this.toSafePatientsRecords(payload.patientsRecords));
+        }
+
+        if (payload.processedMeta !== undefined) {
+            entries[this.processedMetaStorageKey] = JSON.stringify(this.toSafeProcessedMeta(payload.processedMeta));
+        }
+
+        return entries;
+    }
+
+    private filterBackupStorageEntriesByKind(entries: Record<string, string>, kind: BackupPayload["kind"]): Record<string, string> {
+        const filteredEntries: Record<string, string> = {};
+
+        Object.entries(entries).forEach(([key, value]) => {
+            if (key === FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED) {
+                return;
+            }
+
+            if (kind === "patients-only" && key !== this.patientsRecordsStorageKey) {
+                return;
+            }
+
+            if (kind === "all-without-patients" && key === this.patientsRecordsStorageKey) {
+                return;
+            }
+
+            filteredEntries[key] = value;
+        });
+
+        return filteredEntries;
+    }
+
+    private applyBackupStorageEntries(entries: Record<string, string>): void {
+        Object.entries(entries).forEach(([key, value]) => {
+            localStorage.setItem(key, value);
+        });
+    }
+
+    private resolveBackupReferenceDate(payload: Partial<BackupPayload>, entries: Record<string, string>): string | null {
+        const explicitReferenceDate = entries[FISIOHUB_STORAGE_KEYS.REFERENCE_DATE];
+        if (typeof explicitReferenceDate === "string" && explicitReferenceDate.trim().length > 0) {
+            return explicitReferenceDate.trim();
+        }
+
+        const processedMetaRaw = entries[this.processedMetaStorageKey];
+        if (typeof processedMetaRaw === "string" && processedMetaRaw.trim().length > 0) {
+            return this.parseProcessedMeta(processedMetaRaw).referenceDateIso;
+        }
+
+        if (payload.processedMeta) {
+            return this.toSafeProcessedMeta(payload.processedMeta).referenceDateIso;
+        }
+
+        return null;
+    }
+
+    private listFisioHubStorageKeys(): string[] {
+        const keys: string[] = [];
+
+        for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index);
+            if (key && key !== FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED && key.startsWith("fisiohub-")) {
+                keys.push(key);
+            }
+        }
+
+        return keys.sort((left, right) => left.localeCompare(right, "pt-BR", { sensitivity: "base" }));
+    }
+
+    private setPatientsFallbackSuppressed(suppressed: boolean): void {
+        if (suppressed) {
+            localStorage.setItem(FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED, "true");
+            return;
+        }
+
+        localStorage.removeItem(FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED);
+    }
+
+    private setFinanceFallbackSuppressed(suppressed: boolean): void {
+        if (suppressed) {
+            localStorage.setItem(FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED, "true");
+            return;
+        }
+
+        localStorage.removeItem(FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED);
+    }
+
+    private getBackupFileSlug(kind: BackupPayload["kind"]): string {
+        if (kind === "patients-only") {
+            return "somente-pacientes";
+        }
+
+        if (kind === "all-without-patients") {
+            return "sem-pacientes";
+        }
+
+        return "completo";
     }
 
     private async pickBackupFile(): Promise<Partial<BackupPayload> | null> {
@@ -1647,19 +1785,12 @@ export class HomeController {
 
     private loadStagingDataFromStorage(): void {
         const staged = localStorage.getItem(this.stagingDataStorageKey);
-        const legacy = localStorage.getItem(this.legacyImportedDataStorageKey);
-        const source = staged ?? legacy ?? "";
-
-        if (!source.trim()) {
+        if (!staged || !staged.trim()) {
             this.importedItems = [];
             return;
         }
 
-        if (!staged && legacy) {
-            localStorage.setItem(this.stagingDataStorageKey, legacy);
-        }
-
-        const lines = source
+        const lines = staged
             .split(/\r?\n/)
             .map((line) => line.trim())
             .filter((line) => line.length > 0);

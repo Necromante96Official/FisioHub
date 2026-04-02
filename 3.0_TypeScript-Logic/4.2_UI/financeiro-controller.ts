@@ -1,18 +1,13 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
-import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
+import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
+import { parseProcedureEntries, type ProcedureEntry } from "../4.0_Shared/procedure-parser.js";
 import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type FinanceStatus = "Pagante" | "Isento";
 type FinanceTab = "pacientes" | "especialidades";
 type FinanceStatusFilter = "all" | "pagante" | "isento";
 type FinanceSpecialtyFrequency = 1 | 2 | 3;
-
-interface FinanceProcedureEntry {
-    raw: string;
-    baseName: string;
-    frequency: FinanceSpecialtyFrequency;
-    value: number;
-}
+type FinanceProcedureEntry = ProcedureEntry;
 
 interface FinanceAttendance {
     id: string;
@@ -541,6 +536,10 @@ export class FinanceiroController {
         });
 
         if (records.size === 0 && patientRecords.length > 0) {
+            if (localStorage.getItem(FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED) === "true") {
+                return [];
+            }
+
             patientRecords.forEach((record) => {
                 const fallback = this.buildAttendanceFromPatientRecord(record);
                 if (!records.has(fallback.id)) {
@@ -624,7 +623,7 @@ export class FinanceiroController {
             const horario = entryMap.get("horario") ?? "-";
             const proceduresRaw = this.sanitizeProcedimentosValue(entryMap.get("procedimentos") ?? entryMap.get("procedimento") ?? "");
             const dateIso = batch.referenceDateIso;
-            const procedureEntries = this.parseProcedureEntries(proceduresRaw);
+            const procedureEntries = parseProcedureEntries(proceduresRaw);
             const status = this.normalizeFinanceStatus(entryMap.get("status") ?? entryMap.get("situacao") ?? "", convenio, "Pagante", proceduresRaw);
             const normalizedStatus = this.normalizeFinanceStatus(status, convenio, status, proceduresRaw);
             const value = normalizedStatus === "Isento" ? 0 : procedureEntries.reduce((sum, entry) => sum + entry.value, 0);
@@ -668,7 +667,7 @@ export class FinanceiroController {
     private buildAttendanceFromPatientRecord(record: PatientRecord): FinanceAttendance {
         const dateIso = (record.updatedAtIso || record.createdAtIso || new Date().toISOString()).slice(0, 10);
         const proceduresRaw = this.sanitizeProcedimentosValue(record.procedimentos);
-        const procedureEntries = this.parseProcedureEntries(proceduresRaw);
+        const procedureEntries = parseProcedureEntries(proceduresRaw);
         const status = this.normalizeFinanceStatus(record.statusFinanceiro, record.convenio, record.statusFinanceiro, proceduresRaw);
         const value = status === "Isento" ? 0 : procedureEntries.reduce((sum, entry) => sum + entry.value, 0);
 
@@ -862,30 +861,6 @@ export class FinanceiroController {
         group.byFrequency[occurrence.frequency] = frequencyGroup;
     }
 
-    private parseProcedureEntries(value: string): FinanceProcedureEntry[] {
-        const parts = this.splitProcedures(value);
-        const entries = parts.map((raw) => {
-            const frequency = this.extractFrequency(raw);
-            const baseName = this.normalizeSpecialtyLabel(raw);
-            return {
-                raw,
-                baseName,
-                frequency,
-                value: this.getProcedurePrice(frequency)
-            };
-        }).filter((entry) => entry.baseName.trim().length > 0);
-
-        if (entries.length > 0) {
-            return entries;
-        }
-
-        if (value.trim().length === 0) {
-            return [{ raw: "Sem procedimento", baseName: "Sem procedimento", frequency: 1, value: 0 }];
-        }
-
-        return [{ raw: value, baseName: value, frequency: this.extractFrequency(value), value: this.getProcedurePrice(this.extractFrequency(value)) }];
-    }
-
     private extractProcedureBaseNames(record: FinanceAttendance): string[] {
         return this.uniqueValues(record.procedureEntries.map((entry) => entry.baseName));
     }
@@ -912,59 +887,6 @@ export class FinanceiroController {
 
     private countUniquePatients(occurrences: FinanceSpecialtyOccurrence[]): number {
         return new Set(occurrences.map((occurrence) => occurrence.normalizedPatientName)).size;
-    }
-
-    private getProcedurePrice(frequency: FinanceSpecialtyFrequency): number {
-        if (frequency === 2) return 20;
-        if (frequency === 3) return 15;
-        return 25;
-    }
-
-    private extractFrequency(value: string): FinanceSpecialtyFrequency {
-        const normalized = this.normalizeText(value);
-        if (/3\s*x/.test(normalized) || /3x/.test(normalized)) return 3;
-        if (/2\s*x/.test(normalized) || /2x/.test(normalized)) return 2;
-        return 1;
-    }
-
-    private removeFrequencySuffix(value: string): string {
-        return value
-            .replace(/\b(?:1|2|3)\s*x(?:\s*\/\s*semana|\s*por\s*semana)?\b/gi, " ")
-            .replace(/\b(?:1|2|3)x(?:\s*\/\s*semana|\s*por\s*semana)?\b/gi, " ")
-            .replace(/\b(?:1|2|3)\s*vez(?:es)?\s*por\s*semana\b/gi, " ")
-            .replace(/\b(?:1|2|3)\s*\/\s*semana\b/gi, " ")
-            .replace(/\b(?:1|2|3)\s*semana\b/gi, " ")
-            .replace(/\bsemana\b/gi, " ")
-            .replace(/\b(?:isento|pagante|nao|não)\b/gi, " ")
-            .replace(/[-–]/g, " ")
-            .replace(/\s{2,}/g, " ")
-            .trim();
-    }
-
-    private normalizeSpecialtyLabel(value: string): string {
-        const cleaned = this.removeFrequencySuffix(value)
-            .replace(/\s{2,}/g, " ")
-            .replace(/\s*[-–]\s*$/g, "")
-            .trim();
-
-        return cleaned;
-    }
-
-    private splitProcedures(value: string): string[] {
-        return value
-            .split(/\n|\s*;\s*|\s*\|\s*|\s*,\s*/g)
-            .map((part) => part.trim())
-            .filter((part) => part.length > 0)
-            .filter((part) => !this.isNoiseProcedureToken(part));
-    }
-
-    private isNoiseProcedureToken(value: string): boolean {
-        const normalized = this.normalizeText(value);
-        return /^(?:isento|pagante|nao|não|sem procedimento)$/.test(normalized)
-            || /^\d+$/.test(normalized)
-            || /^(?:1|2|3)x(?:\s*\/\s*semana|\s*por\s*semana)?$/.test(normalized)
-            || /^(?:1|2|3)\s*vez(?:es)?\s*por\s*semana$/.test(normalized)
-            || /^(?:1|2|3)x$/.test(normalized);
     }
 
     private splitAppointmentBlocks(lines: string[]): string[][] {

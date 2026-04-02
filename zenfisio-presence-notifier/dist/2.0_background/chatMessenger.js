@@ -4,6 +4,17 @@ const pendingByTab = new Map();
 let chatTabId = null;
 let restoreDone = false;
 let creatingTabPromise = null;
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const bootstrapChatModule = async (tabId) => {
+    const moduleUrl = chrome.runtime.getURL("dist/3.0_content/3.2_googleChat/main.js");
+    await chrome.scripting.executeScript({
+        target: { tabId },
+        args: [moduleUrl],
+        func: async (url) => {
+            await import(url);
+        }
+    });
+};
 const isKnownChatUrl = (url) => {
     if (!url) {
         return false;
@@ -83,10 +94,28 @@ const isNoReceiverError = (error) => {
     return msg.includes("receiving end does not exist") || msg.includes("establish connection");
 };
 const sendToChatTab = async (tabId, messageText) => {
-    await sendMessageToTab(tabId, {
+    const payload = {
         type: MESSAGE_TYPES.CHAT_DELIVER_MESSAGE,
         payload: { messageText }
-    });
+    };
+    let needsBootstrap = false;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+        if (needsBootstrap) {
+            await bootstrapChatModule(tabId);
+            await sleep(attempt === 1 ? 250 : 500);
+        }
+        try {
+            await sendMessageToTab(tabId, payload);
+            return;
+        }
+        catch (error) {
+            if (!isNoReceiverError(error)) {
+                throw error;
+            }
+            needsBootstrap = true;
+        }
+    }
+    throw new Error("Listener do Google Chat nao ficou disponivel a tempo.");
 };
 const ensureQueueEntry = (tabId) => {
     const current = pendingByTab.get(tabId);

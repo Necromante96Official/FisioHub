@@ -1,0 +1,368 @@
+/* ========================================
+   ZENFISIO COLLECTOR v2.0.0
+   Estilos do painel flutuante
+   ======================================== */
+
+/* ========================================
+   VARIAVEIS
+   ======================================== */
+:root {
+    --zfc-primary: #10b981;
+    --zfc-primary-hover: #059669;
+    --zfc-danger: #ef4444;
+    --zfc-danger-hover: #dc2626;
+    --zfc-warning: #f59e0b;
+    --zfc-info: #3b82f6;
+    --zfc-bg: #1e293b;
+    --zfc-bg-light: #334155;
+    --zfc-bg-lighter: #475569;
+    --zfc-text: #f8fafc;
+    --zfc-text-muted: #94a3b8;
+    --zfc-border: #475569;
+    --zfc-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    --zfc-radius: 12px;
+    --zfc-radius-sm: 8px;
+}
+
+/* ========================================
+   PAINEL PRINCIPAL
+   ======================================== */
+#zfc-panel {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 280px !important;
+    background: var(--zfc-bg) !important;
+    border-radius: var(--zfc-radius) !important;
+    box-shadow: var(--zfc-shadow) !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    border: 1px solid var(--zfc-border) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    font-size: 14px !important;
+    color: var(--zfc-text) !important;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+#zfc-panel .zfc-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 12px 16px !important;
+    background: linear-gradient(135deg, var(--zfc-danger), #dc2626) !important;
+    cursor: grab !important;
+}
+
+#zfc-panel .zfc-header:active {
+    cursor: grabbing !important;
+}
+
+#zfc-panel .zfc-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-weight: 600 !important;
+    font-size: 15px !important;
+    color: white !important;
+}
+
+#zfc-panel .zfc-logo {
+    background: rgba(255, 255, 255, 0.2) !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+}
+
+#zfc-panel .zfc-btn-icon {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    color: white !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    font-size: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background 0.2s !important;
+}
+
+#zfc-panel .zfc-btn-icon:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* ========================================
+   BODY
+   ======================================== */
+#zfc-panel .zfc-body {
+    padding: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+}
+
+/* ========================================
+   STATUS BAR
+   ======================================== */
+#zfc-panel .zfc-status-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 10px 12px !important;
+    background: var(--zfc-bg-light) !important;
+    border-radius: var(--zfc-radius-sm) !important;
+}
+
+#zfc-panel .zfc-status {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+#zfc-panel .zfc-dot {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background: var(--zfc-text-muted) !important;
+    transition: all 0.3s !important;
+}
+
+#zfc-panel .zfc-status.active .zfc-dot {
+    background: var(--zfc-primary) !important;
+    box-shadow: 0 0 8px var(--zfc-primary) !important;
+    animation: zfc-pulse 1.5s infinite !important;
+}
+
+@keyframes zfc-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+#zfc-panel .zfc-status-text {
+    font-size: 13px !important;
+    color: var(--zfc-text-muted) !important;
+}
+
+#zfc-panel .zfc-status.active .zfc-status-text {
+    color: var(--zfc-primary) !important;
+    font-weight: 500 !important;
+}
+
+#zfc-panel .zfc-count {
+    background: var(--zfc-primary) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    min-width: 24px !important;
+    text-align: center !important;
+}
+
+/* ========================================
+   BOTOES
+   ======================================== */
+#zfc-panel .zfc-actions {
+    display: flex !important;
+    gap: 8px !important;
+}
+
+#zfc-panel .zfc-btn {
+    flex: 1 !important;
+    padding: 10px 12px !important;
+    border: none !important;
+    border-radius: var(--zfc-radius-sm) !important;
+    cursor: pointer !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    transition: all 0.2s !important;
+    color: white !important;
+}
+
+#zfc-panel .zfc-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+}
+
+#zfc-panel .zfc-btn-icon-inner {
+    font-size: 12px !important;
+}
+
+#zfc-panel .zfc-btn-start {
+    background: var(--zfc-primary) !important;
+}
+
+#zfc-panel .zfc-btn-start:hover:not(:disabled) {
+    background: var(--zfc-primary-hover) !important;
+}
+
+#zfc-panel .zfc-btn-stop {
+    background: var(--zfc-danger) !important;
+}
+
+#zfc-panel .zfc-btn-stop:hover:not(:disabled) {
+    background: var(--zfc-danger-hover) !important;
+}
+
+#zfc-panel .zfc-btn-save {
+    background: var(--zfc-info) !important;
+}
+
+#zfc-panel .zfc-btn-save:hover {
+    background: #2563eb !important;
+}
+
+#zfc-panel .zfc-btn-copy {
+    background: var(--zfc-bg-lighter) !important;
+}
+
+#zfc-panel .zfc-btn-copy:hover {
+    background: #64748b !important;
+}
+
+#zfc-panel .zfc-btn-clear {
+    background: transparent !important;
+    border: 1px solid var(--zfc-border) !important;
+    color: var(--zfc-text-muted) !important;
+}
+
+#zfc-panel .zfc-btn-clear:hover {
+    background: var(--zfc-danger) !important;
+    border-color: var(--zfc-danger) !important;
+    color: white !important;
+}
+
+/* ========================================
+   PREVIEW
+   ======================================== */
+#zfc-panel .zfc-preview {
+    background: var(--zfc-bg-light) !important;
+    border-radius: var(--zfc-radius-sm) !important;
+    overflow: hidden !important;
+}
+
+#zfc-panel .zfc-preview-title {
+    padding: 8px 12px !important;
+    background: var(--zfc-bg-lighter) !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    color: var(--zfc-text-muted) !important;
+}
+
+#zfc-panel .zfc-preview-content {
+    padding: 12px !important;
+    font-size: 12px !important;
+    color: var(--zfc-text) !important;
+    white-space: pre-wrap !important;
+    max-height: 150px !important;
+    overflow-y: auto !important;
+    line-height: 1.5 !important;
+}
+
+#zfc-panel .zfc-preview-content::-webkit-scrollbar {
+    width: 6px !important;
+}
+
+#zfc-panel .zfc-preview-content::-webkit-scrollbar-track {
+    background: var(--zfc-bg-light) !important;
+}
+
+#zfc-panel .zfc-preview-content::-webkit-scrollbar-thumb {
+    background: var(--zfc-bg-lighter) !important;
+    border-radius: 3px !important;
+}
+
+/* ========================================
+   MINI PAINEL (MINIMIZADO)
+   ======================================== */
+#zfc-mini {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    background: var(--zfc-bg) !important;
+    border-radius: 50px !important;
+    padding: 8px 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    cursor: pointer !important;
+    z-index: 999999 !important;
+    box-shadow: var(--zfc-shadow) !important;
+    border: 1px solid var(--zfc-border) !important;
+    transition: transform 0.2s !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#zfc-mini:hover {
+    transform: scale(1.05) !important;
+}
+
+#zfc-mini .zfc-mini-logo {
+    background: linear-gradient(135deg, var(--zfc-primary), #059669) !important;
+    color: white !important;
+    padding: 6px 10px !important;
+    border-radius: 6px !important;
+    font-weight: 700 !important;
+    font-size: 12px !important;
+}
+
+#zfc-mini .zfc-mini-count {
+    background: var(--zfc-primary) !important;
+    color: white !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+}
+
+/* ========================================
+   NOTIFICACOES
+   ======================================== */
+.zfc-notification {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    padding: 12px 20px !important;
+    border-radius: var(--zfc-radius-sm) !important;
+    color: white !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    z-index: 9999999 !important;
+    transform: translateY(100px) !important;
+    opacity: 0 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.zfc-notification.show {
+    transform: translateY(0) !important;
+    opacity: 1 !important;
+}
+
+.zfc-notification-success {
+    background: var(--zfc-primary) !important;
+}
+
+.zfc-notification-error {
+    background: var(--zfc-danger) !important;
+}
+
+.zfc-notification-info {
+    background: var(--zfc-info) !important;
+}
+
+.zfc-notification-warning {
+    background: var(--zfc-warning) !important;
+}
