@@ -126,6 +126,8 @@ const resolveHoverMessage = (element: HTMLElement): string | null => {
             return "Ativa a edição dos dados do paciente.";
         case "savePatientDetailsBtn":
             return "Salva as alterações feitas nos dados do paciente.";
+        case "backToPatientsBtn":
+            return "Volta para a lista de pacientes.";
         default:
             break;
     }
@@ -140,6 +142,10 @@ const resolveHoverMessage = (element: HTMLElement): string | null => {
 
     if (labelKey === "detalhes") {
         return "Abre os detalhes deste paciente.";
+    }
+
+    if (labelKey === "registro") {
+        return "Abre o registro de alterações deste paciente.";
     }
 
     if (labelKey === "evoluído") {

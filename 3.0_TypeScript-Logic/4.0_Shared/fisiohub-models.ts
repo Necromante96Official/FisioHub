@@ -1,3 +1,13 @@
+export type PatientChangeFieldKey = "nome" | "statusFinanceiro" | "horario" | "fisioterapeuta" | "celular" | "convenio" | "procedimentos";
+
+export type PatientChangeHistoryEntry = {
+    referenceDateIso: string;
+    fieldKey: PatientChangeFieldKey;
+    fieldLabel: string;
+    previousValue: string;
+    nextValue: string;
+};
+
 export type PatientRecord = {
     nome: string;
     statusFinanceiro: "Pagante" | "Isento";
@@ -8,6 +18,7 @@ export type PatientRecord = {
     procedimentos: string;
     createdAtIso: string;
     updatedAtIso: string;
+    changeHistory?: PatientChangeHistoryEntry[];
 };
 
 export type ProcessedMeta = {

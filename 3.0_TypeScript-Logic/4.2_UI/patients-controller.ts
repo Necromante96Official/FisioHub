@@ -1,5 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
+import { buildPatientRecordKey, parsePatientChangeHistory } from "../4.0_Shared/patient-history.js";
 import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
@@ -102,6 +103,11 @@ export class PatientsController {
             const index = Number(button.dataset.index);
             const record = this.patientRecords[index];
             if (!record) return;
+
+            if (button.dataset.action === "record") {
+                this.openRecordHistory(record);
+                return;
+            }
 
             this.openDetails(record);
         });
@@ -207,12 +213,27 @@ export class PatientsController {
             statusCell.appendChild(statusPill);
 
             const actionCell = document.createElement("td");
+            const actionGroup = document.createElement("div");
+            actionGroup.className = "fh-patient-actions";
+
             const detailsButton = document.createElement("button");
             detailsButton.type = "button";
             detailsButton.className = "fh-patient-details-btn";
             detailsButton.dataset.index = String(this.patientRecords.indexOf(record));
+            detailsButton.dataset.action = "details";
             detailsButton.textContent = "Detalhes";
-            actionCell.appendChild(detailsButton);
+
+            const recordButton = document.createElement("button");
+            recordButton.type = "button";
+            recordButton.className = "fh-patient-record-btn";
+            recordButton.dataset.index = String(this.patientRecords.indexOf(record));
+            recordButton.dataset.action = "record";
+            recordButton.dataset.hoverDescription = "Abre o registro compacto de alterações deste paciente.";
+            recordButton.textContent = "Registro";
+
+            actionGroup.appendChild(detailsButton);
+            actionGroup.appendChild(recordButton);
+            actionCell.appendChild(actionGroup);
 
             row.appendChild(nameCell);
             row.appendChild(statusCell);
@@ -249,6 +270,7 @@ export class PatientsController {
             return parsed.map((item) => {
                 const candidate = item as Partial<PatientRecord>;
                 const status: PatientRecord["statusFinanceiro"] = candidate.statusFinanceiro === "Isento" ? "Isento" : "Pagante";
+                const changeHistory = parsePatientChangeHistory(candidate.changeHistory);
 
                 return {
                     nome: typeof candidate.nome === "string" ? candidate.nome : "",
@@ -259,7 +281,8 @@ export class PatientsController {
                     convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
                     procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-",
                     createdAtIso: typeof candidate.createdAtIso === "string" ? candidate.createdAtIso : new Date().toISOString(),
-                    updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString()
+                    updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString(),
+                    ...(changeHistory.length > 0 ? { changeHistory } : {})
                 };
             }).filter((record) => record.nome.trim().length > 0);
         } catch {
@@ -386,6 +409,11 @@ export class PatientsController {
         if (!dialog.open) {
             dialog.showModal();
         }
+    }
+
+    private openRecordHistory(record: PatientRecord): void {
+        const recordKey = buildPatientRecordKey(record);
+        window.location.href = `registro.html?patient=${encodeURIComponent(recordKey)}`;
     }
 
     private setDetailsEditMode(enabled: boolean): void {

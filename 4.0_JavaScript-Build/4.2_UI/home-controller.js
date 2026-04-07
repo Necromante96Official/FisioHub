@@ -1,5 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
+import { buildPatientChangeHistoryEntries, buildPatientRecordKey, mergePatientChangeHistory, parsePatientChangeHistory } from "../4.0_Shared/patient-history.js";
 import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class HomeController {
     appId = "app";
@@ -705,10 +706,12 @@ export class HomeController {
             for (const conflict of conflicts) {
                 const choice = decisions.get(conflict.dialogIndex) ?? "existing";
                 if (choice === "incoming") {
+                    const changeHistory = mergePatientChangeHistory(conflict.existing.changeHistory, conflict.incoming.changeHistory, buildPatientChangeHistoryEntries(conflict.existing, conflict.incoming, this.getCurrentDate()));
                     merged[conflict.index] = {
                         ...conflict.incoming,
                         createdAtIso: conflict.existing.createdAtIso,
-                        updatedAtIso: new Date().toISOString()
+                        updatedAtIso: new Date().toISOString(),
+                        ...(changeHistory.length > 0 ? { changeHistory } : {})
                     };
                 }
             }
@@ -716,13 +719,7 @@ export class HomeController {
         return merged;
     }
     normalizePatientKey(record) {
-        const normalizedName = record.nome
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase()
-            .trim();
-        const normalizedPhone = record.celular.replace(/\D/g, "");
-        return `${normalizedName}|${normalizedPhone}`;
+        return buildPatientRecordKey(record);
     }
     areRecordsEquivalent(existing, incoming) {
         return existing.nome === incoming.nome
@@ -922,7 +919,10 @@ export class HomeController {
         return "Procedimentos";
     }
     isMissingRequiredValue(value) {
-        const normalized = value?.trim() ?? "";
+        if (typeof value !== "string") {
+            return true;
+        }
+        const normalized = value.trim();
         return normalized.length === 0;
     }
     parseFieldEntriesFromLine(line) {
@@ -1542,6 +1542,7 @@ export class HomeController {
         return value.map((item) => {
             const candidate = item;
             const status = candidate.statusFinanceiro === "Isento" ? "Isento" : "Pagante";
+            const changeHistory = parsePatientChangeHistory(candidate.changeHistory);
             return {
                 nome: typeof candidate.nome === "string" ? candidate.nome : "",
                 statusFinanceiro: status,
@@ -1551,7 +1552,8 @@ export class HomeController {
                 convenio: typeof candidate.convenio === "string" ? candidate.convenio : "-",
                 procedimentos: typeof candidate.procedimentos === "string" ? this.sanitizeProcedimentosValue(candidate.procedimentos) : "-",
                 createdAtIso: typeof candidate.createdAtIso === "string" ? candidate.createdAtIso : new Date().toISOString(),
-                updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString()
+                updatedAtIso: typeof candidate.updatedAtIso === "string" ? candidate.updatedAtIso : new Date().toISOString(),
+                ...(changeHistory.length > 0 ? { changeHistory } : {})
             };
         }).filter((record) => record.nome.trim().length > 0);
     }
