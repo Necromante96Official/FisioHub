@@ -18,6 +18,11 @@ type PatientConflict = {
 
 type ConflictChoice = "existing" | "incoming";
 
+type BackupFileSelection = {
+    payloads: Array<Partial<BackupPayload>>;
+    invalidCount: number;
+};
+
 type RequiredFieldKey = "convenio" | "procedimentos";
 
 type RequiredFieldIssue = {
@@ -388,14 +393,13 @@ export class HomeController {
     }
 
     private async importBackup(kind: BackupPayload["kind"]): Promise<void> {
-        const payload = await this.pickBackupFile();
-        if (!payload) {
+        const selection = await this.pickBackupFiles();
+        if (!selection) {
             this.showSiteNotification("Importação cancelada.");
             return;
         }
 
-        const backupEntries = this.collectBackupStorageEntriesFromPayload(payload);
-        const entriesToApply = this.filterBackupStorageEntriesByKind(backupEntries, kind);
+        const entriesToApply = this.collectMergedBackupStorageEntriesFromPayloads(selection.payloads, kind);
 
         if (Object.keys(entriesToApply).length === 0) {
             this.showSiteNotification("Arquivo de backup sem dados compatíveis com esta opção.");
@@ -425,7 +429,7 @@ export class HomeController {
 
         const referenceDateIso = kind === "patients-only"
             ? null
-            : this.resolveBackupReferenceDate(payload, entriesToApply);
+            : this.resolveBackupReferenceDateFromMergedPayloads(selection.payloads, entriesToApply);
 
         if (referenceDateIso) {
             this.setDate(referenceDateIso);
@@ -433,7 +437,9 @@ export class HomeController {
 
         this.loadStagingDataFromStorage();
         this.renderImportedData();
-        this.showSiteNotification("Backup importado com sucesso.");
+        this.showSiteNotification(selection.invalidCount > 0
+            ? `${selection.payloads.length} arquivo(s) de backup importado(s). ${selection.invalidCount} arquivo(s) inválido(s) foram ignorados.`
+            : `${selection.payloads.length} arquivo(s) de backup importado(s) com sucesso.`);
     }
 
     private clearAllStoredData(): void {
@@ -645,7 +651,7 @@ export class HomeController {
         const filteredEntries: Record<string, string> = {};
 
         Object.entries(entries).forEach(([key, value]) => {
-            if (key === FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED) {
+            if (key === FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED || key === FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED) {
                 return;
             }
 
@@ -667,6 +673,401 @@ export class HomeController {
         Object.entries(entries).forEach(([key, value]) => {
             localStorage.setItem(key, value);
         });
+    }
+
+    private collectMergedBackupStorageEntriesFromPayloads(payloads: Array<Partial<BackupPayload>>, kind: BackupPayload["kind"]): Record<string, string> {
+        const mergedEntries: Record<string, string> = {};
+
+        payloads.forEach((payload) => {
+            const backupEntries = this.collectBackupStorageEntriesFromPayload(payload);
+            const entriesToApply = this.filterBackupStorageEntriesByKind(backupEntries, kind);
+
+            Object.entries(entriesToApply).forEach(([key, value]) => {
+                if (key === this.processedMetaStorageKey || key === FISIOHUB_STORAGE_KEYS.REFERENCE_DATE) {
+                    return;
+                }
+
+                const currentValue = mergedEntries[key];
+                mergedEntries[key] = this.mergeBackupStorageEntryValue(key, currentValue, value);
+            });
+        });
+
+        if (kind !== "patients-only") {
+            const referenceDateIso = this.resolveBackupReferenceDateFromMergedPayloads(payloads, mergedEntries);
+            if (referenceDateIso) {
+                mergedEntries[FISIOHUB_STORAGE_KEYS.REFERENCE_DATE] = referenceDateIso;
+            }
+
+            const processedMeta = this.buildMergedProcessedMeta(payloads, mergedEntries, referenceDateIso);
+            if (processedMeta) {
+                mergedEntries[this.processedMetaStorageKey] = JSON.stringify(processedMeta);
+            }
+        }
+
+        return mergedEntries;
+    }
+
+    private mergeBackupStorageEntryValue(key: string, currentValue: string | undefined, incomingValue: string): string {
+        if (key === this.patientsRecordsStorageKey) {
+            return this.mergeBackupPatientsRecordsValue(currentValue, incomingValue);
+        }
+
+        if (key === this.stagingDataStorageKey || key === this.processedDataStorageKey) {
+            return this.mergeBackupTextValue(currentValue, incomingValue);
+        }
+
+        if (key === this.evolucoesPendingHistoryStorageKey) {
+            return this.mergeBackupPendingHistoryValue(currentValue, incomingValue);
+        }
+
+        if (key === this.doneEvolutionsStorageKey) {
+            return this.mergeBackupDoneEvolutionsValue(currentValue, incomingValue);
+        }
+
+        if (!currentValue || currentValue.trim().length === 0) {
+            return incomingValue;
+        }
+
+        if (incomingValue.trim().length === 0) {
+            return currentValue;
+        }
+
+        return incomingValue;
+    }
+
+    private mergeBackupTextValue(currentValue: string | undefined, incomingValue: string): string {
+        const mergedLines = this.uniqueValues([
+            ...this.parseContent(currentValue ?? ""),
+            ...this.parseContent(incomingValue)
+        ]);
+
+        return mergedLines.join("\n");
+    }
+
+    private mergeBackupPatientsRecordsValue(currentValue: string | undefined, incomingValue: string): string {
+        const records = [
+            ...this.parsePatientsRecords(currentValue ?? null),
+            ...this.parsePatientsRecords(incomingValue)
+        ];
+
+        return JSON.stringify(this.mergePatientRecordsForBackup(records));
+    }
+
+    private mergeBackupDoneEvolutionsValue(currentValue: string | undefined, incomingValue: string): string {
+        const merged = this.uniqueValues([
+            ...this.parseBackupStringList(currentValue),
+            ...this.parseBackupStringList(incomingValue)
+        ]);
+
+        return JSON.stringify(merged);
+    }
+
+    private mergeBackupPendingHistoryValue(currentValue: string | undefined, incomingValue: string): string {
+        const batches = [
+            ...this.parseBackupPendingHistory(currentValue),
+            ...this.parseBackupPendingHistory(incomingValue)
+        ];
+
+        const grouped = new Map<string, EvolucoesPendingBatch>();
+
+        batches.forEach((batch) => {
+            const referenceDateIso = this.extractIsoDate(batch.referenceDateIso) ?? this.todayIso();
+            const existing = grouped.get(referenceDateIso);
+
+            if (!existing) {
+                grouped.set(referenceDateIso, {
+                    processedAtIso: batch.processedAtIso,
+                    referenceDateIso,
+                    lines: [...batch.lines]
+                });
+                return;
+            }
+
+            existing.processedAtIso = this.selectLatestIsoTimestamp([existing.processedAtIso, batch.processedAtIso]) ?? existing.processedAtIso;
+            existing.lines = this.uniqueValues([...existing.lines, ...batch.lines]);
+        });
+
+        return JSON.stringify(Array.from(grouped.values()).sort((left, right) => left.referenceDateIso.localeCompare(right.referenceDateIso)));
+    }
+
+    private parseBackupStringList(value: string | undefined): string[] {
+        if (!value || value.trim().length === 0) {
+            return [];
+        }
+
+        try {
+            const parsed = JSON.parse(value);
+            if (Array.isArray(parsed)) {
+                return parsed
+                    .map((item) => typeof item === "string" ? item.trim() : "")
+                    .filter((item) => item.length > 0);
+            }
+        } catch {
+            // Fallback para texto simples.
+        }
+
+        return value
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+    }
+
+    private parseBackupPendingHistory(value: string | undefined): EvolucoesPendingBatch[] {
+        if (!value || value.trim().length === 0) {
+            return [];
+        }
+
+        try {
+            const parsed = JSON.parse(value);
+            if (!Array.isArray(parsed)) {
+                return [];
+            }
+
+            return parsed
+                .map((entry) => {
+                    const candidate = entry as Partial<EvolucoesPendingBatch>;
+                    const lines = Array.isArray(candidate.lines)
+                        ? candidate.lines.filter((line): line is string => typeof line === "string").map((line) => line.trim()).filter((line) => line.length > 0)
+                        : [];
+
+                    if (lines.length === 0) {
+                        return null;
+                    }
+
+                    return {
+                        processedAtIso: typeof candidate.processedAtIso === "string" && candidate.processedAtIso.trim().length > 0
+                            ? candidate.processedAtIso.trim()
+                            : new Date().toISOString(),
+                        referenceDateIso: this.extractIsoDate(typeof candidate.referenceDateIso === "string" ? candidate.referenceDateIso : "") ?? this.todayIso(),
+                        lines
+                    };
+                })
+                .filter((entry): entry is EvolucoesPendingBatch => entry !== null);
+        } catch {
+            return [];
+        }
+    }
+
+    private mergePatientRecordsForBackup(records: PatientRecord[]): PatientRecord[] {
+        const groups = new Map<string, PatientRecord[]>();
+
+        records.forEach((record) => {
+            const key = this.normalizePatientKey(record);
+            const bucket = groups.get(key) ?? [];
+            bucket.push(record);
+            groups.set(key, bucket);
+        });
+
+        return Array.from(groups.values())
+            .map((groupRecords) => this.mergePatientRecordGroupForBackup(groupRecords))
+            .filter((record) => record.nome.trim().length > 0)
+            .sort((left, right) => left.nome.localeCompare(right.nome, "pt-BR", { sensitivity: "base" }));
+    }
+
+    private mergePatientRecordGroupForBackup(records: PatientRecord[]): PatientRecord {
+        const orderedRecords = [...records].sort((left, right) => {
+            const updatedComparison = left.updatedAtIso.localeCompare(right.updatedAtIso);
+            if (updatedComparison !== 0) {
+                return updatedComparison;
+            }
+
+            const createdComparison = left.createdAtIso.localeCompare(right.createdAtIso);
+            if (createdComparison !== 0) {
+                return createdComparison;
+            }
+
+            return left.nome.localeCompare(right.nome, "pt-BR", { sensitivity: "base" });
+        });
+
+        let merged = orderedRecords[0];
+
+        if (!merged) {
+            return {
+                nome: "",
+                statusFinanceiro: "Pagante",
+                horario: "-",
+                fisioterapeuta: "-",
+                celular: "-",
+                convenio: "-",
+                procedimentos: "-",
+                createdAtIso: new Date().toISOString(),
+                updatedAtIso: new Date().toISOString()
+            };
+        }
+
+        for (const nextRecord of orderedRecords.slice(1)) {
+            const next = this.toSafeBackupPatientRecord(nextRecord);
+            const effectiveNext: PatientRecord = {
+                nome: this.chooseBackupPatientFieldValue(merged.nome, next.nome),
+                statusFinanceiro: next.statusFinanceiro,
+                horario: this.chooseBackupPatientFieldValue(merged.horario, next.horario),
+                fisioterapeuta: this.chooseBackupPatientFieldValue(merged.fisioterapeuta, next.fisioterapeuta),
+                celular: this.chooseBackupPatientFieldValue(merged.celular, next.celular),
+                convenio: this.chooseBackupPatientFieldValue(merged.convenio, next.convenio),
+                procedimentos: this.chooseBackupPatientFieldValue(merged.procedimentos, next.procedimentos),
+                createdAtIso: this.selectEarliestIsoTimestamp([merged.createdAtIso, next.createdAtIso]) ?? merged.createdAtIso,
+                updatedAtIso: this.selectLatestIsoTimestamp([merged.updatedAtIso, next.updatedAtIso]) ?? next.updatedAtIso,
+                ...(merged.changeHistory ? { changeHistory: merged.changeHistory } : {})
+            };
+
+            const referenceDateIso = this.extractIsoDate(effectiveNext.updatedAtIso) ?? this.todayIso();
+            const historyEntries = buildPatientChangeHistoryEntries(merged, effectiveNext, referenceDateIso);
+            const changeHistory = mergePatientChangeHistory(merged.changeHistory, next.changeHistory, historyEntries);
+
+            merged = {
+                ...effectiveNext,
+                ...(changeHistory.length > 0 ? { changeHistory } : {})
+            };
+        }
+
+        return merged;
+    }
+
+    private toSafeBackupPatientRecord(record: PatientRecord): PatientRecord {
+        return {
+            ...record,
+            nome: record.nome.trim(),
+            horario: record.horario.trim() || "-",
+            fisioterapeuta: record.fisioterapeuta.trim() || "-",
+            celular: record.celular.trim() || "-",
+            convenio: record.convenio.trim() || "-",
+            procedimentos: this.sanitizeProcedimentosValue(record.procedimentos),
+            createdAtIso: record.createdAtIso.trim() || new Date().toISOString(),
+            updatedAtIso: record.updatedAtIso.trim() || new Date().toISOString()
+        };
+    }
+
+    private chooseBackupPatientFieldValue(currentValue: string, incomingValue: string): string {
+        const normalized = incomingValue.trim();
+        if (normalized.length === 0 || normalized === "-") {
+            return currentValue;
+        }
+
+        return normalized;
+    }
+
+    private resolveBackupReferenceDateFromMergedPayloads(payloads: Array<Partial<BackupPayload>>, entries: Record<string, string>): string | null {
+        const candidates = [
+            entries[FISIOHUB_STORAGE_KEYS.REFERENCE_DATE],
+            ...payloads.flatMap((payload) => this.collectBackupReferenceDateCandidates(payload))
+        ];
+
+        return this.selectLatestIsoDate(candidates);
+    }
+
+    private collectBackupReferenceDateCandidates(payload: Partial<BackupPayload>): string[] {
+        const candidates: string[] = [];
+        const storageEntries = payload.storageEntries;
+
+        if (storageEntries && typeof storageEntries === "object" && !Array.isArray(storageEntries)) {
+            const storageReferenceDate = storageEntries[FISIOHUB_STORAGE_KEYS.REFERENCE_DATE];
+            if (typeof storageReferenceDate === "string" && storageReferenceDate.trim().length > 0) {
+                candidates.push(storageReferenceDate);
+            }
+        }
+
+        if (payload.processedMeta && typeof payload.processedMeta.referenceDateIso === "string" && payload.processedMeta.referenceDateIso.trim().length > 0) {
+            candidates.push(payload.processedMeta.referenceDateIso);
+        }
+
+        const legacyReferenceDate = (payload as { referenceDateIso?: unknown }).referenceDateIso;
+        if (typeof legacyReferenceDate === "string" && legacyReferenceDate.trim().length > 0) {
+            candidates.push(legacyReferenceDate);
+        }
+
+        return candidates;
+    }
+
+    private buildMergedProcessedMeta(
+        payloads: Array<Partial<BackupPayload>>,
+        entries: Record<string, string>,
+        referenceDateIso: string | null
+    ): ProcessedMeta | null {
+        const sourceText = entries[this.processedDataStorageKey] ?? entries[this.stagingDataStorageKey] ?? "";
+        const sourceLines = this.parseContent(sourceText);
+        const storedPatients = this.parsePatientsRecords(entries[this.patientsRecordsStorageKey] ?? null);
+        const parsedPatients = sourceLines.length > 0 ? this.parsePatientsFromLines(sourceLines) : [];
+
+        if (sourceLines.length === 0 && storedPatients.length === 0 && parsedPatients.length === 0) {
+            return null;
+        }
+
+        const processedAtIso = this.selectLatestIsoTimestamp([
+            ...payloads.map((payload) => typeof payload.processedMeta?.processedAtIso === "string" ? payload.processedMeta.processedAtIso : null),
+            new Date().toISOString()
+        ]) ?? new Date().toISOString();
+
+        const resolvedReferenceDate = referenceDateIso
+            ?? this.selectLatestIsoDate(payloads.flatMap((payload) => this.collectBackupReferenceDateCandidates(payload)))
+            ?? this.todayIso();
+
+        const totalPatients = storedPatients.length > 0 ? storedPatients.length : parsedPatients.length;
+        const totalForReferenceDate = sourceLines.filter((line) => {
+            const extracted = this.extractIsoDate(line);
+            return !extracted || extracted === resolvedReferenceDate;
+        }).length;
+
+        return {
+            processedAtIso,
+            referenceDateIso: resolvedReferenceDate,
+            totalImportedLines: sourceLines.length,
+            totalPatients,
+            totalForReferenceDate
+        };
+    }
+
+    private selectLatestIsoDate(values: Array<string | null | undefined>): string | null {
+        const candidates = values
+            .map((value) => typeof value === "string" ? this.extractIsoDate(value) ?? value.trim() : "")
+            .filter((value) => value.length === 10);
+
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        return candidates.sort((left, right) => left.localeCompare(right)).at(-1) ?? null;
+    }
+
+    private selectLatestIsoTimestamp(values: Array<string | null | undefined>): string | null {
+        const candidates = values
+            .map((value) => typeof value === "string" ? value.trim() : "")
+            .filter((value) => value.length > 0);
+
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        return candidates.sort((left, right) => left.localeCompare(right)).at(-1) ?? null;
+    }
+
+    private selectEarliestIsoTimestamp(values: Array<string | null | undefined>): string | null {
+        const candidates = values
+            .map((value) => typeof value === "string" ? value.trim() : "")
+            .filter((value) => value.length > 0);
+
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        return candidates.sort((left, right) => left.localeCompare(right))[0] ?? null;
+    }
+
+    private uniqueValues(values: string[]): string[] {
+        const normalized = new Map<string, string>();
+
+        values.forEach((value) => {
+            const trimmed = value.trim();
+            if (!trimmed) {
+                return;
+            }
+
+            const key = this.normalizeKey(trimmed);
+            if (!normalized.has(key)) {
+                normalized.set(key, trimmed);
+            }
+        });
+
+        return Array.from(normalized.values());
     }
 
     private resolveBackupReferenceDate(payload: Partial<BackupPayload>, entries: Record<string, string>): string | null {
@@ -692,7 +1093,7 @@ export class HomeController {
 
         for (let index = 0; index < localStorage.length; index += 1) {
             const key = localStorage.key(index);
-            if (key && key !== FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED && key.startsWith("fisiohub-")) {
+            if (key && key !== FISIOHUB_RUNTIME_KEYS.PATIENTS_FALLBACK_SUPPRESSED && key !== FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED && key.startsWith("fisiohub-")) {
                 keys.push(key);
             }
         }
@@ -730,28 +1131,41 @@ export class HomeController {
         return "completo";
     }
 
-    private async pickBackupFile(): Promise<Partial<BackupPayload> | null> {
+    private async pickBackupFiles(): Promise<BackupFileSelection | null> {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = ".json";
+        input.multiple = true;
 
-        const file = await new Promise<File | null>((resolve) => {
+        const files = await new Promise<FileList | null>((resolve) => {
             input.addEventListener("change", () => {
-                resolve(input.files?.[0] ?? null);
+                resolve(input.files ?? null);
             }, { once: true });
             input.click();
         });
 
-        if (!file) return null;
-
-        try {
-            const raw = await file.text();
-            const parsed = JSON.parse(raw) as Partial<BackupPayload>;
-            return parsed;
-        } catch {
-            this.showSiteNotification("Arquivo de backup inválido.");
+        if (!files || files.length === 0) {
             return null;
         }
+
+        const payloads: Array<Partial<BackupPayload>> = [];
+        let invalidCount = 0;
+
+        for (const file of Array.from(files)) {
+            try {
+                const raw = await file.text();
+                payloads.push(JSON.parse(raw) as Partial<BackupPayload>);
+            } catch {
+                invalidCount += 1;
+            }
+        }
+
+        if (payloads.length === 0) {
+            this.showSiteNotification("Nenhum arquivo de backup válido foi selecionado.");
+            return null;
+        }
+
+        return { payloads, invalidCount };
     }
 
     private parseContent(content: string): string[] {
