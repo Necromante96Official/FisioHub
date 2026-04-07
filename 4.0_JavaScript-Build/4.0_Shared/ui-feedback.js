@@ -533,6 +533,11 @@ export const syncFooterMetadata = async () => {
     if (!footerVersion) {
         return;
     }
+    const dataVersion = footerVersion.getAttribute("data-version")?.trim();
+    if (dataVersion) {
+        footerVersion.textContent = `Versão: ${dataVersion.replace(/^v/i, "")}`;
+        return;
+    }
     try {
         const response = await fetch("package.json", { cache: "no-store" });
         if (!response.ok) {
