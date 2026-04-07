@@ -1,5 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
+import { readStoredStringSet, writeStoredStringSet } from "../4.0_Shared/stored-string-set.js";
 import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type AgendamentoCategory = "atendido" | "falta";
@@ -40,6 +41,7 @@ export class AgendamentosController {
     private readonly processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     private readonly processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     private readonly evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
+    private readonly excludedPatientKeysStorageKey = FISIOHUB_STORAGE_KEYS.AGENDAMENTOS_PATIENT_DETAILS_EXCLUDED_PATIENTS;
     private readonly theme = new ThemeManager();
 
     private allRecords: AgendamentoRecord[] = [];
@@ -147,6 +149,11 @@ export class AgendamentosController {
         });
 
         const dialog = this.getDetailsDialog();
+        const deleteButton = document.getElementById("agendamentosModalDeleteBtn");
+        deleteButton?.addEventListener("click", () => {
+            this.excludeSelectedPatientFromPage();
+        });
+
         const closeButton = document.getElementById("agendamentosModalCloseBtn");
 
         closeButton?.addEventListener("click", () => {
@@ -459,7 +466,7 @@ export class AgendamentosController {
     }
 
     private getVisibleGroups(records: AgendamentoRecord[]): AgendamentoGroup[] {
-        const groups = this.groupRecordsByPatient(records);
+        const groups = this.filterHiddenGroups(this.groupRecordsByPatient(records));
         const filtered = this.activeSearch.trim().length === 0
             ? groups
             : groups.filter((group) => this.matchesSearch(group, this.activeSearch));
@@ -729,7 +736,36 @@ export class AgendamentosController {
     }
 
     private groupsFromAllRecords(): AgendamentoGroup[] {
-        return this.sortGroups(this.groupRecordsByPatient(this.allRecords));
+        return this.sortGroups(this.filterHiddenGroups(this.groupRecordsByPatient(this.allRecords)));
+    }
+
+    private filterHiddenGroups(groups: AgendamentoGroup[]): AgendamentoGroup[] {
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        return groups.filter((group) => !excludedPatientKeys.has(group.nomeNormalizado));
+    }
+
+    private getExcludedPatientKeys(): Set<string> {
+        return readStoredStringSet(this.excludedPatientKeysStorageKey);
+    }
+
+    private excludeSelectedPatientFromPage(): void {
+        if (!this.selectedGroupKey) {
+            return;
+        }
+
+        const patientLabel = document.getElementById("agendamentosModalTitle")?.textContent?.trim() || "este paciente";
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        excludedPatientKeys.add(this.selectedGroupKey);
+        writeStoredStringSet(this.excludedPatientKeysStorageKey, excludedPatientKeys);
+
+        const dialog = this.getDetailsDialog();
+        if (dialog.open) {
+            dialog.close();
+        }
+
+        this.selectedGroupKey = null;
+        sharedShowSiteNotification(`${patientLabel} foi excluído desta página.`);
+        this.render();
     }
 
     private getDetailsDialog(): HTMLDialogElement {

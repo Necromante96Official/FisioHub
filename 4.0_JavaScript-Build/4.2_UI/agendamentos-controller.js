@@ -1,5 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
+import { readStoredStringSet, writeStoredStringSet } from "../4.0_Shared/stored-string-set.js";
 import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class AgendamentosController {
     appId = "app";
@@ -7,6 +8,7 @@ export class AgendamentosController {
     processedDataStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_DATA;
     processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
+    excludedPatientKeysStorageKey = FISIOHUB_STORAGE_KEYS.AGENDAMENTOS_PATIENT_DETAILS_EXCLUDED_PATIENTS;
     theme = new ThemeManager();
     allRecords = [];
     visibleGroups = [];
@@ -102,6 +104,10 @@ export class AgendamentosController {
             this.openDetails(patientKey);
         });
         const dialog = this.getDetailsDialog();
+        const deleteButton = document.getElementById("agendamentosModalDeleteBtn");
+        deleteButton?.addEventListener("click", () => {
+            this.excludeSelectedPatientFromPage();
+        });
         const closeButton = document.getElementById("agendamentosModalCloseBtn");
         closeButton?.addEventListener("click", () => {
             if (dialog.open) {
@@ -375,7 +381,7 @@ export class AgendamentosController {
         return records;
     }
     getVisibleGroups(records) {
-        const groups = this.groupRecordsByPatient(records);
+        const groups = this.filterHiddenGroups(this.groupRecordsByPatient(records));
         const filtered = this.activeSearch.trim().length === 0
             ? groups
             : groups.filter((group) => this.matchesSearch(group, this.activeSearch));
@@ -589,7 +595,30 @@ export class AgendamentosController {
         return `Base mais recente: ${latest.dataLabel}`;
     }
     groupsFromAllRecords() {
-        return this.sortGroups(this.groupRecordsByPatient(this.allRecords));
+        return this.sortGroups(this.filterHiddenGroups(this.groupRecordsByPatient(this.allRecords)));
+    }
+    filterHiddenGroups(groups) {
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        return groups.filter((group) => !excludedPatientKeys.has(group.nomeNormalizado));
+    }
+    getExcludedPatientKeys() {
+        return readStoredStringSet(this.excludedPatientKeysStorageKey);
+    }
+    excludeSelectedPatientFromPage() {
+        if (!this.selectedGroupKey) {
+            return;
+        }
+        const patientLabel = document.getElementById("agendamentosModalTitle")?.textContent?.trim() || "este paciente";
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        excludedPatientKeys.add(this.selectedGroupKey);
+        writeStoredStringSet(this.excludedPatientKeysStorageKey, excludedPatientKeys);
+        const dialog = this.getDetailsDialog();
+        if (dialog.open) {
+            dialog.close();
+        }
+        this.selectedGroupKey = null;
+        sharedShowSiteNotification(`${patientLabel} foi excluído desta página.`);
+        this.render();
     }
     getDetailsDialog() {
         return document.getElementById("agendamentosDetailsDialog");

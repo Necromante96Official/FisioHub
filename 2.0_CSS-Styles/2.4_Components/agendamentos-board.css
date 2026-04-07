@@ -244,6 +244,19 @@
     font-size: 1rem;
 }
 
+.fh-agendamentos-dialog-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    overflow-x: auto;
+}
+
+.fh-agendamentos-dialog-actions .fh-btn {
+    flex: 0 0 auto;
+}
+
 .fh-agendamentos-dialog-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -1,5 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
+import { readStoredStringSet, writeStoredStringSet } from "../4.0_Shared/stored-string-set.js";
 import { parseProcedureEntries } from "../4.0_Shared/procedure-parser.js";
 import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class FinanceiroController {
@@ -9,6 +10,7 @@ export class FinanceiroController {
     processedMetaStorageKey = FISIOHUB_STORAGE_KEYS.PROCESSED_META;
     patientsRecordsStorageKey = FISIOHUB_STORAGE_KEYS.PATIENTS_RECORDS;
     evolucoesPendingHistoryStorageKey = FISIOHUB_STORAGE_KEYS.EVOLUCOES_PENDING_HISTORY;
+    excludedPatientKeysStorageKey = FISIOHUB_STORAGE_KEYS.FINANCE_PATIENT_HISTORY_EXCLUDED_PATIENTS;
     theme = new ThemeManager();
     activeSearch = "";
     activeTab = "pacientes";
@@ -124,6 +126,10 @@ export class FinanceiroController {
             this.openSpecialtyDialog(key);
         });
         const patientDialog = this.getPatientDialog();
+        const patientDelete = document.getElementById("financeiroPatientDialogDeleteBtn");
+        patientDelete?.addEventListener("click", () => {
+            this.excludeSelectedPatientFromPage();
+        });
         const patientClose = document.getElementById("financeiroPatientDialogCloseBtn");
         patientClose?.addEventListener("click", () => {
             if (patientDialog.open) {
@@ -275,9 +281,14 @@ export class FinanceiroController {
         }
     }
     renderPatientDialog() {
-        const group = this.patientGroups.find((item) => item.key === this.selectedPatientKey);
-        if (!group)
+        const group = this.getSelectedPatientGroup();
+        if (!group) {
+            const dialog = this.getPatientDialog();
+            if (dialog.open) {
+                dialog.close();
+            }
             return;
+        }
         this.setText("financeiroPatientDialogTitle", group.patientName);
         this.setText("financeiroPatientDialogAttendances", String(group.totalAttendances));
         this.setText("financeiroPatientDialogValue", this.formatCurrency(group.totalValue));
@@ -546,10 +557,45 @@ export class FinanceiroController {
         };
     }
     filterAttendances(records) {
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        const visibleRecords = records.filter((record) => !excludedPatientKeys.has(record.normalizedPatientName));
         const query = this.activeSearch.trim();
         if (!query)
-            return records;
-        return records.filter((record) => record.searchIndex.includes(query));
+            return visibleRecords;
+        return visibleRecords.filter((record) => record.searchIndex.includes(query));
+    }
+    getExcludedPatientKeys() {
+        return readStoredStringSet(this.excludedPatientKeysStorageKey);
+    }
+    getAllPatientGroups() {
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        return this.groupPatients(this.attendanceRecords.filter((record) => !excludedPatientKeys.has(record.normalizedPatientName)));
+    }
+    getSelectedPatientGroup() {
+        if (!this.selectedPatientKey) {
+            return null;
+        }
+        return this.patientGroups.find((item) => item.key === this.selectedPatientKey)
+            ?? this.getAllPatientGroups().find((item) => item.key === this.selectedPatientKey)
+            ?? null;
+    }
+    excludeSelectedPatientFromPage() {
+        if (!this.selectedPatientKey) {
+            return;
+        }
+        const patientLabel = this.getSelectedPatientGroup()?.patientName
+            ?? document.getElementById("financeiroPatientDialogTitle")?.textContent?.trim()
+            ?? "este paciente";
+        const excludedPatientKeys = this.getExcludedPatientKeys();
+        excludedPatientKeys.add(this.selectedPatientKey);
+        writeStoredStringSet(this.excludedPatientKeysStorageKey, excludedPatientKeys);
+        const dialog = this.getPatientDialog();
+        if (dialog.open) {
+            dialog.close();
+        }
+        this.selectedPatientKey = null;
+        sharedShowSiteNotification(`${patientLabel} foi excluído desta página.`);
+        this.render();
     }
     groupPatients(records) {
         const groups = new Map();
