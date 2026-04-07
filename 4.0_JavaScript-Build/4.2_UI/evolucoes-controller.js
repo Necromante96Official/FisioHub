@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
-import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class EvolucoesController {
     appId = "app";
     pageTemplate = "1.0_HTML-Templates/1.1_Pages/evolucoes.html";
@@ -40,13 +40,15 @@ export class EvolucoesController {
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.render();
-        sharedStartFloatingHomeHint();
-        window.addEventListener("storage", (event) => {
-            if (event.key && !event.key.startsWith("fisiohub-")) {
-                return;
-            }
+        const stopFloatingHomeHint = sharedStartFloatingHomeHint();
+        const disposeStorageListener = bindFisioHubStorageListener(() => {
             this.render();
         });
+        const cleanup = () => {
+            stopFloatingHomeHint();
+            disposeStorageListener();
+        };
+        window.addEventListener("beforeunload", cleanup, { once: true });
     }
     async loadPage() {
         const app = document.getElementById(this.appId);

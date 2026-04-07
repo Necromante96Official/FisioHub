@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type PatientRecord } from "../4.0_Shared/fisiohub-models.js";
-import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 export class PatientsController {
     private readonly appId = "app";
@@ -36,24 +36,25 @@ export class PatientsController {
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.render();
-        sharedStartFloatingHomeHint();
-
-        window.addEventListener("storage", (event) => {
-            if (event.key && !event.key.startsWith("fisiohub-")) {
-                return;
-            }
-
+        const stopFloatingHomeHint = sharedStartFloatingHomeHint();
+        const disposeStorageListener = bindFisioHubStorageListener(() => {
             this.patientRecords = this.parsePatientsFromStorage();
             this.selectedRecordIndex = null;
             this.isEditingDetails = false;
             this.render();
         });
+        const cleanup = (): void => {
+            stopFloatingHomeHint();
+            disposeStorageListener();
+        };
+
+        window.addEventListener("beforeunload", cleanup, { once: true });
 
         if (this.patientRecords.length === 0) {
             if (this.isPatientsFallbackSuppressed()) {
                 this.showSiteNotification("Backup sem pacientes carregado. A lista de pacientes foi ocultada neste modo.");
             } else {
-                this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na pagina inicial.");
+                this.showSiteNotification("Nenhum paciente encontrado. Processe os dados na página inicial.");
             }
         }
     }

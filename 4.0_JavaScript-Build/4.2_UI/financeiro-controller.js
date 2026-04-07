@@ -1,7 +1,7 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
 import { parseProcedureEntries } from "../4.0_Shared/procedure-parser.js";
-import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class FinanceiroController {
     appId = "app";
     pageTemplate = "1.0_HTML-Templates/1.1_Pages/financeiro.html";
@@ -40,15 +40,17 @@ export class FinanceiroController {
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.render();
-        sharedStartFloatingHomeHint();
-        window.addEventListener("storage", (event) => {
-            if (event.key && !event.key.startsWith("fisiohub-")) {
-                return;
-            }
+        const stopFloatingHomeHint = sharedStartFloatingHomeHint();
+        const disposeStorageListener = bindFisioHubStorageListener(() => {
             this.render();
         });
+        const cleanup = () => {
+            stopFloatingHomeHint();
+            disposeStorageListener();
+        };
+        window.addEventListener("beforeunload", cleanup, { once: true });
         if (this.attendanceRecords.length === 0) {
-            sharedShowSiteNotification("Nenhum dado financeiro encontrado. Processe os dados na pagina inicial.");
+            sharedShowSiteNotification("Nenhum dado financeiro encontrado. Processe os dados na página inicial.");
         }
     }
     async loadPage() {

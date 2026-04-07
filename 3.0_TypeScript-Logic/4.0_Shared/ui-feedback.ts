@@ -36,6 +36,10 @@ type HoverToastOptions = {
     describe?: (element: Element) => string | null;
 };
 
+type StorageListenerOptions = {
+    includeNonFisioHubKeys?: boolean;
+};
+
 type HoverToastState = {
     toast: HTMLDivElement;
     hideTimer: number;
@@ -413,6 +417,22 @@ const downloadAnalysisText = (data: AnalysisReportData): void => {
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
 };
 
+export const bindFisioHubStorageListener = (onChange: () => void, options: StorageListenerOptions = {}): (() => void) => {
+    const listener = (event: StorageEvent): void => {
+        if (!options.includeNonFisioHubKeys && event.key && !event.key.startsWith("fisiohub-")) {
+            return;
+        }
+
+        onChange();
+    };
+
+    window.addEventListener("storage", listener);
+
+    return () => {
+        window.removeEventListener("storage", listener);
+    };
+};
+
 const openAnalysisPrintView = (dialog: HTMLDialogElement): void => {
     dialog.dataset.printMode = "true";
     window.requestAnimationFrame(() => {
@@ -526,26 +546,58 @@ export const bindAnalysisDialog = (options: AnalysisDialogOptions): void => {
     });
 };
 
-export const startFloatingHomeHint = (selector = ".fh-floating-home-toast"): void => {
+export const startFloatingHomeHint = (selector = ".fh-floating-home-toast"): (() => void) => {
     const toast = document.querySelector(selector) as HTMLElement | null;
     if (!toast || toast.dataset.started === "true") {
-        return;
+        return () => {};
     }
 
     toast.dataset.started = "true";
     const intervalMs = 15000;
+    let timerId: number | null = null;
+    let cancelled = false;
 
     const pulse = (): void => {
+        if (cancelled) {
+            return;
+        }
+
         toast.classList.remove("is-visible");
         void toast.offsetWidth;
         toast.classList.add("is-visible");
     };
 
+    const clearTimer = (): void => {
+        if (timerId !== null) {
+            window.clearTimeout(timerId);
+            timerId = null;
+        }
+    };
+
+    const cancel = (): void => {
+        if (cancelled) {
+            return;
+        }
+
+        cancelled = true;
+        clearTimer();
+        toast.classList.remove("is-visible");
+        delete toast.dataset.started;
+    };
+
     let nextTick = performance.now() + intervalMs;
 
     const scheduleNext = (): void => {
+        if (cancelled) {
+            return;
+        }
+
         const delay = Math.max(0, nextTick - performance.now());
-        window.setTimeout(() => {
+        timerId = window.setTimeout(() => {
+            if (cancelled) {
+                return;
+            }
+
             pulse();
             nextTick += intervalMs;
             scheduleNext();
@@ -553,6 +605,8 @@ export const startFloatingHomeHint = (selector = ".fh-floating-home-toast"): voi
     };
 
     scheduleNext();
+
+    return cancel;
 };
 
 export const bindHoverToasts = (options: HoverToastOptions = {}): void => {

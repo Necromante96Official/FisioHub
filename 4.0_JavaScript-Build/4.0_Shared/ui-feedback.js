@@ -300,6 +300,18 @@ const downloadAnalysisText = (data) => {
     anchor.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 0);
 };
+export const bindFisioHubStorageListener = (onChange, options = {}) => {
+    const listener = (event) => {
+        if (!options.includeNonFisioHubKeys && event.key && !event.key.startsWith("fisiohub-")) {
+            return;
+        }
+        onChange();
+    };
+    window.addEventListener("storage", listener);
+    return () => {
+        window.removeEventListener("storage", listener);
+    };
+};
 const openAnalysisPrintView = (dialog) => {
     dialog.dataset.printMode = "true";
     window.requestAnimationFrame(() => {
@@ -396,25 +408,52 @@ export const bindAnalysisDialog = (options) => {
 export const startFloatingHomeHint = (selector = ".fh-floating-home-toast") => {
     const toast = document.querySelector(selector);
     if (!toast || toast.dataset.started === "true") {
-        return;
+        return () => { };
     }
     toast.dataset.started = "true";
     const intervalMs = 15000;
+    let timerId = null;
+    let cancelled = false;
     const pulse = () => {
+        if (cancelled) {
+            return;
+        }
         toast.classList.remove("is-visible");
         void toast.offsetWidth;
         toast.classList.add("is-visible");
     };
+    const clearTimer = () => {
+        if (timerId !== null) {
+            window.clearTimeout(timerId);
+            timerId = null;
+        }
+    };
+    const cancel = () => {
+        if (cancelled) {
+            return;
+        }
+        cancelled = true;
+        clearTimer();
+        toast.classList.remove("is-visible");
+        delete toast.dataset.started;
+    };
     let nextTick = performance.now() + intervalMs;
     const scheduleNext = () => {
+        if (cancelled) {
+            return;
+        }
         const delay = Math.max(0, nextTick - performance.now());
-        window.setTimeout(() => {
+        timerId = window.setTimeout(() => {
+            if (cancelled) {
+                return;
+            }
             pulse();
             nextTick += intervalMs;
             scheduleNext();
         }, delay);
     };
     scheduleNext();
+    return cancel;
 };
 export const bindHoverToasts = (options = {}) => {
     const scope = options.scope ?? document;

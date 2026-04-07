@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type ProcessedMeta } from "../4.0_Shared/fisiohub-models.js";
-import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 
 type AgendamentoCategory = "atendido" | "falta";
 
@@ -69,18 +69,19 @@ export class AgendamentosController {
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.render();
-        sharedStartFloatingHomeHint();
-
-        window.addEventListener("storage", (event) => {
-            if (event.key && !event.key.startsWith("fisiohub-")) {
-                return;
-            }
-
+        const stopFloatingHomeHint = sharedStartFloatingHomeHint();
+        const disposeStorageListener = bindFisioHubStorageListener(() => {
             this.render();
         });
+        const cleanup = (): void => {
+            stopFloatingHomeHint();
+            disposeStorageListener();
+        };
+
+        window.addEventListener("beforeunload", cleanup, { once: true });
 
         if (this.allRecords.length === 0) {
-            sharedShowSiteNotification("Nenhum agendamento encontrado. Processe os dados na pagina inicial.");
+            sharedShowSiteNotification("Nenhum agendamento encontrado. Processe os dados na página inicial.");
         }
     }
 

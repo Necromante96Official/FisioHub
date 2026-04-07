@@ -1,6 +1,6 @@
 import { ThemeManager } from "../4.1_Core/theme-manager.js";
 import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS } from "../4.0_Shared/fisiohub-models.js";
-import { bindAnalysisDialog, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
+import { bindAnalysisDialog, bindFisioHubStorageListener, bindHoverToasts as sharedBindHoverToasts, bindTermsDialog, showSiteNotification as sharedShowSiteNotification, startFloatingHomeHint as sharedStartFloatingHomeHint, syncFooterMetadata } from "../4.0_Shared/ui-feedback.js";
 export class HomeController {
     appId = "app";
     homeTemplate = "1.0_HTML-Templates/1.1_Pages/home.html";
@@ -35,14 +35,16 @@ export class HomeController {
         this.bindHandlers();
         sharedBindHoverToasts({ scope: document });
         this.renderImportedData();
-        sharedStartFloatingHomeHint();
-        window.addEventListener("storage", (event) => {
-            if (event.key && !event.key.startsWith("fisiohub-")) {
-                return;
-            }
+        const stopFloatingHomeHint = sharedStartFloatingHomeHint();
+        const disposeStorageListener = bindFisioHubStorageListener(() => {
             this.loadStagingDataFromStorage();
             this.renderImportedData();
         });
+        const cleanup = () => {
+            stopFloatingHomeHint();
+            disposeStorageListener();
+        };
+        window.addEventListener("beforeunload", cleanup, { once: true });
     }
     async loadHome() {
         const app = document.getElementById(this.appId);
@@ -597,7 +599,7 @@ export class HomeController {
             return parsed;
         }
         catch {
-            this.showSiteNotification("Arquivo de backup invalido.");
+            this.showSiteNotification("Arquivo de backup inválido.");
             return null;
         }
     }
@@ -690,6 +692,7 @@ export class HomeController {
             }
             conflicts.push({
                 index: foundIndex,
+                dialogIndex: conflicts.length,
                 existing,
                 incoming
             });
@@ -700,7 +703,7 @@ export class HomeController {
                 return null;
             }
             for (const conflict of conflicts) {
-                const choice = decisions.get(conflict.index) ?? "existing";
+                const choice = decisions.get(conflict.dialogIndex) ?? "existing";
                 if (choice === "incoming") {
                     merged[conflict.index] = {
                         ...conflict.incoming,
@@ -1189,7 +1192,7 @@ export class HomeController {
             };
             const onAutoProcess = () => {
                 if (savedPatientsRecords.length === 0) {
-                    this.showSiteNotification("Nao ha pacientes salvos para auto completar os campos obrigatorios.");
+                    this.showSiteNotification("Não há pacientes salvos para auto completar os campos obrigatórios.");
                     return;
                 }
                 let autoFilledCount = 0;
@@ -1210,7 +1213,7 @@ export class HomeController {
                     });
                 });
                 if (autoFilledCount === 0) {
-                    this.showSiteNotification("Nao foi possivel auto completar os campos com base na lista de pacientes.");
+                    this.showSiteNotification("Não foi possível auto completar os campos com base na lista de pacientes.");
                 }
                 else {
                     this.showSiteNotification(`${autoFilledCount} campo(s) obrigatorio(s) foram preenchidos automaticamente.`);
@@ -1271,7 +1274,7 @@ export class HomeController {
             };
             const onConfirm = () => {
                 if (hasMissingRequiredInputs()) {
-                    this.showSiteNotification("Ainda faltam campos obrigatorios para preencher.");
+                    this.showSiteNotification("Ainda faltam campos obrigatórios para preencher.");
                     updateConfirmState();
                     return;
                 }
