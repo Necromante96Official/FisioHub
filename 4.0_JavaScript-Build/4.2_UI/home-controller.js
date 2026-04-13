@@ -1067,6 +1067,7 @@ export class HomeController {
         title.textContent = "Conflito de paciente detectado";
         exitBtn.textContent = "Sair";
         useAllNewBtn.textContent = "Usar Novo";
+        useAllNewBtn.hidden = false;
         confirmBtn.hidden = true;
         confirmBtn.disabled = true;
         if (autoFillBtn) {
@@ -1329,6 +1330,7 @@ export class HomeController {
         const message = document.getElementById("patientConflictMessage");
         const list = document.getElementById("patientConflictList");
         const exitBtn = document.getElementById("exitPatientConflictBtn");
+        const useAllNewBtn = document.getElementById("useAllNewPatientConflictBtn");
         const confirmBtn = document.getElementById("confirmPatientConflictBtn");
         const autoFillBtn = document.getElementById("autoFillRequiredBtn");
         const procedureSearchDialog = document.getElementById("procedureSearchDialog");
@@ -1337,12 +1339,13 @@ export class HomeController {
         const procedureSearchCount = document.getElementById("procedureSearchCount");
         const procedureSearchEmpty = document.getElementById("procedureSearchEmpty");
         const closeProcedureSearchBtn = document.getElementById("closeProcedureSearchBtn");
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn || !autoFillBtn || !procedureSearchDialog || !procedureSearchInput || !procedureSearchList || !procedureSearchCount || !procedureSearchEmpty || !closeProcedureSearchBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !useAllNewBtn || !confirmBtn || !autoFillBtn || !procedureSearchDialog || !procedureSearchInput || !procedureSearchList || !procedureSearchCount || !procedureSearchEmpty || !closeProcedureSearchBtn) {
             return Promise.resolve(null);
         }
         title.textContent = "Correção obrigatória de dados";
         message.textContent = "Foram encontrados campos obrigatórios faltando. Preencha todos para continuar o processamento.";
         exitBtn.textContent = "Cancelar";
+        useAllNewBtn.hidden = true;
         confirmBtn.hidden = false;
         confirmBtn.textContent = "Processar com correções";
         autoFillBtn.hidden = false;
