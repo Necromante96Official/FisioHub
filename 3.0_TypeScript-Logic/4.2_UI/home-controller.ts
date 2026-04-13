@@ -509,16 +509,9 @@ export class HomeController {
     }
 
     private clearOnlyPageDataPreservingPatientsList(): void {
-        const keysToRemove = [
-            this.stagingDataStorageKey,
-            this.processedDataStorageKey,
-            this.processedMetaStorageKey,
-            this.evolucoesPendingHistoryStorageKey,
-            this.doneEvolutionsStorageKey,
-            FISIOHUB_STORAGE_KEYS.REFERENCE_DATE
-        ];
-
-        keysToRemove.forEach((key) => localStorage.removeItem(key));
+        this.clearAllFisioHubStorage([this.patientsRecordsStorageKey]);
+        this.setPatientsFallbackSuppressed(false);
+        this.setFinanceFallbackSuppressed(true);
 
         this.importedItems = [];
         this.nextItemId = 1;
