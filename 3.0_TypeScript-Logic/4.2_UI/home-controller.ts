@@ -1312,15 +1312,17 @@ export class HomeController {
         const message = document.getElementById("patientConflictMessage") as HTMLElement | null;
         const list = document.getElementById("patientConflictList") as HTMLElement | null;
         const exitBtn = document.getElementById("exitPatientConflictBtn") as HTMLButtonElement | null;
+        const useAllNewBtn = document.getElementById("useAllNewPatientConflictBtn") as HTMLButtonElement | null;
         const confirmBtn = document.getElementById("confirmPatientConflictBtn") as HTMLButtonElement | null;
         const autoFillBtn = document.getElementById("autoFillRequiredBtn") as HTMLButtonElement | null;
 
-        if (!dialog || !title || !message || !list || !exitBtn || !confirmBtn) {
+        if (!dialog || !title || !message || !list || !exitBtn || !useAllNewBtn || !confirmBtn) {
             return Promise.resolve(null);
         }
 
         title.textContent = "Conflito de paciente detectado";
         exitBtn.textContent = "Sair";
+        useAllNewBtn.textContent = "Usar Novo";
         confirmBtn.hidden = true;
         confirmBtn.disabled = true;
         if (autoFillBtn) {
@@ -1410,6 +1412,23 @@ export class HomeController {
                 });
             };
 
+            const applyChoiceToAll = (choice: ConflictChoice): void => {
+                const cards = Array.from(list.querySelectorAll(".fh-conflict-item")) as HTMLElement[];
+
+                cards.forEach((card, index) => {
+                    const conflictIndex = Number(card.dataset.conflictIndex ?? index);
+                    if (!Number.isFinite(conflictIndex)) {
+                        return;
+                    }
+
+                    decisions.set(conflictIndex, choice);
+                    markCard(card, choice);
+                });
+
+                updateProgress();
+                finalizeIfReady();
+            };
+
             const finalizeIfReady = (): void => {
                 if (decisions.size === conflicts.length) {
                     pendingResult = decisions;
@@ -1448,6 +1467,10 @@ export class HomeController {
                 closeDialogAsync();
             };
 
+            const onUseAllNew = (): void => {
+                applyChoiceToAll("incoming");
+            };
+
             const onCancel = (event: Event): void => {
                 event.preventDefault();
                 pendingResult = null;
@@ -1459,6 +1482,7 @@ export class HomeController {
             };
 
             list.addEventListener("click", onListClick, { signal });
+            useAllNewBtn.addEventListener("click", onUseAllNew, { signal });
             exitBtn.addEventListener("click", onExit, { once: true, signal });
             dialog.addEventListener("cancel", onCancel, { signal });
             dialog.addEventListener("close", onClose, { signal });
