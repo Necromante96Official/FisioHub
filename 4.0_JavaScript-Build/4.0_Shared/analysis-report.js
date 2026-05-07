@@ -552,9 +552,29 @@ export const buildAnalysisReportData = () => {
     const financePagantes = financeGroups.filter((group) => group.status === "Pagante").length;
     const financeIsentos = financeGroups.filter((group) => group.status === "Isento").length;
     const financeRevenue = financeGroups.reduce((sum, group) => sum + group.totalValue, 0);
-    const scheduleTotal = scheduleRecords.length;
-    const scheduleAbsences = scheduleRecords.filter((r) => r.statusCategoria === "falta").length;
-    const scheduleAttended = scheduleTotal - scheduleAbsences;
+    let scheduleTotal = scheduleRecords.length;
+    let scheduleAbsences = scheduleRecords.filter((r) => r.statusCategoria === "falta").length;
+    let scheduleAttended = scheduleTotal - scheduleAbsences;
+    // Preferir os contadores já renderizados na página de Agendamentos quando disponíveis
+    try {
+        const attendedEl = document.getElementById("agendamentosAttendedCount");
+        const absencesEl = document.getElementById("agendamentosAbsencesCount");
+        const totalEl = document.getElementById("agendamentosTotalCount");
+        const pAtt = attendedEl?.textContent?.trim() ?? "";
+        const pAbs = absencesEl?.textContent?.trim() ?? "";
+        const pTot = totalEl?.textContent?.trim() ?? "";
+        const nAtt = pAtt ? Number(pAtt.replace(/[^0-9\-]+/g, "")) : NaN;
+        const nAbs = pAbs ? Number(pAbs.replace(/[^0-9\-]+/g, "")) : NaN;
+        const nTot = pTot ? Number(pTot.replace(/[^0-9\-]+/g, "")) : NaN;
+        if (Number.isFinite(nAtt) && Number.isFinite(nAbs) && Number.isFinite(nTot)) {
+            scheduleAttended = nAtt;
+            scheduleAbsences = nAbs;
+            scheduleTotal = nTot;
+        }
+    }
+    catch (_err) {
+        // Falha silenciosa — mantém os valores calculados internamente
+    }
     return {
         generatedAtIso: new Date().toISOString(),
         referenceDateIso,
