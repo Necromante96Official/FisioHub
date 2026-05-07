@@ -712,9 +712,9 @@ export const buildAnalysisReportData = (): AnalysisReportData => {
     const financeIsentos = financeGroups.filter((group) => group.status === "Isento").length;
     const financeRevenue = financeGroups.reduce((sum, group) => sum + group.totalValue, 0);
 
-    const scheduleAttended = scheduleGroups.reduce((sum, group) => sum + group.totalAtendimentos, 0);
-    const scheduleAbsences = scheduleGroups.reduce((sum, group) => sum + group.totalFaltas, 0);
-    const scheduleTotal = scheduleAttended + scheduleAbsences;
+    const scheduleTotal = scheduleRecords.length;
+    const scheduleAbsences = scheduleRecords.filter((r) => r.statusCategoria === "falta").length;
+    const scheduleAttended = scheduleTotal - scheduleAbsences;
 
     return {
         generatedAtIso: new Date().toISOString(),
