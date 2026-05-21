@@ -1,4 +1,4 @@
-import { FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "./fisiohub-models.js";
+import { FISIOHUB_RUNTIME_KEYS, FISIOHUB_STORAGE_KEYS, type EvolucoesPendingBatch, type PatientRecord, type ProcessedMeta } from "./fisiohub-models.js";
 import { parseProcedureEntries } from "./procedure-parser.js";
 
 type AnalysisPendingRecord = {
@@ -307,6 +307,7 @@ const makeAttendanceKey = (input: { referenceDateIso: string; patientName: strin
 const readFinanceAttendanceRecords = (): AnalysisFinanceAttendance[] => {
     const records = new Map<string, AnalysisFinanceAttendance>();
     const patientRecords = parsePatientsRecords();
+    const isFallbackSuppressed = localStorage.getItem(FISIOHUB_RUNTIME_KEYS.FINANCE_FALLBACK_SUPPRESSED) === "true";
     const patientLookup = new Map(patientRecords.map((record) => [normalizeText(record.nome), record]));
     const processedRaw = (localStorage.getItem(FISIOHUB_STORAGE_KEYS.PROCESSED_DATA) ?? "").trim();
     const batches: Array<{ referenceDateIso: string; lines: string[] }> = [];
@@ -385,6 +386,10 @@ const readFinanceAttendanceRecords = (): AnalysisFinanceAttendance[] => {
     });
 
     if (records.size === 0 && patientRecords.length > 0) {
+        if (isFallbackSuppressed) {
+            return [];
+        }
+
         patientRecords.forEach((record) => {
             const fallback = buildAttendanceFromPatientRecord(record);
             if (!records.has(fallback.id)) {
