@@ -1,5 +1,5 @@
 /**
- * ZENFISIO COLETOR DE DADOS v0.5.5
+ * ZENFISIO COLETOR DE DADOS v0.5.6
  * Sistema de coleta automatica de dados de agendamentos
  * Atalho: Ctrl+Shift+X para ativar/desativar
  * Anti-duplicação melhorado
@@ -16,7 +16,7 @@
     // CONFIGURACOES
     // ========================================
     var CONFIG = {
-        version: '0.5.5',
+        version: '0.5.6',
         storageKey: 'zenfisio_collector_data',
         activeStorageKey: 'zenfisio_collector_active',
         popupCheckDelay: 500,
@@ -1337,7 +1337,7 @@
 
     async function saveContentWithNativePicker(content, fileName) {
         var fileHandle = await window.showSaveFilePicker({
-            startIn: 'downloads',
+            id: 'zenfisio-coletor-dados-export',
             suggestedName: fileName,
             types: [
                 {

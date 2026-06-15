@@ -148,6 +148,26 @@ export class HomeController {
             event.preventDefault();
             backupsDialog.close();
         });
+        const tutorialDialog = document.getElementById("tutorialDialog");
+        const tutorialOpenBtn = document.getElementById("tutorialBtn");
+        const tutorialCloseBtn = document.getElementById("closeTutorialDialogBtn");
+        tutorialOpenBtn?.addEventListener("click", () => {
+            if (!tutorialDialog?.open) {
+                tutorialDialog?.showModal();
+            }
+        });
+        tutorialCloseBtn?.addEventListener("click", () => {
+            tutorialDialog?.close();
+        });
+        tutorialDialog?.addEventListener("click", (event) => {
+            if (event.target === tutorialDialog) {
+                tutorialDialog.close();
+            }
+        });
+        tutorialDialog?.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            tutorialDialog.close();
+        });
         document.getElementById("exportAllBackupBtn")?.addEventListener("click", () => {
             backupsDialog?.close();
             this.exportBackup("all");

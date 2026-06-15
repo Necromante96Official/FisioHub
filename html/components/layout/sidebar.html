@@ -17,6 +17,10 @@
       <button id="clearAllDataBtn" class="fh-btn fh-btn-ghost" type="button" data-hover-description="Limpa todos os dados das páginas, mantendo a Lista de Pacientes intacta.">Limpar Dados</button>
     </div>
 
+    <div class="fh-panel-actions-center">
+      <button id="tutorialBtn" class="fh-btn fh-btn-tutorial" type="button" data-hover-description="Abre um passo a passo visual do FisioHub.">Tutorial</button>
+    </div>
+
     <div class="fh-panel-actions-right">
       <button id="importBtn" class="fh-btn fh-btn-primary" type="button">Importar dados</button>
       <button id="processBtn" class="fh-btn" type="button">Processar</button>
@@ -46,6 +50,139 @@
           <button id="importPatientsOnlyBackupBtn" class="fh-btn" type="button">Importar somente pacientes</button>
           <button id="importAllWithoutPatientsBackupBtn" class="fh-btn fh-btn-ghost" type="button">Importar sem pacientes</button>
         </div>
+      </div>
+    </article>
+  </dialog>
+
+  <dialog id="tutorialDialog" class="fh-tutorial-dialog" aria-labelledby="tutorialTitle">
+    <article class="fh-tutorial-surface">
+      <header class="fh-tutorial-header">
+        <div>
+          <span class="fh-tutorial-kicker">Guia visual</span>
+          <h3 id="tutorialTitle">Tutorial FisioHub</h3>
+          <p>Um passo a passo didático para usar o sistema principal, organizar dados e conferir os resultados com segurança.</p>
+        </div>
+        <button id="closeTutorialDialogBtn" class="fh-btn fh-btn-ghost" type="button">Fechar</button>
+      </header>
+
+      <div class="fh-tutorial-content">
+        <section class="fh-tutorial-hero">
+          <div class="fh-tutorial-hero-copy">
+            <span class="fh-tutorial-kicker">Fluxo recomendado</span>
+            <h4>Da importação à conferência final</h4>
+            <p>O FisioHub trabalha localmente no navegador. Primeiro você escolhe a data, depois importa os dados, processa, confere os módulos e por fim salva backups quando necessário.</p>
+          </div>
+          <div class="fh-tutorial-flow" aria-hidden="true">
+            <span>Data</span>
+            <span>Importar</span>
+            <span>Processar</span>
+            <span>Conferir</span>
+            <span>Backup</span>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">1</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Escolha a data de referência</h4>
+            <p>Use o seletor de data e os botões de navegação para definir o dia que será processado, analisado e comparado nos módulos.</p>
+            <div class="fh-tutorial-date-demo" aria-hidden="true">
+              <span>&lt;&lt;</span>
+              <span>-</span>
+              <strong>04/06/2026</strong>
+              <span>+</span>
+              <span>&gt;&gt;</span>
+              <em>Hoje</em>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">2</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Importe ou cole os dados</h4>
+            <p>Use <strong>Importar dados</strong> para carregar um arquivo, ou cole/edite diretamente no bloco de dados importados antes de processar.</p>
+            <div class="fh-tutorial-editor-demo" aria-hidden="true">
+              <span>Horario: 08:00 - 09:00</span>
+              <span>Paciente: Maria Silva</span>
+              <span>Status: Atendido</span>
+              <span>Procedimentos: Cinesioterapia</span>
+              <span>Valor: R$ 80,00</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">3</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Processe as informações</h4>
+            <p>Clique em <strong>Processar</strong> para consolidar pacientes, evoluções pendentes, agendamentos e financeiro. Se faltar convênio ou procedimento, o sistema solicitará correção.</p>
+            <div class="fh-tutorial-actions-demo" aria-hidden="true">
+              <span class="fh-demo-btn fh-demo-primary">Importar dados</span>
+              <span class="fh-demo-btn">Processar</span>
+              <span class="fh-demo-btn fh-demo-danger">Limpar Texto</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">4</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Navegue pelos módulos</h4>
+            <p>Depois de processar, use os módulos superiores para conferir cada visão operacional sem precisar sair da página principal.</p>
+            <div class="fh-tutorial-modules-demo" aria-hidden="true">
+              <span>Evoluções Pendentes</span>
+              <span>Análise Financeira</span>
+              <span>Agendamentos</span>
+              <span>Lista de Pacientes</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">5</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Confira os resultados</h4>
+            <p>Use cada tela para validar pendências, agenda do dia, dados financeiros, histórico dos pacientes e possíveis inconsistências antes de limpar qualquer dado.</p>
+            <div class="fh-tutorial-results-demo" aria-hidden="true">
+              <span><strong>Paciente</strong><small>Dados e histórico</small></span>
+              <span><strong>Evolução</strong><small>Pendências do dia</small></span>
+              <span><strong>Financeiro</strong><small>Valores e convênios</small></span>
+              <span><strong>Agenda</strong><small>Atendimentos do período</small></span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-step">
+          <span class="fh-tutorial-step-number">6</span>
+          <div class="fh-tutorial-step-copy">
+            <h4>Faça backups e limpezas com cuidado</h4>
+            <p>Use <strong>Backups</strong> para exportar/restaurar dados. Use as opções de limpeza apenas quando tiver certeza do que será removido.</p>
+            <div class="fh-tutorial-actions-demo" aria-hidden="true">
+              <span class="fh-demo-btn fh-demo-success">Backups</span>
+              <span class="fh-demo-btn fh-demo-ghost">Limpar Dados</span>
+              <span class="fh-demo-btn fh-demo-danger">Limpar Texto</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="fh-tutorial-note fh-tutorial-note--safe">
+          <h4>Boas práticas</h4>
+          <ul>
+            <li>Confira a data antes de processar os dados.</li>
+            <li>Use backups antes de limpezas grandes.</li>
+            <li>Revise pacientes com nomes parecidos antes de confirmar conflitos.</li>
+          </ul>
+        </section>
+
+        <section class="fh-tutorial-note fh-tutorial-note--warning">
+          <h4>Atenção</h4>
+          <ul>
+            <li><strong>Limpar Texto</strong> remove apenas o rascunho importado.</li>
+            <li><strong>Limpar Dados</strong> limpa dados das páginas, preservando a lista de pacientes.</li>
+            <li><strong>Limpar Tudo</strong> deve ser usado apenas quando quiser reiniciar os dados locais.</li>
+          </ul>
+        </section>
       </div>
     </article>
   </dialog>
