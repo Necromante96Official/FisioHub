@@ -1,0 +1,76 @@
+import { extractPatientNameFromText, isLikelyValidPatientName, sanitizePatientName } from "../../shared/patientName.js";
+let lastPatientName = null;
+let lastUpdatedAt = 0;
+let lastRawSample = null;
+let lastRawUpdatedAt = 0;
+const subscribers = new Set();
+const notifySubscribers = () => {
+    for (const callback of subscribers) {
+        try {
+            callback();
+        }
+        catch (error) {
+            console.warn("Falha ao notificar cache de paciente", error);
+        }
+    }
+};
+export const cacheNetworkPatientName = (value) => {
+    const sanitized = sanitizePatientName(value || "");
+    if (!isLikelyValidPatientName(sanitized)) {
+        return;
+    }
+    lastPatientName = sanitized;
+    lastUpdatedAt = Date.now();
+    notifySubscribers();
+};
+export const cacheNetworkPatientText = (text) => {
+    if (!text) {
+        return;
+    }
+    lastRawSample = text;
+    lastRawUpdatedAt = Date.now();
+    notifySubscribers();
+};
+export const cachePatientNameFromText = (text) => {
+    if (!text) {
+        return;
+    }
+    const extracted = extractPatientNameFromText(text);
+    if (isLikelyValidPatientName(extracted)) {
+        cacheNetworkPatientName(extracted);
+    }
+};
+export const getCachedNetworkPatientName = () => {
+    if (!lastPatientName) {
+        if (lastRawSample) {
+            cachePatientNameFromText(lastRawSample);
+            if (lastPatientName) {
+                return lastPatientName;
+            }
+        }
+        return null;
+    }
+    if (Date.now() - lastUpdatedAt > 90 * 1000) {
+        lastPatientName = null;
+        lastUpdatedAt = 0;
+        return null;
+    }
+    return lastPatientName;
+};
+export const getCachedNetworkPatientText = () => {
+    if (!lastRawSample) {
+        return null;
+    }
+    if (Date.now() - lastRawUpdatedAt > 90 * 1000) {
+        lastRawSample = null;
+        lastRawUpdatedAt = 0;
+        return null;
+    }
+    return lastRawSample;
+};
+export const subscribeNetworkPatientUpdates = (callback) => {
+    subscribers.add(callback);
+    return () => {
+        subscribers.delete(callback);
+    };
+};

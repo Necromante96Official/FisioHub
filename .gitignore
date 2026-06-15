@@ -2,3 +2,20 @@
 _oldversion/
 node_modules/
 .DadosColetados/
+
+# Configuracoes locais e credenciais
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+secrets*.json
+
+# Saidas locais
+*.log
+npm-debug.log*
+coverage/
+dist-temp/
+.vite/

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zenfisio-ColetorDeDados</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 340px;
+            min-height: 440px;
+            padding: 14px;
+            color: #fff;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.20), transparent 42%),
+                linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 0.98));
+        }
+
+        .shell {
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.04);
+            box-shadow:
+                0 22px 48px rgba(0, 0, 0, 0.42),
+                0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+        }
+
+        .accent {
+            height: 4px;
+            background: linear-gradient(90deg, #38bdf8, #3b82f6, #7c3aed);
+        }
+
+        .header {
+            display: grid;
+            gap: 10px;
+            padding: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .brand-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        .logo-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            flex: 0 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.32);
+            font-size: 14px;
+            font-weight: 950;
+            letter-spacing: -0.04em;
+        }
+
+        .brand-copy {
+            display: grid;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .kicker {
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .logo-text {
+            color: #fff;
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            line-height: 1.08;
+        }
+
+        .version {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 28px;
+            padding: 0 9px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.07);
+            color: rgba(255, 255, 255, 0.70);
+            font-size: 10px;
+            font-weight: 900;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.74);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .content {
+            display: grid;
+            gap: 10px;
+            padding: 0 12px 12px;
+        }
+
+        .section {
+            display: grid;
+            gap: 9px;
+            padding: 11px;
+            border: 1px solid rgba(255, 255, 255, 0.11);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.06);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        }
+
+        .section-title {
+            color: rgba(255, 255, 255, 0.54);
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .info-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 34px;
+            padding: 8px 9px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.66);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .info-value {
+            color: #fff;
+            font-size: 12px;
+            font-weight: 900;
+            text-align: right;
+        }
+
+        .info-value.success {
+            color: #dcfce7;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 24px;
+            padding: 0 9px;
+            border-radius: 999px;
+            background: rgba(34, 197, 94, 0.22);
+            color: #dcfce7;
+            font-size: 10px;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .instructions {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .instructions ol {
+            display: grid;
+            gap: 8px;
+            list-style: none;
+            counter-reset: steps;
+        }
+
+        .instructions ol li {
+            position: relative;
+            min-height: 28px;
+            padding: 6px 8px 6px 34px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            counter-increment: steps;
+        }
+
+        .instructions ol li::before {
+            content: counter(steps);
+            position: absolute;
+            left: 8px;
+            top: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #2563eb, #60a5fa);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 950;
+        }
+
+        .instructions strong {
+            color: #dbeafe;
+            font-weight: 900;
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+            list-style: none;
+        }
+
+        .fields li {
+            min-height: 30px;
+            padding: 7px 8px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.82);
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .footer {
+            padding: 2px 4px 4px;
+            color: rgba(255, 255, 255, 0.42);
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <div class="accent"></div>
+
+        <header class="header">
+            <div class="brand">
+                <div class="brand-main">
+                    <span class="logo-icon">ZF</span>
+                    <span class="brand-copy">
+                        <span class="kicker">Zenfisio</span>
+                        <span class="logo-text">Coletor de Dados</span>
+                    </span>
+                </div>
+                <span class="version">v0.5.5</span>
+            </div>
+            <p class="subtitle">Painel premium para coletar agendamentos e exportar os dados com seguranca.</p>
+        </header>
+
+        <section class="content">
+            <div class="section">
+                <div class="section-title">Status</div>
+                <div class="info-grid">
+                    <div class="info-row">
+                        <span class="info-label">Extensao</span>
+                        <span class="badge">Ativa</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Site alvo</span>
+                        <span class="info-value">app.zenfisio.com</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Atalho</span>
+                        <span class="info-value success">Ctrl + Shift + X</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Como usar</div>
+                <div class="instructions">
+                    <ol>
+                        <li>Acesse <strong>app.zenfisio.com/calendar</strong>.</li>
+                        <li>Use o atalho ou abra o painel flutuante.</li>
+                        <li>Clique em <strong>Iniciar</strong> e abra os agendamentos.</li>
+                        <li>Use <strong>Salvar TXT</strong> ou <strong>Copiar</strong> para exportar.</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Dados coletados</div>
+                <ul class="fields">
+                    <li>Horario</li>
+                    <li>Fisioterapeuta</li>
+                    <li>Paciente</li>
+                    <li>Celular</li>
+                    <li>Convenio</li>
+                    <li>Status</li>
+                    <li>Procedimentos</li>
+                    <li>Valor</li>
+                </ul>
+            </div>
+
+            <footer class="footer">Desenvolvido para Zenfisio Auto Gerenciamento</footer>
+        </section>
+    </main>
+</body>
+</html>

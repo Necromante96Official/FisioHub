@@ -4,8 +4,8 @@
     "module": "ES2022",
     "moduleResolution": "Bundler",
     "lib": ["ES2022", "DOM"],
-    "rootDir": "3.0_TypeScript-Logic",
-    "outDir": "4.0_JavaScript-Build",
+    "rootDir": "ts",
+    "outDir": "js",
     "strict": true,
     "noEmitOnError": true,
     "skipLibCheck": true,
@@ -13,6 +13,6 @@
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["3.0_TypeScript-Logic/**/*.ts"],
-  "exclude": ["4.0_JavaScript-Build", "_oldversion", "node_modules"]
+  "include": ["ts/**/*.ts"],
+  "exclude": ["js", "_oldversion", "node_modules"]
 }

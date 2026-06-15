@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gerador de Icones - zenfisio-ColetorDeDados</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: #f0f0f0;
+            text-align: center;
+        }
+        .canvas-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        .canvas-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        canvas {
+            display: block;
+            margin: 10px auto;
+            border: 1px solid #ddd;
+        }
+        h1 {
+            color: #10b981;
+        }
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        code {
+            background: #e5e5e5;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Icones - zenfisio-ColetorDeDados</h1>
+    
+    <div class="canvas-container">
+        <div class="canvas-item">
+            <h3>16x16</h3>
+            <canvas id="iconSmall" width="16" height="16"></canvas>
+            <a id="downloadSmall" download="icon-small.png">Baixar</a>
+        </div>
+        <div class="canvas-item">
+            <h3>48x48</h3>
+            <canvas id="iconMedium" width="48" height="48"></canvas>
+            <a id="downloadMedium" download="icon-medium.png">Baixar</a>
+        </div>
+        <div class="canvas-item">
+            <h3>128x128</h3>
+            <canvas id="iconLarge" width="128" height="128"></canvas>
+            <a id="downloadLarge" download="icon-large.png">Baixar</a>
+        </div>
+    </div>
+
+    <div class="instructions">
+        <h3>Instrucoes:</h3>
+        <ol>
+            <li>Abra este arquivo no navegador</li>
+            <li>Clique com botao direito em cada icone</li>
+            <li>Selecione "Salvar imagem como..."</li>
+            <li>Salve na pasta <code>icons/</code> com os nomes: <code>icon-small.png</code>, <code>icon-medium.png</code>, <code>icon-large.png</code></li>
+        </ol>
+    </div>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+            const padding = size * 0.1;
+            const radius = size * 0.2;
+
+            // Fundo com gradiente
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#10b981');
+            gradient.addColorStop(1, '#059669');
+
+            // Desenhar retangulo arredondado
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+
+            // Texto "ZF"
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = `bold ${size * 0.45}px Arial`;
+            ctx.fillText('ZF', size / 2, size / 2 + size * 0.02);
+        }
+
+        // Gerar icones
+        const icons = [
+            { size: 16, canvasId: 'iconSmall', downloadId: 'downloadSmall' },
+            { size: 48, canvasId: 'iconMedium', downloadId: 'downloadMedium' },
+            { size: 128, canvasId: 'iconLarge', downloadId: 'downloadLarge' }
+        ];
+
+        icons.forEach(({ size, canvasId, downloadId }) => {
+            const canvas = document.getElementById(canvasId);
+            drawIcon(canvas, size);
+
+            // Configurar link de download
+            const link = document.getElementById(downloadId);
+            link.href = canvas.toDataURL('image/png');
+        });
+    </script>
+</body>
+</html>

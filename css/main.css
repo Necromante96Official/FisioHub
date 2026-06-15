@@ -1,0 +1,40 @@
+@import url("tokens/colors.css");
+@import url("tokens/spacing.css");
+@import url("base/reset.css");
+@import url("base/typography.css");
+@import url("components/header.css");
+@import url("components/sidebar.css");
+@import url("components/modules.css");
+@import url("components/footer.css");
+@import url("components/patients-board.css");
+@import url("components/evolucoes-board.css");
+@import url("components/agendamentos-board.css");
+@import url("components/financeiro-board.css");
+@import url("components/registro-board.css");
+@import url("pages/home.css");
+@import url("pages/pacientes.css");
+@import url("pages/evolucoes.css");
+@import url("pages/agendamentos.css");
+@import url("pages/financeiro.css");
+@import url("pages/registro.css");
+
+html {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--fh-primary-2) 34%, transparent) color-mix(in srgb, var(--fh-border) 18%, transparent);
+}
+
+body::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--fh-primary-2) 34%, transparent);
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+}
+
+body::-webkit-scrollbar-track {
+    background: color-mix(in srgb, var(--fh-border) 18%, transparent);
+}

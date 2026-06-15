@@ -1,6 +1,6 @@
-# Module.md - Arvore Genealogica de Modularizacao do Novo FisioHub
+# Module.md - Arquitetura Modular Do FisioHub
 
-Este documento define a base estrutural do novo sistema FisioHub. A escolha tecnica consolidada para a nova implementacao e:
+Este documento define a base estrutural do sistema FisioHub. A escolha tecnica consolidada para a implementacao atual e:
 
 - TypeScript como linguagem principal de todo o sistema
 - HTML para estrutura de interface
@@ -10,110 +10,96 @@ Este documento define a base estrutural do novo sistema FisioHub. A escolha tecn
 
 O objetivo e manter a base funcional do sistema antigo, mas com organizacao muito superior, menor chance de bugs, escalabilidade real e manutencao simples.
 
-## 1.0_HTML-Templates
+## html
 
 Responsavel por toda a camada de estrutura visual em HTML.
 
 ### Estrutura
 
-- 1.0/ master.html
-- 1.1/ pages/
-- 1.2/ components/
-- 1.3/ layouts/
+- html/pages/
+- html/components/
+- html/components/layout/
 
 ### Exemplos
 
-- 1.1.1/ pages/home.html
-- 1.1.2/ pages/evolucoes.html
-- 1.1.3/ pages/financeiro.html
-- 1.1.4/ pages/agendamentos.html
-- 1.1.5/ pages/pacientes.html
-- 1.2.1/ components/header.html
-- 1.2.2/ components/sidebar.html
-- 1.2.3/ components/footer.html
-- 1.2.4/ components/modal-backup.html
-- 1.3.1/ layouts/app-shell.html
+- html/pages/home.html
+- html/pages/evolucoes.html
+- html/pages/financeiro.html
+- html/pages/agendamentos.html
+- html/pages/pacientes.html
+- html/components/layout/header.html
+- html/components/layout/sidebar.html
+- html/components/layout/footer.html
 
-## 2.0_CSS-Styles
+## css
 
 Responsavel pela identidade visual, layout, responsividade e temas.
 
 ### Estrutura
 
-- 2.0/ master.scss
-- 2.1/ base/
-- 2.2/ tokens/
-- 2.3/ pages/
-- 2.4/ components/
-- 2.5/ utilities/
+- css/main.css
+- css/base/
+- css/tokens/
+- css/pages/
+- css/components/
 
 ### Exemplos
 
-- 2.1.1/ base/reset.scss
-- 2.1.2/ base/typography.scss
-- 2.1.3/ base/animations.scss
-- 2.2.1/ tokens/colors.scss
-- 2.2.2/ tokens/spacing.scss
-- 2.2.3/ tokens/breakpoints.scss
-- 2.3.1/ pages/home.scss
-- 2.3.2/ pages/evolucoes.scss
-- 2.3.3/ pages/financeiro.scss
-- 2.3.4/ pages/agendamentos.scss
-- 2.3.5/ pages/pacientes.scss
-- 2.4.1/ components/header.scss
-- 2.4.2/ components/sidebar.scss
-- 2.4.3/ components/modal.scss
-- 2.4.4/ components/notification.scss
-- 2.5.1/ utilities/display.scss
-- 2.5.2/ utilities/spacing.scss
+- css/base/reset.css
+- css/base/typography.css
+- css/tokens/colors.css
+- css/tokens/spacing.css
+- css/pages/home.css
+- css/pages/evolucoes.css
+- css/pages/financeiro.css
+- css/pages/agendamentos.css
+- css/pages/pacientes.css
+- css/components/header.css
+- css/components/sidebar.css
+- css/components/footer.css
 
-## 3.0_TypeScript-Logic
+## ts
 
 Responsavel por toda a regra de negocio, estado, integracao e comunicacao entre modulos.
 
 ### Estrutura
 
-- 3.0/ master.ts
-- 3.1/ core/
-- 3.2/ domain/
-- 3.3/ application/
-- 3.4/ infrastructure/
-- 3.5/ ui/
-- 3.6/ shared/
+- ts/main.ts
+- ts/core/
+- ts/domain/
+- ts/application/
+- ts/infrastructure/
+- ts/ui/
+- ts/shared/
 
 ### Exemplos
 
-- 3.1.1/ core/events.ts
-- 3.1.2/ core/logger.ts
-- 3.1.3/ core/theme-manager.ts
-- 3.1.4/ core/notification-manager.ts
-- 3.2.1/ domain/atendimento.ts
-- 3.2.2/ domain/paciente.ts
-- 3.2.3/ domain/evolucao.ts
-- 3.2.4/ domain/backup.ts
-- 3.2.5/ domain/status.ts
-- 3.3.1/ application/data-analyzer.ts
-- 3.3.2/ application/data-processor.ts
-- 3.3.3/ application/backup-service.ts
-- 3.3.4/ application/import-service.ts
-- 3.3.5/ application/export-service.ts
-- 3.3.6/ application/patient-service.ts
-- 3.3.7/ application/finance-service.ts
-- 3.3.8/ application/agendamento-service.ts
-- 3.3.9/ application/evolucao-service.ts
-- 3.4.1/ infrastructure/local-storage-adapter.ts
-- 3.4.2/ infrastructure/indexeddb-adapter.ts
-- 3.4.3/ infrastructure/sqlite-adapter.ts
-- 3.4.4/ infrastructure/http-client.ts
-- 3.5.1/ ui/app-shell.ts
-- 3.5.2/ ui/sidebar-controller.ts
-- 3.5.3/ ui/modules-controller.ts
-- 3.5.4/ ui/modal-controller.ts
-- 3.6.1/ shared/constants.ts
-- 3.6.2/ shared/types.ts
-- 3.6.3/ shared/utils.ts
+- ts/core/theme-manager.ts
+- ts/domain/fisiohub-models.ts
+- ts/domain/appointment-parser.ts
+- ts/domain/procedure-parser.ts
+- ts/application/analysis-report.ts
+- ts/infrastructure/template-loader.ts
+- ts/shared/ui-feedback.ts
+- ts/ui/home-controller.ts
+- ts/ui/patients-controller.ts
+- ts/ui/financeiro-controller.ts
 
-## 4.0_(Backend)
+## js
+
+Responsavel pela saida compilada do TypeScript.
+
+### Estrutura
+
+- js/main.js
+- js/core/
+- js/domain/
+- js/application/
+- js/infrastructure/
+- js/shared/
+- js/ui/
+
+## Backend Futuro
 
 Responsavel por servicos server-side, autenticacao futura, persistencia e integracoes.
 
@@ -142,7 +128,7 @@ Responsavel por servicos server-side, autenticacao futura, persistencia e integr
 - 4.5.1/ middleware/error-handler.ts
 - 4.5.2/ middleware/auth.ts
 
-## 5.0_(SQL_Data)
+## SQL Data Futuro
 
 Responsavel pela modelagem e manutencao da estrutura de dados.
 
@@ -164,7 +150,7 @@ Responsavel pela modelagem e manutencao da estrutura de dados.
 - logs
 - users se houver autenticacao
 
-## 6.0_(Python_Optional)
+## Python Optional Futuro
 
 Camada opcional para funcionalidades futuras que nao precisem ficar no fluxo principal.
 
@@ -182,18 +168,17 @@ Camada opcional para funcionalidades futuras que nao precisem ficar no fluxo pri
 - 6.2/ scripts/
 - 6.3/ ml/
 
-## 7.0_(Assets)
+## assets
 
 Responsavel por imagens, icones, fontes e recursos estaticos.
 
 ### Estrutura
 
-- 7.0/ images/
-- 7.1/ icons/
-- 7.2/ fonts/
-- 7.3/ illustrations/
+- assets/images/
+- assets/icons/
+- assets/fonts/
 
-## 8.0_(Tests)
+## Tests Futuro
 
 Responsavel por garantir qualidade, previsibilidade e evolucao segura.
 

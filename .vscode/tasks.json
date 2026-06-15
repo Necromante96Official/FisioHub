@@ -13,77 +13,36 @@
 			"problemMatcher": [
 				"$tsc"
 			],
-			"group": "build"
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			}
 		},
 		{
-			"label": "build",
+			"label": "typecheck",
 			"type": "shell",
 			"command": "npm",
 			"args": [
 				"run",
-				"build"
+				"typecheck"
 			],
 			"isBackground": false,
 			"problemMatcher": [
 				"$tsc"
 			],
-			"group": "build"
+			"group": "test"
 		},
 		{
-			"label": "build",
+			"label": "dev",
 			"type": "shell",
 			"command": "npm",
 			"args": [
 				"run",
-				"build"
+				"dev"
 			],
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
-		},
-		{
-			"label": "build",
-			"type": "shell",
-			"command": "npm",
-			"args": [
-				"run",
-				"build"
-			],
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
-		},
-		{
-			"label": "build",
-			"type": "shell",
-			"command": "npm",
-			"args": [
-				"run",
-				"build"
-			],
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
-		},
-		{
-			"label": "build",
-			"type": "shell",
-			"command": "npm",
-			"args": [
-				"run",
-				"build"
-			],
-			"isBackground": false,
-			"problemMatcher": [
-				"$tsc"
-			],
-			"group": "build"
+			"isBackground": true,
+			"problemMatcher": [],
+			"group": "none"
 		}
 	]
 }

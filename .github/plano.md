@@ -8,8 +8,8 @@ O sistema antigo não era apenas uma aplicação web isolada. Ele era um ecossis
 
 - Um painel principal em navegador para processamento e consulta de dados.
 - Um backend Node.js/Express com SQLite, usado principalmente para backup e restauração.
-- Uma extensão Chrome chamada Zenfisio Collector, responsável por coletar dados da agenda da Zenfisio e exportar TXT.
-- Uma segunda extensão Chrome, Zenfisio Presence Notifier, responsável por monitorar alterações e enviar mensagens automáticas ao Google Chat.
+- Uma extensão Chrome chamada zenfisio-ColetorDeDados, responsável por coletar dados da agenda da Zenfisio e exportar TXT.
+- Uma segunda extensão Chrome, zenfisio-NotificarMensagens, responsável por monitorar alterações e enviar mensagens automáticas ao Google Chat.
 - Um conjunto de páginas dedicadas para módulos de negócio, como evoluções, financeiro, agendamentos e pacientes.
 
 O coração operacional do sistema antigo estava no frontend. O backend existia, mas a maior parte da regra de negócio rodava no navegador e persistia em `localStorage`.
@@ -53,8 +53,8 @@ Na prática, a lógica mais importante não estava concentrada em um servidor. E
 - `src/js/core/dataAnalyzer.js`
 - `src/js/components/backup-manager.js`
 - `src/js/pages/*.js`
-- `zenfisio-collector/collector.js`
-- `zenfisio-presence-notifier/src/background/*.js`
+- `zenfisio-ColetorDeDados/collector.js`
+- `zenfisio-NotificarMensagens/src/background/*.js`
 
 Isso significa que a versão antiga era fortemente orientada a navegador e automação, não a backend centralizado.
 
@@ -99,8 +99,8 @@ Contém um backend mais estruturado em camadas:
 
 ### 4.4 Pastas das extensões
 
-- `zenfisio-collector/`: extensão de coleta de dados da agenda.
-- `zenfisio-presence-notifier/`: extensão de automação de mensagens no Google Chat.
+- `zenfisio-ColetorDeDados/`: extensão de coleta de dados da agenda.
+- `zenfisio-NotificarMensagens/`: extensão de automação de mensagens no Google Chat.
 
 ## 5. Frontend Principal
 
@@ -154,7 +154,7 @@ Isso mostra uma arquitetura de composição por script solto, com inicializaçã
 A entrada de dados acontecia de duas formas:
 
 - Colagem direta no textarea principal.
-- Importação de arquivo TXT gerado pelo Zenfisio Collector.
+- Importação de arquivo TXT gerado pelo zenfisio-ColetorDeDados.
 
 ### 6.2 Processamento
 
@@ -274,13 +274,13 @@ Palavras-chave:
 
 ## 10. Extensões e integrações externas
 
-### 10.1 Zenfisio Collector
+### 10.1 zenfisio-ColetorDeDados
 
 - Coleta dados da agenda za Zenfisio.
 - Exporta TXT estruturado.
 - O `sidebar-new.js` parseia o TXT e produz registros para DataProcessor.
 
-### 10.2 Zenfisio Presence Notifier
+### 10.2 zenfisio-NotificarMensagens
 
 - Escuta mudanças na agenda (Google Chat etc).
 - Encaminha mensagens automáticas ou alertas.
@@ -535,7 +535,7 @@ A sidebar era o componente mais importante de entrada operacional, com seleção
 
 ## 16. Análise Do Collector
 
-O Zenfisio Collector era uma extensão de coleta para Chrome que:
+O zenfisio-ColetorDeDados era uma extensão de coleta para Chrome que:
 
 - Monitorava o DOM da Zenfisio em segundo plano.
 - Detectava popups e janelas de detalhes de agendamento.
@@ -547,7 +547,7 @@ O Collector tinha atalhos, feedback visual no navegador e persistência de estad
 
 ## 17. Análise Do Presence Notifier
 
-O Zenfisio Presence Notifier era uma extensão separada que:
+O zenfisio-NotificarMensagens era uma extensão separada que:
 
 - Trabalhava com `manifest v3`.
 - Tinha service worker em background.
