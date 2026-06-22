@@ -1,7 +1,7 @@
 {
   "name": "fisiohub",
   "private": true,
-  "version": "0.5.6",
+  "version": "0.5.7",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 4173",
@@ -11,7 +11,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "check": "npm run typecheck && npm run build",
     "test": "npm run build && node --test tests/*.test.mjs zenfisio-ColetorDeDados/tests/*.test.mjs",
-    "check:extension": "npm --prefix zenfisio-NotificarMensagens run typecheck && npm --prefix zenfisio-NotificarMensagens run test"
+    "check:extension": "npm --prefix zenfisio-NotificarMensagens run typecheck && npm --prefix zenfisio-NotificarMensagens run test",
+    "check:repeat-alert": "npm --prefix zenfisio-AlertaRepetidor run typecheck && npm --prefix zenfisio-AlertaRepetidor run test"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

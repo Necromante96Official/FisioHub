@@ -1,16 +1,15 @@
 {
-  "name": "zenfisio-notificar-mensagens",
+  "name": "zenfisio-alerta-repetidor",
   "version": "0.5.7",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "watch": "tsc -p tsconfig.json --watch",
+    "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "npm run build && node --test tests/*.test.mjs"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.292",
+    "@types/chrome": "^0.1.36",
     "typescript": "^5.9.3"
   }
 }

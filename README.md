@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versão-0.5.6-2fbe8f?style=for-the-badge" alt="Versão">
+  <img src="https://img.shields.io/badge/Versão-0.5.7-2fbe8f?style=for-the-badge" alt="Versão">
   <img src="https://img.shields.io/badge/Uso-Interno-red?style=for-the-badge" alt="Uso Interno">
   <img src="https://img.shields.io/badge/Status-Ativo-success?style=for-the-badge" alt="Status">
   <img src="https://img.shields.io/badge/Dados-Locais-blue?style=for-the-badge" alt="Dados Locais">
@@ -26,6 +26,7 @@
 - [Validação técnica](#validação-técnica)
 - [Segurança e backups](#segurança-e-backups)
 - [GitHub Pages](#github-pages)
+- [Smoke test manual](#smoke-test-manual)
 - [Termos de uso e suporte](#termos-de-uso-e-suporte)
 
 ---
@@ -110,6 +111,14 @@ Exibe a ficha/histórico individual de um paciente selecionado.
 - Ajuda a consultar atendimentos anteriores.
 - Facilita revisão de dados do paciente.
 
+### Análise consolidada
+
+Painel executivo acessível pelo botão `Análise` no rodapé.
+
+- Cruza evoluções, financeiro e agendamentos da data de referência.
+- Gera panorama institucional para consulta rápida.
+- Permite exportar em TXT ou imprimir em A4.
+
 ---
 
 ## Extensões de apoio
@@ -140,6 +149,19 @@ Principais recursos:
 - Ações rápidas para abrir ZenFisio, Chat, histórico e teste de chat.
 - Suporte a status como atendido, cancelado e faltou.
 
+### `zenfisio-AlertaRepetidor`
+
+Extensão Chrome para identificar agendamentos com repetição completa que precisam renovar.
+
+Principais recursos:
+
+- Análise automática por clique sequencial na agenda do ZenFisio (07h a 17h).
+- Destaca cards com `Repetido: X de Y` quando `X === Y` e total entre 1 e 20.
+- Faixa branca animada no card para facilitar a visualização.
+- Botão flutuante `AR` com menu para iniciar ou parar a análise.
+- Atalho `Alt + Z` para mostrar ou ocultar o botão flutuante.
+- Destaques persistem ao abrir/fechar agendamentos, recarregar a página e durante o mesmo dia.
+
 ---
 
 ## Guia rápido de uso
@@ -152,6 +174,16 @@ Use a extensão `zenfisio-ColetorDeDados` no site do ZenFisio:
 - Clique em `Iniciar`.
 - Use `Coletar auto` para coletar os agendamentos visíveis entre 08h e 17h, ou colete manualmente.
 - Clique em `Salvar TXT`.
+
+### 1.1. (Opcional) Conferir renovações na agenda
+
+Use a extensão `zenfisio-AlertaRepetidor` no calendário do ZenFisio:
+
+- Aperte `Alt + Z` para exibir o botão flutuante `AR`, se necessário.
+- Clique em `Iniciar analise` no menu ou no popup da extensão.
+- Aguarde a varredura automática dos agendamentos entre 07h e 17h.
+- Cards com repetição completa (ex.: `3 de 3`) recebem destaque animado.
+- Use `Parar analise` para interromper sem perder os destaques já encontrados.
 
 ### 2. Abrir o FisioHub
 
@@ -182,6 +214,8 @@ Depois do processamento, navegue por:
 - `Análise Financeira`
 - `Agendamentos`
 - `Lista de Pacientes`
+
+Use o botão `Análise` no rodapé para abrir o painel consolidado da data selecionada.
 
 ---
 
@@ -216,6 +250,7 @@ Comandos principais:
 npm run check
 npm run test
 npm run check:extension
+npm run check:repeat-alert
 ```
 
 O que cada comando faz:
@@ -223,6 +258,16 @@ O que cada comando faz:
 - `npm run check`: valida TypeScript e build do app principal.
 - `npm run test`: roda build e testes automatizados do app e do Coletor.
 - `npm run check:extension`: valida, testa e compila a extensão `zenfisio-NotificarMensagens`.
+- `npm run check:repeat-alert`: valida, testa e compila a extensão `zenfisio-AlertaRepetidor`.
+
+Build individual das extensões:
+
+```powershell
+npm --prefix zenfisio-NotificarMensagens run build
+npm --prefix zenfisio-AlertaRepetidor run build
+```
+
+A extensão `zenfisio-ColetorDeDados` não usa build separado; carregue a pasta diretamente no Chrome.
 
 ---
 
@@ -267,6 +312,7 @@ Antes de publicar:
 npm run check
 npm run test
 npm run check:extension
+npm run check:repeat-alert
 ```
 
 ---
@@ -281,7 +327,9 @@ Antes de entregar uma nova versão:
 - Importar um arquivo pequeno e processar.
 - Conferir pacientes, evoluções, agendamentos e financeiro.
 - Testar backup/exportação e importação.
-- Recarregar as extensões no Chrome e conferir versão dos manifests.
+- Abrir o painel `Análise` no rodapé e conferir TXT/impressão.
+- Recarregar as três extensões no Chrome e conferir versão `0.5.7` nos manifests.
+- No ZenFisio, testar `zenfisio-AlertaRepetidor`: iniciar análise, parar no meio, abrir/fechar agendamento e recarregar a página no mesmo dia.
 
 ---
 
@@ -330,5 +378,5 @@ O suporte não inclui atendimento 24/7, treinamento formal individual ou recuper
 <p align="center">
   <strong>© 2026 Necromante96Official • Todos os direitos reservados</strong><br>
   Criado por <a href="https://github.com/Necromante96Official">Lucas Tavares</a> para apoiar a rotina da Clínica de Fisioterapia ESEFID/UFRGS.<br>
-  <em>FisioHub 0.5.6 - versão local, modular e compatível com GitHub Pages.</em>
+  <em>FisioHub 0.5.7 - versão local, modular e compatível com GitHub Pages.</em>
 </p>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Alerta Repetidor 0.5.7</title>
+    <link rel="stylesheet" href="./popup.css">
+  </head>
+  <body>
+    <main class="panel">
+      <header>
+        <span>ZenFisio</span>
+        <h1>Alerta Repetidor</h1>
+        <p class="version">Release 0.5.7</p>
+      </header>
+
+      <section id="message" class="message">Pronto para analisar agendamentos.</section>
+
+      <section class="stats">
+        <article>
+          <span>Cards</span>
+          <strong id="totalCards">0</strong>
+        </article>
+        <article>
+          <span>Analisados</span>
+          <strong id="analyzedCards">0</strong>
+        </article>
+        <article>
+          <span>Repetidos</span>
+          <strong id="foundRepeats">0</strong>
+        </article>
+        <article class="hot">
+          <span>Destacados</span>
+          <strong id="highlightedCards">0</strong>
+        </article>
+      </section>
+
+      <section class="details">
+        <span>Detalhes abertos</span>
+        <strong id="openedDetails">0</strong>
+        <span>Ultima analise</span>
+        <strong id="lastScanIso">-</strong>
+      </section>
+
+      <div class="actions">
+        <button id="startScan" type="button">Analisar com calma</button>
+        <button id="stopScan" type="button" class="secondary">Parar analise</button>
+      </div>
+    </main>
+
+    <script type="module" src="./popup.js"></script>
+  </body>
+</html>

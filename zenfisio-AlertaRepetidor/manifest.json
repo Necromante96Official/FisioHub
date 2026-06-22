@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "zenfisio-AlertaRepetidor",
+  "description": "Analisa agendamentos ZenFisio e destaca repeticoes completas para renovacao.",
+  "version": "0.5.7",
+  "permissions": ["storage", "tabs"],
+  "host_permissions": ["https://app.zenfisio.com/*"],
+  "action": {
+    "default_title": "Alerta Repetidor",
+    "default_popup": "dist/ui/popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://app.zenfisio.com/*"],
+      "js": ["dist/content/loader.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dist/content/*.js"],
+      "matches": ["https://app.zenfisio.com/*"]
+    }
+  ]
+}

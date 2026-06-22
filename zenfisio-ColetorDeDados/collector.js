@@ -1,5 +1,5 @@
 /**
- * ZENFISIO COLETOR DE DADOS v0.5.6
+ * ZENFISIO COLETOR DE DADOS v0.5.7
  * Sistema de coleta automatica de dados de agendamentos
  * Atalho: Ctrl+Shift+X para ativar/desativar
  * Anti-duplicação melhorado
@@ -16,7 +16,7 @@
     // CONFIGURACOES
     // ========================================
     var CONFIG = {
-        version: '0.5.6',
+        version: '0.5.7',
         storageKey: 'zenfisio_collector_data',
         activeStorageKey: 'zenfisio_collector_active',
         popupCheckDelay: 500,
